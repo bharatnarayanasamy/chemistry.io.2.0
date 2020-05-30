@@ -131,6 +131,11 @@ class Scene2 extends Phaser.Scene {
     var bullet = new Bullet(this, angle, player);
     //reduces bullet size
     bullet.setScale(.25);
+
+    //changing the angle of the bullet image so it looks better
+    var angleInDegrees = (angle * (180/3.1415)) + 90;
+    bullet.angle += angleInDegrees;
+    
   }
 
   //increments score when player picks up powerup
