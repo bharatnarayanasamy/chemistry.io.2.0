@@ -9,6 +9,12 @@ class Scene2 extends Phaser.Scene {
     //Setting the background to a gray-ish color
     this.cameras.main.backgroundColor.setTo(200,200,200);
 
+    //creating a player sprite with the image named "player"
+    this.player = new Player(this, game.config.width / 2 - 8, game.config.height - 64);
+
+    //player cannot go beyond boundaries
+    this.player.body.setCollideWorldBounds(true);
+
     //Displaying the user's current score
     this.scoreLabel = {"proton": this.add.text(20, 20, "protons: 0", {
       font: "25px Arial",
@@ -19,7 +25,7 @@ class Scene2 extends Phaser.Scene {
     }), "electron": this.add.text(20, 80, "electrons: 0", {
       font: "25px Arial",
       fill: "yellow"
-    })}
+    })};
     
     //setting score for all 3 atomic particles to 0
     this.score = {
@@ -72,13 +78,6 @@ class Scene2 extends Phaser.Scene {
 
     }
 
-
-    //creating a player sprite with the image named "player"
-    this.player = new Player(this, config.width / 2 - 8, config.height - 64);
-    
-    //player cannot go beyond boundaries
-    this.player.body.setCollideWorldBounds(true);
-
     //Create group to hold all our projectiles, aka the bullets
     this.projectiles = this.add.group();
 
@@ -100,6 +99,8 @@ class Scene2 extends Phaser.Scene {
     //used too collect information on keys that were pressed - important for moving the player  
     this.cursorKeys = this.input.keyboard.createCursorKeys();
 
+    //collecting information on space bar
+    this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     
 
   }
@@ -112,7 +113,7 @@ class Scene2 extends Phaser.Scene {
     this.player.pointerMove(this);
     
     //If mouse clicked and cooldown for shots has elapsed, fire a bullet
-    if (this.input.activePointer.isDown && time > lastFired) {
+    if ((this.input.activePointer.isDown || Phaser.Input.Keyboard.JustDown(this.spacebar)) && time > lastFired) {
       //calls shootBeam function, which fires a bullet
       this.shootBeam(this.player);
       //starts cooldown period - cannot fire for next 200 miliseconds

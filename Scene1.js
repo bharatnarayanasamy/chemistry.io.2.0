@@ -31,7 +31,7 @@ class Scene1 extends Phaser.Scene {
     var out_style = {font: "bold 32px Arial", fill: "#0f0", boundsAlignH: "center", boundsAlignV: "middle"};
 
     //Play Button - click to enter game
-    const playButton = this.add.text(config.width/2-100, config.height/2, 'Play Game!', default_style);
+    const playButton = this.add.text(game.config.width/2-100, game.config.height/2, 'Play Game!', default_style);
     playButton.setInteractive();
 
     //When button is clicked, transition to the "playGame" scene
