@@ -4,7 +4,9 @@
 var gameSettings = {
   playerSpeed: 200,
   maxPowerups: 10,
+  maxObstacles: 2,
   powerUpVel: 50,
+  obstacleVel: 0,
   ROTATION_SPEED_DEGREES: Phaser.Math.RadToDeg(5 * Math.PI), // 0.5 arc per sec, 2 sec per arc
   TOLERANCE: 0.02 * 1 * Math.PI,
 }

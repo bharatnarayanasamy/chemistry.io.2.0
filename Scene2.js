@@ -56,6 +56,23 @@ class Scene2 extends Phaser.Scene {
       powerUp.setBounce(1);
     }
 
+    //adding obstacles
+    this.obstacles = this.physics.add.group();
+
+    //looping through obstacles and setting their initial conditions
+    for (var i = 0; i < gameSettings.maxObstacles; i++){
+
+      var obstacle = this.physics.add.sprite(75, 75, "obstacle");
+      obstacle.setScale(0.45);
+      this.obstacles.add(obstacle);
+      obstacle.setRandomPosition(20, 20, game.config.width-20, game.config.height-20);
+      obstacle.setVelocity(gameSettings.obstacleVel, gameSettings.obstacleVel);
+      obstacle.setCollideWorldBounds(true);
+      obstacle.setBounce(-1);
+
+    }
+
+
     //creating a player sprite with the image named "player"
     this.player = new Player(this, config.width / 2 - 8, config.height - 64);
     
@@ -64,15 +81,27 @@ class Scene2 extends Phaser.Scene {
 
     //Create group to hold all our projectiles, aka the bullets
     this.projectiles = this.add.group();
+
     //Use physics to stipulate that collisions between a powerUp and a bullet will destroy the projectile
     this.physics.add.collider(this.projectiles, this.powerUps, function (projectile, powerUp) {
       projectile.destroy();
     });
+    //physics for obstacles and bullets
+    this.physics.add.collider(this.projectiles, this.obstacles, function (projectile, obstacle) {
+      projectile.destroy();
+    });
+
+    //physics for player and obstacles
+    this.physics.add.collider(this.player, this.obstacles);
+
     //Use physics to stipulate that if a player overlaps with (picks up) a powerup, call function pickPowerUp
     this.physics.add.overlap(this.player, this.powerUps, this.pickPowerUp, null, this);
 
     //used too collect information on keys that were pressed - important for moving the player  
     this.cursorKeys = this.input.keyboard.createCursorKeys();
+
+    
+
   }
 
   update(time) {
@@ -131,11 +160,10 @@ class Scene2 extends Phaser.Scene {
     var bullet = new Bullet(this, angle, player);
     //reduces bullet size
     bullet.setScale(.25);
-
     //changing the angle of the bullet image so it looks better
     var angleInDegrees = (angle * (180/3.1415)) + 90;
     bullet.angle += angleInDegrees;
-    
+
   }
 
   //increments score when player picks up powerup
