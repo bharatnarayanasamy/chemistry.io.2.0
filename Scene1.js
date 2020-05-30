@@ -23,7 +23,7 @@ class Scene1 extends Phaser.Scene {
 
   create() {
     //Title Screen Text
-    this.add.text(20, 20, "Title Screen");
+    this.add.text(20, 20, "CHEMISTRY.IO");
 
     //Setting the details for different styles
     var default_style = {font: "bold 32px Arial", fill: "#fff", boundsAlignH: "center", boundsAlignV: "middle"};
@@ -39,6 +39,7 @@ class Scene1 extends Phaser.Scene {
       this.scene.start("playGame");
     });
 
+    /*
     //when mouse hovers over button, change to over_style font style
     playButton.on('pointerover', () => {
       playButton.setStyle(over_style);
@@ -48,5 +49,6 @@ class Scene1 extends Phaser.Scene {
     playButton.on('pointerout', () => {
       playButton.setStyle(out_style);
     });
+    */
   }
 }
