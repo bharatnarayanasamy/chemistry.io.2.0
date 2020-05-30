@@ -27,12 +27,15 @@ class Bullet extends Phaser.GameObjects.Sprite{
 
     //add this (the bullet object) into the projectiles group
     scene.projectiles.add(this);
-
   }
 
   update(){
     //get rid of bullet if it travels beyond the boundaries of the map
-    if(this.y < 32 ){
+    if(this.y < 32 || this.y > game.config.height - 32 ){
+      this.destroy();
+    }
+
+    if(this.x < 32 || this.x > game.config.width - 32 ){
       this.destroy();
     }
   }

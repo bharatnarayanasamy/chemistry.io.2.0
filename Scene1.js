@@ -16,7 +16,6 @@ class Scene1 extends Phaser.Scene {
     this.load.image("electron", "assets/images/electron.png");
     this.load.image("neutron", "assets/images/neutron.png");
     
-    
     //Setting the maximum number of mouse pointers that can be used on the screen to one
     this.input.maxPointers = 1;
   }
