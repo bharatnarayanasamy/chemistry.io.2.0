@@ -4,7 +4,6 @@ class Scene1 extends Phaser.Scene {
     //bootGame is the name for this specific Scene in Phaser
     super("bootGame");
   }
-
   
   preload(){
     //Loading the images for the bullet types, players, proton, electron and neutrons
