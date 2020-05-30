@@ -84,6 +84,7 @@ class Player extends Phaser.GameObjects.Sprite {
         }
     }
 
+    //changes the texture of the player to helium
     upgrade() {
         this.setTexture('helium');
     }
