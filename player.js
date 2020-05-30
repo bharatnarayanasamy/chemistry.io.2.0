@@ -21,7 +21,35 @@ class Player extends Phaser.GameObjects.Sprite {
         //reset player velocity
         this.body.setVelocity(0);
 
+        //move right or left
+        if(scene.input.keyboard.addKey('A').isDown){
+            this.body.setVelocityX(-gameSettings.playerSpeed);
+        } else if(scene.input.keyboard.addKey('D').isDown){
+            this.body.setVelocityX(gameSettings.playerSpeed);
+        }
+        
+        //move up or down
+        if(scene.input.keyboard.addKey('W').isDown){
+            this.body.setVelocityY(-gameSettings.playerSpeed);
+        } else if(scene.input.keyboard.addKey('S').isDown){
+            this.body.setVelocityY(gameSettings.playerSpeed);
+        }
+
+
+
         //move right/left
+        if (scene.cursorKeys.left.isDown) {
+            this.body.setVelocityX(-gameSettings.playerSpeed);
+        } else if (scene.cursorKeys.right.isDown) {
+            this.body.setVelocityX(gameSettings.playerSpeed);
+        }
+        //move up/down
+        if (scene.cursorKeys.up.isDown) {
+            this.body.setVelocityY(-gameSettings.playerSpeed);
+        } else if (scene.cursorKeys.down.isDown) {
+            this.body.setVelocityY(gameSettings.playerSpeed);
+        }
+
         if (scene.cursorKeys.left.isDown) {
             this.body.setVelocityX(-gameSettings.playerSpeed);
         } else if (scene.cursorKeys.right.isDown) {
