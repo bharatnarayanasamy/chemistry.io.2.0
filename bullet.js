@@ -3,8 +3,8 @@ class Bullet extends Phaser.GameObjects.Sprite{
   //scene = scene2, where everything is happening.
   //taking in a scene allows us to access all the information in that scene
   //angle helps determine the direction bullet will travel in
-  constructor(scene, angle){
-
+  constructor(scene, angle, player){
+    
     //starting location of the bullet. angles help determine whether bullet will start to the left of the 
     //player if gun is pointed leftwards, or right of the player if gun is pointed rightwards
     var x = scene.player.x + 50 * Math.cos(angle);
@@ -25,9 +25,7 @@ class Bullet extends Phaser.GameObjects.Sprite{
 
     //add this (the bullet object) into the projectiles group
     scene.projectiles.add(this);
-
   }
-
 
   update(){
     //get rid of bullet if it travels beyond the boundaries of the map

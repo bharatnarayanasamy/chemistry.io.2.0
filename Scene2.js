@@ -44,7 +44,6 @@ class Scene2 extends Phaser.Scene {
       powerUp.setCollideWorldBounds(true);
       //powerUp will bounce when it collides with the boundaries
       powerUp.setBounce(1);
-
     }
 
     //creating a player sprite with the image named "player"
@@ -64,7 +63,6 @@ class Scene2 extends Phaser.Scene {
 
     //used too collect information on keys that were pressed - important for moving the player  
     this.cursorKeys = this.input.keyboard.createCursorKeys();
-
   }
 
   update(time) {
@@ -74,12 +72,10 @@ class Scene2 extends Phaser.Scene {
     //tells the barrel of the gun to point wherever the mouse is pointing
     this.player.pointerMove(this);
     
-    this.input.activePointer
-
     //If mouse clicked and cooldown for shots has elapsed, fire a bullet
     if (this.input.activePointer.isDown && time > lastFired) {
       //calls shootBeam function, which fires a bullet
-      this.shootBeam();
+      this.shootBeam(this.player);
       //starts cooldown period - cannot fire for next 200 miliseconds
       lastFired = time + 200;
     }
@@ -106,7 +102,6 @@ class Scene2 extends Phaser.Scene {
           var powerUp = this.physics.add.sprite(16, 16, "neutron");
           powerUp.setScale(.1);
         }
-  
         this.powerUps.add(powerUp);
         powerUp.setRandomPosition(0, 0, game.config.width, game.config.height);
         powerUp.setVelocity(gameSettings.powerUpVel, gameSettings.powerUpVel);
@@ -119,11 +114,11 @@ class Scene2 extends Phaser.Scene {
   }
 
   //function that fires the bullet
-  shootBeam() {
+  shootBeam(player) {
     //calculates angle between player and pointer - helps make sure bullet fires in the direction specified by the pointer
-    var angle = Phaser.Math.Angle.Between(this.player.x, this.player.y, this.input.activePointer.worldX, this.input.activePointer.worldY);
+    var angle = Phaser.Math.Angle.Between(player.x, player.y, this.input.activePointer.worldX, this.input.activePointer.worldY);
     //creates a new bullet object
-    var bullet = new Bullet(this, angle);
+    var bullet = new Bullet(this, angle, player);
     //reduces bullet size
     bullet.setScale(.25);
   }
@@ -137,7 +132,5 @@ class Scene2 extends Phaser.Scene {
     if (this.score>5) {
       player.setTexture('helium');
     }
-
   }
-
 }
