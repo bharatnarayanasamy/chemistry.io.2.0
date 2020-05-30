@@ -47,4 +47,8 @@ class Player extends Phaser.GameObjects.Sprite {
             this.body.setAngularVelocity(Math.sign(angleDelta) * gameSettings.ROTATION_SPEED_DEGREES);
         }
     }
+
+    upgrade() {
+        this.setTexture('helium');
+    }
 }

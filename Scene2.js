@@ -10,13 +10,23 @@ class Scene2 extends Phaser.Scene {
     this.cameras.main.backgroundColor.setTo(200,200,200);
 
     //Displaying the user's current score
-    this.scoreLabel = this.add.text(20, 20, "Score: 0", {
+    this.scoreLabel = {"proton": this.add.text(20, 20, "protons: 0", {
       font: "25px Arial",
       fill: "yellow"
-    });
-
-    //setting score to 0
-    this.score = 0;
+    }), "neutron": this.add.text(20, 50, "neutrons: 0", {
+      font: "25px Arial",
+      fill: "yellow"
+    }), "electron": this.add.text(20, 80, "electrons: 0", {
+      font: "25px Arial",
+      fill: "yellow"
+    })}
+    
+    //setting score for all 3 atomic particles to 0
+    this.score = {
+      "neutron": 0,
+      "proton": 0,
+      "electron": 0
+    };
 
     //Enabling collisions when an object hits the boundary
     this.physics.world.setBoundsCollision();
@@ -126,11 +136,13 @@ class Scene2 extends Phaser.Scene {
   //increments score when player picks up powerup
   pickPowerUp(player, powerUp) {
     powerUp.destroy();
-    this.score +=1;
-    this.scoreLabel.text = "Score: " + this.score;
 
-    if (this.score>5) {
-      player.setTexture('helium');
+    this.score[powerUp.texture.key] +=1;
+    this.scoreLabel[powerUp.texture.key].text = powerUp.texture.key + ": " + this.score[powerUp.texture.key];
+
+    //upgrading if player score is greater than 
+    if (this.score["proton"]>1 && this.score["neutron"]>1 && this.score["electron"]>1) {
+      player.upgrade();
     }
   }
 }

@@ -9,8 +9,8 @@ class Scene1 extends Phaser.Scene {
   preload(){
     //Loading the images for the bullet types, players, proton, electron and neutrons
     this.load.image("helium", "assets/images/helium.png");
-    this.load.image("heliumBullet", "assets/images/heliumBullet.png");
-    this.load.image("bullet", "assets/images/bullet.png");
+    this.load.image("heliumbullet", "assets/images/heliumBullet.png");
+    this.load.image("hydrogenbullet", "assets/images/hydrogenbullet.png");
     this.load.image("hydrogen", "assets/images/hydrogen.png");
     this.load.image("proton", "assets/images/proton.png");
     this.load.image("electron", "assets/images/electron.png");
