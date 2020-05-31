@@ -7,8 +7,8 @@ class Bullet extends Phaser.GameObjects.Sprite{
 
     //starting location of the bullet. angles help determine whether bullet will start to the left of the 
     //player if gun is pointed leftwards, or right of the player if gun is pointed rightwards
-    var x = scene.player.x + 50 * Math.cos(angle);
-    var y = scene.player.y + 50 * Math.sin(angle); 
+    var x = scene.player.x + 75 * Math.cos(angle);
+    var y = scene.player.y + 75 * Math.sin(angle); 
 
     //use the super constructor to make a GameObject sprite
     //set bullet texture to be based off of the player's texture

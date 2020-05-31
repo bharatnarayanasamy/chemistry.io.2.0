@@ -26,6 +26,10 @@ class Scene2 extends Phaser.Scene {
       font: "25px Arial",
       fill: "yellow"
     })};
+
+    this.health = gameSettings.playerHealth;
+
+    this.healthLabel = this.add.text(20, 110, "Health: " + this.health, 16);
     
     //setting score for all 3 atomic particles to 0
     this.score = {
@@ -33,6 +37,7 @@ class Scene2 extends Phaser.Scene {
       "proton": 0,
       "electron": 0
     };
+
 
     //Enabling collisions when an object hits the boundary
     this.physics.world.setBoundsCollision();
@@ -81,20 +86,22 @@ class Scene2 extends Phaser.Scene {
     //Create group to hold all our projectiles, aka the bullets
     this.projectiles = this.add.group();
 
-    //Use physics to stipulate that collisions between a powerUp and a bullet will destroy the projectile
-    this.physics.add.collider(this.projectiles, this.powerUps, function (projectile, powerUp) {
-      projectile.destroy();
-    });
+    //physics for projectile and powerups
+    this.physics.add.overlap(this.projectiles, this.powerUps, this.pickPowerUpProj, null, this);
+
     //physics for obstacles and bullets
     this.physics.add.collider(this.projectiles, this.obstacles, function (projectile, obstacle) {
       projectile.destroy();
     });
 
     //physics for player and obstacles
-    this.physics.add.collider(this.player, this.obstacles);
+    this.physics.add.collider(this.player, this.obstacles, this.hurtPlayerObs, null, this);
+
+    //physics for player and projectiles
+    this.physics.add.overlap(this.player, this.projectiles, this.hurtPlayerProj, null, this);
 
     //Use physics to stipulate that if a player overlaps with (picks up) a powerup, call function pickPowerUp
-    this.physics.add.overlap(this.player, this.powerUps, this.pickPowerUp, null, this);
+    this.physics.add.overlap(this.player, this.powerUps, this.pickPowerUpPlayer, null, this);
 
     //used too collect information on keys that were pressed - important for moving the player  
     this.cursorKeys = this.input.keyboard.createCursorKeys();
@@ -168,7 +175,7 @@ class Scene2 extends Phaser.Scene {
   }
 
   //increments score when player picks up powerup
-  pickPowerUp(player, powerUp) {
+  pickPowerUpPlayer(player, powerUp) {
     powerUp.destroy();
 
     this.score[powerUp.texture.key] +=1;
@@ -179,4 +186,36 @@ class Scene2 extends Phaser.Scene {
       player.upgrade();
     }
   }
+
+  //increments scoer when player hits powerup with projectile
+  pickPowerUpProj(projectile, powerUp) {
+    powerUp.destroy();
+    projectile.destroy();
+
+    this.score[powerUp.texture.key] +=1;
+    this.scoreLabel[powerUp.texture.key].text = powerUp.texture.key + ": " + this.score[powerUp.texture.key];
+
+    //upgrading if player score is greater than 
+    if (this.score["proton"]>1 && this.score["neutron"]>1 && this.score["electron"]>1) {
+      player.upgrade();
+    }
+  }
+
+  //deals with damage when projectile hits player
+  hurtPlayerProj(player, projectile){
+    projectile.destroy();
+    if (this.health >= 10){
+      this.health -= 10;
+    }
+    this.healthLabel.text = "Health: " + this.health;
+  }
+
+  //deals with damage when obstacle hits player
+  hurtPlayerObs(player, obstacle){
+    if (this.health >= 10){
+      this.health -= 10;
+    }
+    this.healthLabel.text = "Health: " + this.health;
+  }
+
 }
