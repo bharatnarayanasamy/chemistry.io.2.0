@@ -9,6 +9,7 @@ var gameSettings = {
   obstacleVel: 0,
   ROTATION_SPEED_DEGREES: Phaser.Math.RadToDeg(2 * Math.PI), // 0.5 arc per sec, 2 sec per arc
   TOLERANCE: 0.02 * 1 * Math.PI,
+  playerHealth: 100,
 }
 
 //Dictionary of configurations for our specific Phaser game
