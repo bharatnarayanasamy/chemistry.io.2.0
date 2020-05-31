@@ -173,7 +173,7 @@ class Scene2 extends Phaser.Scene {
 
     this.score[powerUp.texture.key] +=1;
     this.scoreLabel[powerUp.texture.key].text = powerUp.texture.key + ": " + this.score[powerUp.texture.key];
-
+    
     //upgrading if player score is greater than 
     if (this.score["proton"]>1 && this.score["neutron"]>1 && this.score["electron"]>1) {
       player.upgrade();

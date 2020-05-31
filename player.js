@@ -72,11 +72,9 @@ class Player extends Phaser.GameObjects.Sprite {
         //moves player based on mouse
         var xdistance = scene.input.activePointer.worldX - this.x;
         var ydistance = scene.input.activePointer.worldY - this.y;
-
         
         this.body.setVelocityX(gameSettings.playerSpeed * xdistance/(Math.sqrt(xdistance*xdistance+ydistance*ydistance)))
-        this.body.setVelocityY(gameSettings.playerSpeed * ydistance/(Math.sqrt(xdistance*xdistance+ydistance*ydistance)))
-        
+        this.body.setVelocityY(gameSettings.playerSpeed * ydistance/(Math.sqrt(xdistance*xdistance+ydistance*ydistance)))        
         */
 
         //some fancy math stuff I got from online
