@@ -130,14 +130,20 @@ class Scene2 extends Phaser.Scene {
       lastShot = time;
     }
 
-    if(this.physics.overlap(this.player, this.obstacles) && time > lastHurt + 1000){
+    //when player is hurt, lastHurt is updated, if statement implements cooldown
+    if(this.physics.overlap(this.player, this.obstacles) && time > lastHurt + 500){
       this.hurtPlayerObs(this.player);
       lastHurt = time;
     }
 
+    //player only heals 5 seconds after being shot, hurt, or healed
     if(time > lastShot + 5000 && time > lastHurt + 5000 && time > lastHealed + 5000) {
       this.healPlayer(this.player);
       lastHealed = time;
+    }
+
+    if(this.player.health == 0){
+      this.player.destroy();
     }
 
     //call each bullet within the projectiles class and updates its location (basically bullet movement)
@@ -247,5 +253,4 @@ class Scene2 extends Phaser.Scene {
     }
     this.healthLabel.text = "Health: " + this.player.health;
   }
-
 }
