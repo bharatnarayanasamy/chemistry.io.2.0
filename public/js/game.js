@@ -216,7 +216,7 @@ function update(time) {
             //calculates angle between player and pointer - helps make sure bullet fires in the direction specified by the pointer
             var angle = Phaser.Math.Angle.Between(this.player.x, this.player.y, this.input.activePointer.worldX, this.input.activePointer.worldY);
             //creates a new bullet object
-            var bullet = new Bullet(this, angle, this.player);
+            var bullet = new Bullet(this, this.player.rotation, this.player);
             //reduces bullet size
             bullet.setScale(.25);
             //changing the angle of the bullet image so it looks better
