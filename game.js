@@ -32,3 +32,6 @@ var game = new Phaser.Game(config);
 
 //Setting default value of lastFired to 0. Used to enforce delay between shots
 var lastFired = 0;
+
+//Same for lastShot, delay before health regen
+var lastShot = 0;

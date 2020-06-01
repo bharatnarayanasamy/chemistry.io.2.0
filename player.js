@@ -14,6 +14,8 @@ class Player extends Phaser.GameObjects.Sprite {
         //rotating player
         this.angle = 270;
         this.setScale(.25);
+
+        this.health = gameSettings.playerHealth;
     }
 
     //moves player sprite in response to keystrokes

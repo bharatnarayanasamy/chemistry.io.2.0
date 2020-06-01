@@ -27,9 +27,7 @@ class Scene2 extends Phaser.Scene {
       fill: "yellow"
     })};
 
-    this.health = gameSettings.playerHealth;
-
-    this.healthLabel = this.add.text(20, 110, "Health: " + this.health, 16);
+    this.healthLabel = this.add.text(20, 110, "Health: " + this.player.health, 16);
     
     //setting score for all 3 atomic particles to 0
     this.score = {
@@ -127,6 +125,11 @@ class Scene2 extends Phaser.Scene {
       lastFired = time + 200;
     }
 
+    if(this.player.health < 100 && time > lastShot) {
+      this.healPlayer(this.player);
+      lastShot = time + 5000
+    }
+
     //call each bullet within the projectiles class and updates its location (basically bullet movement)
     for (var i = 0; i < this.projectiles.getChildren().length; i++) {
       var bullet = this.projectiles.getChildren()[i];
@@ -201,21 +204,38 @@ class Scene2 extends Phaser.Scene {
     }
   }
 
-  //deals with damage when projectile hits player
-  hurtPlayerProj(player, projectile){
+   //deals with damage when projectile hits player
+   hurtPlayerProj(player, projectile){
     projectile.destroy();
-    if (this.health >= 10){
-      this.health -= 10;
+    if (this.player.health >= 10){
+      this.player.health -= 10;
     }
-    this.healthLabel.text = "Health: " + this.health;
+    //in case we have damage that goes by 5s as well
+    else if (this.player.health > 0){
+      this.player.health = 0;
+    }
+    this.healthLabel.text = "Health: " + this.player.health;
   }
 
   //deals with damage when obstacle hits player
   hurtPlayerObs(player, obstacle){
-    if (this.health >= 10){
-      this.health -= 10;
+    if (this.player.health >= 10){
+      this.player.health -= 10;
     }
-    this.healthLabel.text = "Health: " + this.health;
+    else if (this.player.health > 0){
+      this.player.health = 0;
+    }
+    this.healthLabel.text = "Health: " + this.player.health;
+  }
+
+  healPlayer(player){
+    if (this.player.health < 80){
+      this.player.health += 20;
+    }
+    else{
+      this.player.health = 100;
+    }
+    this.healthLabel.text = "Health: " + this.player.health;
   }
 
 }
