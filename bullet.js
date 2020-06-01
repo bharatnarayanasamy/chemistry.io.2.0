@@ -22,8 +22,8 @@ class Bullet extends Phaser.GameObjects.Sprite{
     scene.physics.world.enableBody(this);
 
     //set velocity to be some scalar times the vector of OP, where O is the player's coords and P is the pointer's coords
-    this.body.velocity.x = Math.cos(angle) * 300; 
-    this.body.velocity.y = Math.sin(angle) * 300; 
+    this.body.velocity.x = Math.cos(angle) * gameSettings.bulletVel; 
+    this.body.velocity.y = Math.sin(angle) * gameSettings.bulletVel; 
 
     //add this (the bullet object) into the projectiles group
     scene.projectiles.add(this);

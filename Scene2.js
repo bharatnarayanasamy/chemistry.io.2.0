@@ -93,7 +93,7 @@ class Scene2 extends Phaser.Scene {
     });
 
     //physics for player and obstacles
-    this.physics.add.collider(this.player, this.obstacles, this.hurtPlayerObs, null, this);
+    this.physics.add.collider(this.player, this.obstacles);
 
     //physics for player and projectiles
     this.physics.add.overlap(this.player, this.projectiles, this.hurtPlayerProj, null, this);
@@ -125,9 +125,19 @@ class Scene2 extends Phaser.Scene {
       lastFired = time + 200;
     }
 
-    if(this.player.health < 100 && time > lastShot) {
+    //when player is shot, lastShot is updated, same for when player is hurt by obstacles
+    if(this.physics.overlap(this.player, this.projectiles)){
+      lastShot = time;
+    }
+
+    if(this.physics.overlap(this.player, this.obstacles) && time > lastHurt + 1000){
+      this.hurtPlayerObs(this.player);
+      lastHurt = time;
+    }
+
+    if(time > lastShot + 5000 && time > lastHurt + 5000 && time > lastHealed + 5000) {
       this.healPlayer(this.player);
-      lastShot = time + 5000
+      lastHealed = time;
     }
 
     //call each bullet within the projectiles class and updates its location (basically bullet movement)

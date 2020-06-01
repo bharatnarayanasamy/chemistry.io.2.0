@@ -7,6 +7,7 @@ var gameSettings = {
   maxObstacles: 2,
   powerUpVel: 50,
   obstacleVel: 0,
+  bulletVel: 300,
   ROTATION_SPEED_DEGREES: Phaser.Math.RadToDeg(2 * Math.PI), // 0.5 arc per sec, 2 sec per arc
   TOLERANCE: 0.02 * 1 * Math.PI,
   playerHealth: 100,
@@ -35,3 +36,13 @@ var lastFired = 0;
 
 //Same for lastShot, delay before health regen
 var lastShot = 0;
+
+//Same for lastShot, delay before health regen
+var lastHurt = 0;
+
+//Same for lastShot, delay before repeated obstacle damage
+var nextHurt = 0;
+
+//Same for lastShot, delay before health regen
+var lastHealed = 0;
+
