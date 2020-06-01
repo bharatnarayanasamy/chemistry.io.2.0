@@ -74,7 +74,8 @@ class Scene2 extends Phaser.Scene {
       var obstacle = this.physics.add.sprite(75, 75, "obstacle");
       obstacle.setScale(0.45);
       this.obstacles.add(obstacle);
-      obstacle.setRandomPosition(20, 20, game.config.width-20, game.config.height-20);
+      obstacle.x = Phaser.Math.Between(200, this.game.config.width-100);
+      obstacle.y = Phaser.Math.Between(150, this.game.config.height-150);
       obstacle.setVelocity(gameSettings.obstacleVel, gameSettings.obstacleVel);
       obstacle.setCollideWorldBounds(true);
       obstacle.setBounce(-1);
