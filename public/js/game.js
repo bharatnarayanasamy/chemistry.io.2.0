@@ -58,12 +58,12 @@ function create() {
     var self = this;
     this.socket = io();
     this.otherPlayers = this.physics.add.group();
+    this.otherPlayersHP = [];
     this.socket.on('currentPlayers', function (players) {
         Object.keys(players).forEach(function (id) {
             if (players[id].playerId === self.socket.id) {
                 addPlayer(self, players[id]);
             } else {
-                console.log("hi");
                 addOtherPlayers(self, players[id]);
             }
         });
@@ -72,7 +72,6 @@ function create() {
         addOtherPlayers(self, playerInfo);
     });
     this.socket.on('disconnect', function (playerId) {
-        console.log("hi");
         self.otherPlayers.getChildren().forEach(function (otherPlayer) {
             console.log("player disconnected")
             if (playerId === otherPlayer.playerId) {
@@ -88,7 +87,9 @@ function create() {
                 otherPlayer.setPosition(playerInfo.x, playerInfo.y);
             }
         });
+        self.otherPlayersHP.forEach(element => element.move(self, playerInfo.x-50, playerInfo.y-50));
     });
+    
 
     // Listen for bullet update events 
     this.socket.on('bullets-update', function (server_bullet_array) {
@@ -102,9 +103,7 @@ function create() {
                 
                 bullet_array[i] = new Bullet(self, angle + angleInDegrees, server_bullet_array[i].x, server_bullet_array[i].y);                
                 
-                bullet_array[i].setScale(.25);
-
-                
+                bullet_array[i].setScale(.25);                
             } else {
                 //Otherwise, just update it! 
                 bullet_array[i].x = server_bullet_array[i].x;
@@ -189,15 +188,8 @@ function create() {
             y: self.player.y,
             rotation: self.player.rotation
         };
+        self.hp = new HealthBar(self, playerInfo.x-50,playerInfo.y - 50);
 
-        /*
-        //physics for players and obstacles
-        this.physics.add.collider(self.player, this.obstacles, this.hurtPlayerObs, null, this);
-        //physics for player and projectiles
-        this.physics.add.overlap(self.player, this.projectiles, this.hurtPlayerProj, null, this);
-        //Use physics to stipulate that if a player overlaps with (picks up) a powerup, call function pickPowerUp
-        this.physics.add.overlap(self.player, this.powerUps, this.pickPowerUpPlayer, null, this);
-        */
     }
 
     function addOtherPlayers(self, playerInfo) {
@@ -210,6 +202,12 @@ function create() {
         otherPlayer.playerId = playerInfo.playerId;
         otherPlayer.setScale(.25);
         self.otherPlayers.add(otherPlayer);
+        console.log(self.otherPlayers);
+
+        const otherPlayerHp = new HealthBar(self, playerInfo.x-50,playerInfo.y - 50);
+        otherPlayerHp.playerId = playerInfo.playerId;
+        self.otherPlayersHP.push(otherPlayerHp);
+        console.log(self.otherPlayersHP);
     }
 
     //Setting the background to a gray-ish color
@@ -284,6 +282,7 @@ function update(time) {
             //calls shootBeam function, which fires a bullet
             //calculates angle between player and pointer - helps make sure bullet fires in the direction specified by the pointer
             var angle = Phaser.Math.Angle.Between(this.player.x, this.player.y, this.input.activePointer.worldX, this.input.activePointer.worldY);
+            var angleInDegrees = (angle * (180 / 3.1415)) + 90;
             //starts cooldown period - cannot fire for next 200 miliseconds
             lastFired = time + 500;
 
@@ -293,7 +292,7 @@ function update(time) {
             var vy = Math.sin(angle) * 300;
 
             // Tell the server we shot a bullet 
-            this.socket.emit('shoot-bullet', { x: x_pos, y: y_pos, angle: angle, speed_x: vx, speed_y: vy })
+            this.socket.emit('shoot-bullet', { x: x_pos, y: y_pos, angle: angle + angleInDegrees, speed_x: vx, speed_y: vy })
             lastFired = time + 200;
         }
 
@@ -312,6 +311,8 @@ function update(time) {
             if ((x !== this.player.oldPosition.x || y !== this.player.oldPosition.y || r !== this.player.oldPosition.rotation)) {
                 this.socket.emit('playerMovement', { x: this.player.x, y: this.player.y, rotation: this.player.rotation });
             }
+            this.hp.move(this, x-50, y-50);
+
         }
 
         this.player.oldPosition = {

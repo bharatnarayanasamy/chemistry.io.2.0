@@ -16,9 +16,6 @@ server.listen(8083, () => {
 var players = {};
 var bullet_array = [];
 
-var width = 1200;
-var height = 800;
-
 var proton = {
   x: Math.floor(Math.random() * 1100) + 50,
   y: Math.floor(Math.random() * 700) + 50
@@ -42,7 +39,8 @@ io.on('connection', function (socket) {
     y: Math.floor(Math.random() * 700) + 50,
     rotation: 0,
     playerId: socket.id,
-    team: (Math.floor(Math.random() * 2) == 0) ? 'green' : 'blue'
+    team: (Math.floor(Math.random() * 2) == 0) ? 'green' : 'blue',
+    healthbar: as
   };
   // send the players object to the new player
   socket.emit('currentPlayers', players);
