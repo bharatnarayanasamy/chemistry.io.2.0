@@ -33,6 +33,8 @@ var config = {
 };
 var lastFired = 0;
 
+var bullet_array = [];
+
 var game = new Phaser.Game(config);
 
 function preload() {
@@ -59,6 +61,7 @@ function create() {
             if (players[id].playerId === self.socket.id) {
                 addPlayer(self, players[id]);
             } else {
+                console.log("hi");
                 addOtherPlayers(self, players[id]);
             }
         });
@@ -67,10 +70,12 @@ function create() {
         addOtherPlayers(self, playerInfo);
     });
     this.socket.on('disconnect', function (playerId) {
+        console.log("hi");
         self.otherPlayers.getChildren().forEach(function (otherPlayer) {
+            console.log("player disconnected")
             if (playerId === otherPlayer.playerId) {
-                console.log("player destroyed")
                 otherPlayer.destroy();
+                console.log("player destroyed")
             }
         });
     });
@@ -81,6 +86,34 @@ function create() {
                 otherPlayer.setPosition(playerInfo.x, playerInfo.y);
             }
         });
+    });
+    // Listen for bullet update events 
+    this.socket.on('bullets-update', function (server_bullet_array) {
+        // If there's not enough bullets on the client, create them
+        for (var i = 0; i < server_bullet_array.length; i++) {
+            if (bullet_array[i] == undefined) {
+                bullet_array[i] = self.add.sprite(server_bullet_array[i].x, server_bullet_array[i].y, 'hydrogenbullet');
+                bullet_array[i].setScale(.25);
+                
+                //calculates angle between player and pointer - helps make sure bullet fires in the direction specified by the pointer
+                var angle = Phaser.Math.Angle.Between(self.player.x, self.player.y, self.input.activePointer.worldX, self.input.activePointer.worldY);
+                //changing the angle of the bullet image so it looks better
+                var angleInDegrees = (angle * (180 / 3.1415)) + 90;
+                bullet_array[i].angle = angle + angleInDegrees;
+                
+            } else {
+                //Otherwise, just update it! 
+                bullet_array[i].x = server_bullet_array[i].x;
+                bullet_array[i].y = server_bullet_array[i].y;
+            }
+        }
+        // Otherwise if there's too many, delete the extra 
+        for (var i = server_bullet_array.length; i < bullet_array.length; i++) {
+            bullet_array[i].destroy();
+            bullet_array.splice(i, 1);
+            i--;
+        }
+
     });
 
 
@@ -111,7 +144,7 @@ function create() {
     }
 
     function addOtherPlayers(self, playerInfo) {
-        const otherPlayer = self.add.sprite(playerInfo.x, playerInfo.y, 'hydrogen')
+        const otherPlayer = self.physics.add.sprite(playerInfo.x, playerInfo.y, 'hydrogen')
         if (playerInfo.team === 'blue') {
             otherPlayer.setTint(0x0000ff);
         } else {
@@ -215,14 +248,16 @@ function update(time) {
             //calls shootBeam function, which fires a bullet
             //calculates angle between player and pointer - helps make sure bullet fires in the direction specified by the pointer
             var angle = Phaser.Math.Angle.Between(this.player.x, this.player.y, this.input.activePointer.worldX, this.input.activePointer.worldY);
-            //creates a new bullet object
-            var bullet = new Bullet(this, this.player.rotation, this.player);
-            //reduces bullet size
-            bullet.setScale(.25);
-            //changing the angle of the bullet image so it looks better
-            var angleInDegrees = (angle * (180 / 3.1415)) + 90;
-            bullet.angle += angleInDegrees;
             //starts cooldown period - cannot fire for next 200 miliseconds
+            lastFired = time + 500;
+
+            var x_pos = this.player.x + 75 * Math.cos(angle);
+            var y_pos = this.player.y + 75 * Math.sin(angle);
+            var vx = Math.cos(angle) * 300;
+            var vy = Math.sin(angle) * 300;
+
+            // Tell the server we shot a bullet 
+            this.socket.emit('shoot-bullet', { x: x_pos, y: y_pos, angle: angle, speed_x: vx, speed_y: vy })
             lastFired = time + 200;
         }
 
@@ -238,7 +273,6 @@ function update(time) {
             var r = this.player.rotation;
             if ((x !== this.player.oldPosition.x || y !== this.player.oldPosition.y || r !== this.player.oldPosition.rotation)) {
                 this.socket.emit('playerMovement', { x: this.player.x, y: this.player.y, rotation: this.player.rotation });
-                console.log(this.player.oldPosition)
             }
         }
         this.player.oldPosition = {

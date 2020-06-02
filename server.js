@@ -9,7 +9,12 @@ app.get('/', function (req, res) {
   res.sendFile(__dirname + '/index.html');
 });
 
+server.listen(8083, () => {
+  console.log(`Listening on ${server.address().port}`);
+});
+
 var players = {};
+var bullet_array = [];
 
 io.on('connection', function (socket) {
   console.log('a user connected');
@@ -43,8 +48,37 @@ io.on('connection', function (socket) {
     // emit a message to all players about the player that moved
     socket.broadcast.emit('playerMoved', players[socket.id]);
   });
+
+  // Listen for shoot-bullet events and add it to our bullet array
+  socket.on('shoot-bullet',function(data){
+    if(players[socket.id] == undefined) return;
+    var new_bullet = data;
+    data.owner_id = socket.id; // Attach id of the player to the bullet 
+    bullet_array.push(new_bullet);
+  });
 });
-server.listen(8083, () => {
-  console.log(`Listening on ${server.address().port}`);
-});
+
+// Update the bullets 60 times per frame and send updates 
+function ServerGameLoop(){
+  for(var i=0;i<bullet_array.length;i++){
+    var bullet = bullet_array[i];
+    bullet.x += bullet.speed_x/50; 
+    bullet.y += bullet.speed_y/50; 
+    
+    // Remove if it goes too far off screen 
+    if(bullet.x < -10 || bullet.x > 1200 || bullet.y < -10 || bullet.y > 900){
+        bullet_array.splice(i,1);
+        i--;
+    }
+        
+  }
+  // Tell everyone where all the bullets are by sending the whole array
+  io.emit("bullets-update",bullet_array);
+}
+
+setInterval(ServerGameLoop, 16); 
+
+
+
+
 
