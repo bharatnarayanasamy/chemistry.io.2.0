@@ -141,7 +141,7 @@ function create() {
 
    this.protonScoreText = this.add.text(16, 20, 'Protons: ' + (numProtons), { fontSize: '32px', fill: '#FF0000' });  
    this.electonScoreText = this.add.text(16, 50, 'Electrons: ' + (numElectrons), { fontSize: '32px', fill: '#FF0000' });  
-   this.neutronScoreText = this.add.text(16, 80, 'Protons: ' + (numNeutrons), { fontSize: '32px', fill: '#FF0000' });  
+   this.neutronScoreText = this.add.text(16, 80, 'Neutrons: ' + (numNeutrons), { fontSize: '32px', fill: '#FF0000' });  
 
     this.socket.on('protonLocation', function (protonLocation) {
         if (self.proton) self.proton.destroy();
@@ -158,8 +158,8 @@ function create() {
         self.electron = self.physics.add.image(electronLocation.x, electronLocation.y, 'electron');
         self.electron.setScale(0.04);
         self.physics.add.overlap(self.player, self.electron, function () {
-            this.socket.emit('electronCollected');
-            this.electonScoreText.text = "Electrons: " + (++numElectrons);
+        this.socket.emit('electronCollected');
+        this.electonScoreText.text = "Electrons: " + (++numElectrons);
         }, null, self);
     });
 
@@ -169,7 +169,7 @@ function create() {
         self.neutron.setScale(0.1);
         self.physics.add.overlap(self.player, self.neutron, function () {
         this.socket.emit('neutronCollected');
-        this.protonScoreText.text = 'Neutrons: ' + (++numNeutrons);
+        this.neutronScoreText.text = 'Neutrons: ' + (++numNeutrons);
     }, null, self);
     });
 
