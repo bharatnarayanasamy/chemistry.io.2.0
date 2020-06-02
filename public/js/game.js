@@ -35,6 +35,8 @@ var lastFired = 0;
 
 var bullet_array = [];
 
+
+
 var game = new Phaser.Game(config);
 
 function preload() {
@@ -87,6 +89,7 @@ function create() {
             }
         });
     });
+
     // Listen for bullet update events 
     this.socket.on('bullets-update', function (server_bullet_array) {
         // If there's not enough bullets on the client, create them
@@ -116,6 +119,59 @@ function create() {
 
     });
 
+
+
+    var numProtons = 0;
+    var numNeutrons = 0;
+    var numElectrons = 0;
+
+    //Displaying the user's current score
+   /* this.scoreLabel = {"proton": this.add.text(20, 20, "protons: 0", {
+      font: "25px Arial",
+      fill: "yellow"
+    }), "neutron": this.add.text(20, 50, "neutrons: 0", {
+      font: "25px Arial",
+      fill: "yellow"
+    }), "electron": this.add.text(20, 80, "electrons: 0", {
+      font: "25px Arial",
+      fill: "yellow"
+    })};
+    */
+
+
+   this.protonScoreText = this.add.text(16, 20, 'Protons: ' + (numProtons), { fontSize: '32px', fill: '#FF0000' });  
+   this.electonScoreText = this.add.text(16, 50, 'Electrons: ' + (numElectrons), { fontSize: '32px', fill: '#FF0000' });  
+   this.neutronScoreText = this.add.text(16, 80, 'Protons: ' + (numNeutrons), { fontSize: '32px', fill: '#FF0000' });  
+
+    this.socket.on('protonLocation', function (protonLocation) {
+        if (self.proton) self.proton.destroy();
+        self.proton = self.physics.add.image(protonLocation.x, protonLocation.y, 'proton');
+        self.proton.setScale(0.08);
+        self.physics.add.overlap(self.player, self.proton, function () {
+            this.socket.emit('protonCollected');
+            this.protonScoreText.text = 'Protons: ' + (++numProtons);
+        }, null, self);
+    });
+
+    this.socket.on('electronLocation', function (electronLocation) {
+        if (self.electron) self.electron.destroy();
+        self.electron = self.physics.add.image(electronLocation.x, electronLocation.y, 'electron');
+        self.electron.setScale(0.04);
+        self.physics.add.overlap(self.player, self.electron, function () {
+            this.socket.emit('electronCollected');
+            this.electonScoreText.text = "Electrons: " + (++numElectrons);
+        }, null, self);
+    });
+
+    this.socket.on('neutronLocation', function (neutronLocation) {
+        if (self.neutron) self.neutron.destroy();
+        self.neutron = self.physics.add.image(neutronLocation.x, neutronLocation.y, 'neutron');
+        self.neutron.setScale(0.1);
+        self.physics.add.overlap(self.player, self.neutron, function () {
+        this.socket.emit('neutronCollected');
+        this.protonScoreText.text = 'Neutrons: ' + (++numNeutrons);
+    }, null, self);
+    });
 
     function addPlayer(self, playerInfo) {
         self.player = self.physics.add.sprite(playerInfo.x, playerInfo.y, 'hydrogen')
@@ -158,31 +214,11 @@ function create() {
     //Setting the background to a gray-ish color
     this.cameras.main.backgroundColor.setTo(200, 200, 200);
 
-    //Displaying the user's current score
-    this.scoreLabel = {
-        "proton": this.add.text(20, 20, "protons: 0", {
-            font: "25px Arial",
-            fill: "yellow"
-        }), "neutron": this.add.text(20, 50, "neutrons: 0", {
-            font: "25px Arial",
-            fill: "yellow"
-        }), "electron": this.add.text(20, 80, "electrons: 0", {
-            font: "25px Arial",
-            fill: "yellow"
-        })
-    };
-
     this.health = gameSettings.playerHealth;
 
     this.healthLabel = this.add.text(20, 110, "Health: " + this.health, 16);
 
-    //setting score for all 3 atomic particles to 0
-    this.score = {
-        "neutron": 0,
-        "proton": 0,
-        "electron": 0
-    };
-
+   
     //Enabling collisions when an object hits the boundary
     this.physics.world.setBoundsCollision();
 
@@ -196,8 +232,7 @@ function create() {
     //collecting information on space bar
     this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
-
-}
+}  
 
 function update(time) {
     if (typeof this.player != "undefined") {
@@ -275,15 +310,39 @@ function update(time) {
                 this.socket.emit('playerMovement', { x: this.player.x, y: this.player.y, rotation: this.player.rotation });
             }
         }
+
         this.player.oldPosition = {
             x: this.player.x,
             y: this.player.y,
             rotation: this.player.rotation,
         };
+
     }
-
-
 }
+
+
+
+
+//penis
+
+
+
+// Do not venture past this line!
+
+
+
+
+
+
+
+
+//penis
+
+
+
+
+
+
 
 //increments score when player picks up powerup
 function pickPowerUpPlayer(player, powerUp) {
@@ -322,5 +381,6 @@ function hurtPlayerObs(player, obstacle) {
     }
     this.healthLabel.text = "Health: " + this.health;
 }
+
 
 

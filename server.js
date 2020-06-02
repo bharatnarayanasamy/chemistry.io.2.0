@@ -16,18 +16,44 @@ server.listen(8083, () => {
 var players = {};
 var bullet_array = [];
 
+var width = 1200;
+var height = 800;
+
+var proton = {
+  x: Math.floor(Math.random() * 1100) + 50,
+  y: Math.floor(Math.random() * 700) + 50
+  
+};
+var electron = {
+  x: Math.floor(Math.random() * 1100) + 50,
+  y: Math.floor(Math.random() * 700) + 50
+};
+var neutron = {
+  x: Math.floor(Math.random() * 1100) + 50,
+  y: Math.floor(Math.random() * 700) + 50
+};
+
+
 io.on('connection', function (socket) {
   console.log('a user connected');
   // create a new player and add it to our players object
   players[socket.id] = {
-    x: Math.floor(Math.random() * 700) + 50,
-    y: Math.floor(Math.random() * 500) + 50,
+    x: Math.floor(Math.random() * 1100) + 50,
+    y: Math.floor(Math.random() * 700) + 50,
     rotation: 0,
     playerId: socket.id,
     team: (Math.floor(Math.random() * 2) == 0) ? 'green' : 'blue'
   };
   // send the players object to the new player
   socket.emit('currentPlayers', players);
+
+  // send the proton/electron/neutron object to the new player
+  socket.emit('protonLocation', proton);
+  
+  socket.emit('electronLocation', electron);
+
+  socket.emit('neutronLocation', neutron);
+  
   // update all other players of the new player
   socket.broadcast.emit('newPlayer', players[socket.id]);
   
@@ -47,7 +73,25 @@ io.on('connection', function (socket) {
     // emit a message to all players about the player that moved
     socket.broadcast.emit('playerMoved', players[socket.id]);
   });
+  
+  socket.on('protonCollected', function () {
+    proton.x = Math.floor(Math.random() * 1100) + 50;
+    proton.y = Math.floor(Math.random() * 700) + 50;
+    io.emit('protonLocation', proton);
+  });
+  
+  socket.on('electronCollected', function () {
+    electron.x = Math.floor(Math.random() * 1100) + 50;
+    electron.y = Math.floor(Math.random() * 700) + 50;
+    io.emit('electronLocation', electron);
+  });
 
+  socket.on('neutronCollected', function () {
+    neutron.x = Math.floor(Math.random() * 1100) + 50;
+    neutron.y = Math.floor(Math.random() * 700) + 50;
+    io.emit('neutronLocation', neutron);
+  });
+  
   // Listen for shoot-bullet events and add it to our bullet array
   socket.on('shoot-bullet',function(data){
     if(players[socket.id] == undefined) return;
