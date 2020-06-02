@@ -123,7 +123,7 @@ function create() {
         if (playerInfo.team === 'blue') {
             self.player.setTint(0x0000ff);
         } else {
-            self.player.setTint(0xff0000);
+            self.player.setTint(0x00ff00);
         }
         self.player.body.angle = 45;
         self.player.body.setCollideWorldBounds(true);
@@ -148,7 +148,7 @@ function create() {
         if (playerInfo.team === 'blue') {
             otherPlayer.setTint(0x0000ff);
         } else {
-            otherPlayer.setTint(0xff0000);
+            otherPlayer.setTint(0x00ff00);
         }
         otherPlayer.playerId = playerInfo.playerId;
         otherPlayer.setScale(.25);

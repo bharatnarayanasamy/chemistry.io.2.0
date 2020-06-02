@@ -24,14 +24,13 @@ io.on('connection', function (socket) {
     y: Math.floor(Math.random() * 500) + 50,
     rotation: 0,
     playerId: socket.id,
-    team: (Math.floor(Math.random() * 2) == 0) ? 'red' : 'blue'
+    team: (Math.floor(Math.random() * 2) == 0) ? 'green' : 'blue'
   };
   // send the players object to the new player
   socket.emit('currentPlayers', players);
   // update all other players of the new player
   socket.broadcast.emit('newPlayer', players[socket.id]);
-  // update all other players of the new player
-  socket.broadcast.emit('newPlayer', players[socket.id]);
+  
   // when a player disconnects, remove them from our players object
   socket.on('disconnect', function () {
     console.log('user disconnected: ', socket.id);
