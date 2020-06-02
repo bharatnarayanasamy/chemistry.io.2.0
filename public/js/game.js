@@ -95,14 +95,15 @@ function create() {
         // If there's not enough bullets on the client, create them
         for (var i = 0; i < server_bullet_array.length; i++) {
             if (bullet_array[i] == undefined) {
-                bullet_array[i] = self.add.sprite(server_bullet_array[i].x, server_bullet_array[i].y, 'hydrogenbullet');
-                bullet_array[i].setScale(.25);
-                
                 //calculates angle between player and pointer - helps make sure bullet fires in the direction specified by the pointer
                 var angle = Phaser.Math.Angle.Between(self.player.x, self.player.y, self.input.activePointer.worldX, self.input.activePointer.worldY);
                 //changing the angle of the bullet image so it looks better
                 var angleInDegrees = (angle * (180 / 3.1415)) + 90;
-                bullet_array[i].angle = angle + angleInDegrees;
+                
+                bullet_array[i] = new Bullet(self, angle + angleInDegrees, server_bullet_array[i].x, server_bullet_array[i].y);                
+                
+                bullet_array[i].setScale(.25);
+
                 
             } else {
                 //Otherwise, just update it! 
@@ -296,11 +297,13 @@ function update(time) {
             lastFired = time + 200;
         }
 
+        /*
         //call each bullet within the projectiles class and updates its location (basically bullet movement)
         for (var i = 0; i < this.projectiles.getChildren().length; i++) {
             var bullet = this.projectiles.getChildren()[i];
             bullet.update();
         }
+        */
 
         if (typeof this.player.oldPosition != "undefined") {
             var x = this.player.x;
@@ -320,29 +323,7 @@ function update(time) {
     }
 }
 
-
-
-
-//penis
-
-
-
 // Do not venture past this line!
-
-
-
-
-
-
-
-
-//penis
-
-
-
-
-
-
 
 //increments score when player picks up powerup
 function pickPowerUpPlayer(player, powerUp) {
