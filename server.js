@@ -40,7 +40,6 @@ io.on('connection', function (socket) {
     rotation: 0,
     playerId: socket.id,
     team: (Math.floor(Math.random() * 2) == 0) ? 'green' : 'blue',
-    healthbar: as
   };
   // send the players object to the new player
   socket.emit('currentPlayers', players);
