@@ -292,7 +292,7 @@ function update(time) {
             var vy = Math.sin(angle) * 300;
 
             // Tell the server we shot a bullet 
-            this.socket.emit('shoot-bullet', { x: x_pos, y: y_pos, angle: angle + angleInDegrees, speed_x: vx, speed_y: vy })
+            this.socket.emit('shoot-bullet', { x: x_pos, y: y_pos, angle: angle, speed_x: vx, speed_y: vy })
             lastFired = time + 200;
         }
 
