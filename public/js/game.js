@@ -77,6 +77,7 @@ function create() {
             if (playerId === otherPlayer.playerId) {
                 otherPlayer.destroy();
                 console.log("player destroyed")
+                console.log(otherPlayer);
             }
         });
     });
@@ -87,9 +88,9 @@ function create() {
                 otherPlayer.setPosition(playerInfo.x, playerInfo.y);
             }
         });
-        self.otherPlayersHP.forEach(element => element.move(self, playerInfo.x-50, playerInfo.y-50));
+        self.otherPlayersHP.forEach(element => element.move(self, playerInfo.x - 50, playerInfo.y - 50));
     });
-    
+
 
     // Listen for bullet update events 
     this.socket.on('bullets-update', function (server_bullet_array) {
@@ -100,10 +101,10 @@ function create() {
                 var angle = Phaser.Math.Angle.Between(self.player.x, self.player.y, self.input.activePointer.worldX, self.input.activePointer.worldY);
                 //changing the angle of the bullet image so it looks better
                 var angleInDegrees = (angle * (180 / 3.1415)) + 90;
-                
-                bullet_array[i] = new Bullet(self, angle + angleInDegrees, server_bullet_array[i].x, server_bullet_array[i].y);                
-                
-                bullet_array[i].setScale(.25);                
+
+                bullet_array[i] = new Bullet(self, angle + angleInDegrees, server_bullet_array[i].x, server_bullet_array[i].y);
+
+                bullet_array[i].setScale(.25);
             } else {
                 //Otherwise, just update it! 
                 bullet_array[i].x = server_bullet_array[i].x;
@@ -126,22 +127,22 @@ function create() {
     var numElectrons = 0;
 
     //Displaying the user's current score
-   /* this.scoreLabel = {"proton": this.add.text(20, 20, "protons: 0", {
-      font: "25px Arial",
-      fill: "yellow"
-    }), "neutron": this.add.text(20, 50, "neutrons: 0", {
-      font: "25px Arial",
-      fill: "yellow"
-    }), "electron": this.add.text(20, 80, "electrons: 0", {
-      font: "25px Arial",
-      fill: "yellow"
-    })};
-    */
+    /* this.scoreLabel = {"proton": this.add.text(20, 20, "protons: 0", {
+       font: "25px Arial",
+       fill: "yellow"
+     }), "neutron": this.add.text(20, 50, "neutrons: 0", {
+       font: "25px Arial",
+       fill: "yellow"
+     }), "electron": this.add.text(20, 80, "electrons: 0", {
+       font: "25px Arial",
+       fill: "yellow"
+     })};
+     */
 
 
-   this.protonScoreText = this.add.text(16, 20, 'Protons: ' + (numProtons), { fontSize: '32px', fill: '#FF0000' });  
-   this.electonScoreText = this.add.text(16, 50, 'Electrons: ' + (numElectrons), { fontSize: '32px', fill: '#FF0000' });  
-   this.neutronScoreText = this.add.text(16, 80, 'Neutrons: ' + (numNeutrons), { fontSize: '32px', fill: '#FF0000' });  
+    this.protonScoreText = this.add.text(16, 20, 'Protons: ' + (numProtons), { fontSize: '32px', fill: '#FF0000' });
+    this.electonScoreText = this.add.text(16, 50, 'Electrons: ' + (numElectrons), { fontSize: '32px', fill: '#FF0000' });
+    this.neutronScoreText = this.add.text(16, 80, 'Neutrons: ' + (numNeutrons), { fontSize: '32px', fill: '#FF0000' });
 
     this.socket.on('protonLocation', function (protonLocation) {
         if (self.proton) self.proton.destroy();
@@ -158,8 +159,8 @@ function create() {
         self.electron = self.physics.add.image(electronLocation.x, electronLocation.y, 'electron');
         self.electron.setScale(0.04);
         self.physics.add.overlap(self.player, self.electron, function () {
-        this.socket.emit('electronCollected');
-        this.electonScoreText.text = "Electrons: " + (++numElectrons);
+            this.socket.emit('electronCollected');
+            this.electonScoreText.text = "Electrons: " + (++numElectrons);
         }, null, self);
     });
 
@@ -168,9 +169,9 @@ function create() {
         self.neutron = self.physics.add.image(neutronLocation.x, neutronLocation.y, 'neutron');
         self.neutron.setScale(0.1);
         self.physics.add.overlap(self.player, self.neutron, function () {
-        this.socket.emit('neutronCollected');
-        this.neutronScoreText.text = 'Neutrons: ' + (++numNeutrons);
-    }, null, self);
+            this.socket.emit('neutronCollected');
+            this.neutronScoreText.text = 'Neutrons: ' + (++numNeutrons);
+        }, null, self);
     });
 
     function addPlayer(self, playerInfo) {
@@ -188,7 +189,7 @@ function create() {
             y: self.player.y,
             rotation: self.player.rotation
         };
-        self.hp = new HealthBar(self, playerInfo.x-50,playerInfo.y - 50);
+        self.hp = new HealthBar(self, playerInfo.x - 50, playerInfo.y - 50);
 
     }
 
@@ -204,7 +205,7 @@ function create() {
         self.otherPlayers.add(otherPlayer);
         console.log(self.otherPlayers);
 
-        const otherPlayerHp = new HealthBar(self, playerInfo.x-50,playerInfo.y - 50);
+        const otherPlayerHp = new HealthBar(self, playerInfo.x - 50, playerInfo.y - 50);
         otherPlayerHp.playerId = playerInfo.playerId;
         self.otherPlayersHP.push(otherPlayerHp);
         console.log(self.otherPlayersHP);
@@ -217,7 +218,7 @@ function create() {
 
     this.healthLabel = this.add.text(20, 110, "Health: " + this.health, 16);
 
-   
+
     //Enabling collisions when an object hits the boundary
     this.physics.world.setBoundsCollision();
 
@@ -231,7 +232,7 @@ function create() {
     //collecting information on space bar
     this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
-}  
+}
 
 function update(time) {
     if (typeof this.player != "undefined") {
@@ -311,7 +312,7 @@ function update(time) {
             if ((x !== this.player.oldPosition.x || y !== this.player.oldPosition.y || r !== this.player.oldPosition.rotation)) {
                 this.socket.emit('playerMovement', { x: this.player.x, y: this.player.y, rotation: this.player.rotation });
             }
-            this.hp.move(this, x-50, y-50);
+            this.hp.move(this, x - 50, y - 50);
 
         }
 
