@@ -80,6 +80,11 @@ function create() {
                 console.log(otherPlayer);
             }
         });
+        for (i = 0; i<self.otherPlayersHP.length; i++) {
+            if (playerId === self.otherPlayersHP[i].playerId) {
+                self.otherPlayersHP[i].destroy();
+            }
+        }
     });
     this.socket.on('playerMoved', function (playerInfo) {
         self.otherPlayers.getChildren().forEach(function (otherPlayer) {
@@ -190,6 +195,7 @@ function create() {
             rotation: self.player.rotation
         };
         self.hp = new HealthBar(self, playerInfo.x - 50, playerInfo.y - 50);
+
 
     }
 
