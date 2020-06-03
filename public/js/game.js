@@ -83,6 +83,8 @@ function create() {
         for (i = 0; i<self.otherPlayersHP.length; i++) {
             if (playerId === self.otherPlayersHP[i].playerId) {
                 self.otherPlayersHP[i].destroy();
+                self.otherPlayersHP.splice(i, 1);
+                i--;
             }
         }
     });
