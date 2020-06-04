@@ -32,8 +32,7 @@ var config = {
     }
 };
 var lastFired = 0;
-
-var bullet_array = [];
+var lastshot = 0;
 
 
 
@@ -58,6 +57,7 @@ function create() {
     var self = this;
     this.socket = io();
     this.otherPlayers = this.physics.add.group();
+    this.otherElements = this.physics.add.group();
     this.otherPlayersHP = [];
     this.socket.on('currentPlayers', function (players) {
         Object.keys(players).forEach(function (id) {
@@ -71,63 +71,52 @@ function create() {
     this.socket.on('newPlayer', function (playerInfo) {
         addOtherPlayers(self, playerInfo);
     });
-    this.socket.on('disconnect', function (playerId) {
-        self.otherPlayers.getChildren().forEach(function (otherPlayer) {
+    this.socket.on('disconnect', function (playerId) {        
+        //destroying other elements
+        self.otherElements.getChildren().forEach(function (otherElement) {
             console.log("player disconnected")
-            if (playerId === otherPlayer.playerId) {
-                otherPlayer.destroy();
+            if (playerId === otherElement.playerId) {
+                otherElement.destroy();
                 console.log("player destroyed")
-                console.log(otherPlayer);
             }
         });
-        for (i = 0; i<self.otherPlayersHP.length; i++) {
-            if (playerId === self.otherPlayersHP[i].playerId) {
-                self.otherPlayersHP[i].destroy();
-                self.otherPlayersHP.splice(i, 1);
-                i--;
-            }
-        }
+
     });
     this.socket.on('playerMoved', function (playerInfo) {
-        self.otherPlayers.getChildren().forEach(function (otherPlayer) {
-            if (playerInfo.playerId === otherPlayer.playerId) {
-                otherPlayer.setRotation(playerInfo.rotation);
-                otherPlayer.setPosition(playerInfo.x, playerInfo.y);
+        self.otherElements.getChildren().forEach(function (otherElement) {
+            if (playerInfo.playerId === otherElement.playerId) {
+                otherElement.rotation = playerInfo.rotation;
+                otherElement.x = playerInfo.x;
+                otherElement.y = playerInfo.y;
             }
         });
-        self.otherPlayersHP.forEach(element => element.move(self, playerInfo.x - 50, playerInfo.y - 50));
     });
 
 
     // Listen for bullet update events 
     this.socket.on('bullets-update', function (server_bullet_array) {
-        // If there's not enough bullets on the client, create them
+        // If there's not enough bullets on the client, create themfd
         for (var i = 0; i < server_bullet_array.length; i++) {
-            if (bullet_array[i] == undefined) {
-                //calculates angle between player and pointer - helps make sure bullet fires in the direction specified by the pointer
-                var angle = Phaser.Math.Angle.Between(self.player.x, self.player.y, self.input.activePointer.worldX, self.input.activePointer.worldY);
-                //changing the angle of the bullet image so it looks better
-                var angleInDegrees = (angle * (180 / 3.1415)) + 90;
+            if (self.element.bullet_array[i] == undefined) {
 
-                bullet_array[i] = new Bullet(self, angle + angleInDegrees, server_bullet_array[i].x, server_bullet_array[i].y);
+                var angle = Phaser.Math.Angle.Between(self.element.x, self.element.y, self.input.activePointer.worldX, self.input.activePointer.worldY);
 
-                bullet_array[i].setScale(.25);
+                self.element.bullet_array[i] = new Bullet(self, angle, server_bullet_array[i].x, server_bullet_array[i].y);
+
             } else {
                 //Otherwise, just update it! 
-                bullet_array[i].x = server_bullet_array[i].x;
-                bullet_array[i].y = server_bullet_array[i].y;
+                self.element.bullet_array[i].x = server_bullet_array[i].x;
+                self.element.bullet_array[i].y = server_bullet_array[i].y;
             }
         }
         // Otherwise if there's too many, delete the extra 
-        for (var i = server_bullet_array.length; i < bullet_array.length; i++) {
-            bullet_array[i].destroy();
-            bullet_array.splice(i, 1);
+        for (var i = server_bullet_array.length; i < self.element.bullet_array.length; i++) {
+            self.element.bullet_array[i].destroy();
+            self.element.bullet_array.splice(i, 1);
             i--;
         }
 
     });
-
-
 
     var numProtons = 0;
     var numNeutrons = 0;
@@ -146,7 +135,7 @@ function create() {
      })};
      */
 
-
+    /*
     this.protonScoreText = this.add.text(16, 20, 'Protons: ' + (numProtons), { fontSize: '32px', fill: '#FF0000' });
     this.electonScoreText = this.add.text(16, 50, 'Electrons: ' + (numElectrons), { fontSize: '32px', fill: '#FF0000' });
     this.neutronScoreText = this.add.text(16, 80, 'Neutrons: ' + (numNeutrons), { fontSize: '32px', fill: '#FF0000' });
@@ -180,43 +169,23 @@ function create() {
             this.neutronScoreText.text = 'Neutrons: ' + (++numNeutrons);
         }, null, self);
     });
+    */
 
     function addPlayer(self, playerInfo) {
-        self.player = self.physics.add.sprite(playerInfo.x, playerInfo.y, 'hydrogen')
-        self.player.setScale(.25);
-        if (playerInfo.team === 'blue') {
-            self.player.setTint(0x0000ff);
-        } else {
-            self.player.setTint(0x00ff00);
-        }
-        self.player.body.angle = 45;
-        self.player.body.setCollideWorldBounds(true);
-        self.player.oldPosition = {
-            x: self.player.x,
-            y: self.player.y,
-            rotation: self.player.rotation
+        //code for element class
+        self.element = new Element(self, playerInfo.x, playerInfo.y, 45, playerInfo.playerId, "hydrogen");
+        
+        self.element.oldPosition = {
+            x: self.element.x,
+            y: self.element.y,
+            rotation: self.element.rotation
         };
-        self.hp = new HealthBar(self, playerInfo.x - 50, playerInfo.y - 50);
-
-
     }
 
     function addOtherPlayers(self, playerInfo) {
-        const otherPlayer = self.physics.add.sprite(playerInfo.x, playerInfo.y, 'hydrogen')
-        if (playerInfo.team === 'blue') {
-            otherPlayer.setTint(0x0000ff);
-        } else {
-            otherPlayer.setTint(0x00ff00);
-        }
-        otherPlayer.playerId = playerInfo.playerId;
-        otherPlayer.setScale(.25);
-        self.otherPlayers.add(otherPlayer);
-        console.log(self.otherPlayers);
-
-        const otherPlayerHp = new HealthBar(self, playerInfo.x - 50, playerInfo.y - 50);
-        otherPlayerHp.playerId = playerInfo.playerId;
-        self.otherPlayersHP.push(otherPlayerHp);
-        console.log(self.otherPlayersHP);
+        const otherElement = new Element(self, playerInfo.x, playerInfo.y, 45, playerInfo.playerId, "hydrogen");
+        otherElement.setTint(0x0000ff);
+        self.otherElements.add(otherElement);
     }
 
     //Setting the background to a gray-ish color
@@ -243,66 +212,17 @@ function create() {
 }
 
 function update(time) {
-    if (typeof this.player != "undefined") {
-        //player movement
-        this.player.body.setVelocity(0);
-        if (this.cursors.left.isDown) {
-            this.player.setVelocityX(-gameSettings.playerSpeed);
-        } else if (this.cursors.right.isDown) {
-            this.player.setVelocityX(gameSettings.playerSpeed);
-        }
-        if (this.cursors.up.isDown) {
-            this.player.setVelocityY(-gameSettings.playerSpeed);
-        } else if (this.cursors.down.isDown) {
-            this.player.setVelocityY(gameSettings.playerSpeed);
-        }
 
-        if (this.input.keyboard.addKey('A').isDown) {
-            this.player.setVelocityX(-gameSettings.playerSpeed);
-        } else if (this.input.keyboard.addKey('D').isDown) {
-            this.player.setVelocityX(gameSettings.playerSpeed);
-        }
-        //move up or down
-        if (this.input.keyboard.addKey('W').isDown) {
-            this.player.setVelocityY(-gameSettings.playerSpeed);
-        } else if (this.input.keyboard.addKey('S').isDown) {
-            this.player.setVelocityY(gameSettings.playerSpeed);
-        }
+  
+    if (typeof this.element != "undefined") {        
+        this.element.movePlayer(this);
 
-        //angle pointer
-        var angleToPointer = Phaser.Math.Angle.Between(this.player.x, this.player.y, this.input.activePointer.worldX, this.input.activePointer.worldY);
-        var angleDelta = Phaser.Math.Angle.Wrap(angleToPointer - this.player.rotation);
-        //some fancy math stuff I got from online
-        if (Phaser.Math.Within(angleDelta, 0, gameSettings.TOLERANCE)) {
-            this.player.rotation = angleToPointer;
-            this.player.body.setAngularVelocity(0);
-        } else {
-            this.player.body.setAngularVelocity(Math.sign(angleDelta) * gameSettings.ROTATION_SPEED_DEGREES);
-        }
-
-        //calls a function that tells the player sprite to react to keyboard commands 
-        //this.player.movePlayerManager(this);
-
-        //tells the barrel of the gun to point wherever the mouse is pointing
-        //this.player.pointerMove(this);
-
-        //If mouse clicked and cooldown for shots has elapsed, fire a bullet
-        if ((this.input.activePointer.isDown || Phaser.Input.Keyboard.JustDown(this.spacebar)) && time > lastFired) {
-            //calls shootBeam function, which fires a bullet
-            //calculates angle between player and pointer - helps make sure bullet fires in the direction specified by the pointer
-            var angle = Phaser.Math.Angle.Between(this.player.x, this.player.y, this.input.activePointer.worldX, this.input.activePointer.worldY);
-            var angleInDegrees = (angle * (180 / 3.1415)) + 90;
-            //starts cooldown period - cannot fire for next 200 miliseconds
-            lastFired = time + 500;
-
-            var x_pos = this.player.x + 75 * Math.cos(angle);
-            var y_pos = this.player.y + 75 * Math.sin(angle);
-            var vx = Math.cos(angle) * 300;
-            var vy = Math.sin(angle) * 300;
+        if((this.input.activePointer.isDown || Phaser.Input.Keyboard.JustDown(this.spacebar)) && lastshot < time){
+            var bullet = this.element.shootBullet(this);
 
             // Tell the server we shot a bullet 
-            this.socket.emit('shoot-bullet', { x: x_pos, y: y_pos, angle: angle, speed_x: vx, speed_y: vy })
-            lastFired = time + 200;
+            this.socket.emit('shoot-bullet', {x: bullet.x, y: bullet.y, angle: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y })
+            lastshot = time + 500;
         }
 
         /*
@@ -312,22 +232,19 @@ function update(time) {
             bullet.update();
         }
         */
-
-        if (typeof this.player.oldPosition != "undefined") {
-            var x = this.player.x;
-            var y = this.player.y;
-            var r = this.player.rotation;
-            if ((x !== this.player.oldPosition.x || y !== this.player.oldPosition.y || r !== this.player.oldPosition.rotation)) {
-                this.socket.emit('playerMovement', { x: this.player.x, y: this.player.y, rotation: this.player.rotation });
+        
+        if (typeof this.element.oldPosition != "undefined") {
+            var x = this.element.x;
+            var y = this.element.y;
+            var r = this.element.rotation;
+            if ((x !== this.element.oldPosition.x || y !== this.element.oldPosition.y || r !== this.element.oldPosition.rotation)) {
+                this.socket.emit('playerMovement', { x: this.element.x, y: this.element.y, rotation: this.element.rotation });
             }
-            this.hp.move(this, x - 50, y - 50);
-
         }
-
-        this.player.oldPosition = {
-            x: this.player.x,
-            y: this.player.y,
-            rotation: this.player.rotation,
+        this.element.oldPosition = {
+            x: this.element.x,
+            y: this.element.y,
+            rotation: this.element.rotation,
         };
 
     }

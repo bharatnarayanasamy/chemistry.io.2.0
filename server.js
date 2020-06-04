@@ -30,7 +30,6 @@ var neutron = {
   y: Math.floor(Math.random() * 700) + 50
 };
 
-
 io.on('connection', function (socket) {
   console.log('a user connected');
   // create a new player and add it to our players object
@@ -41,6 +40,7 @@ io.on('connection', function (socket) {
     playerId: socket.id,
     team: (Math.floor(Math.random() * 2) == 0) ? 'green' : 'blue',
   };
+
   // send the players object to the new player
   socket.emit('currentPlayers', players);
 
@@ -58,7 +58,6 @@ io.on('connection', function (socket) {
   socket.on('disconnect', function () {
     console.log('user disconnected: ', socket.id);
     delete players[socket.id];
-    console.log(players);
     // emit a message to all players to remove this player
     io.emit('disconnect', socket.id);
   });
@@ -112,13 +111,12 @@ function ServerGameLoop(){
     }
         
   }
+  
   // Tell everyone where all the bullets are by sending the whole array
-  io.emit("bullets-update",bullet_array);
+  io.emit("bullets-update", bullet_array);
 }
 
 setInterval(ServerGameLoop, 16); 
-
-
 
 
 
