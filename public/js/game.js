@@ -8,7 +8,7 @@ var gameSettings = {
     powerUpVel: 50,
     obstacleVel: 0,
     ROTATION_SPEED_DEGREES: Phaser.Math.RadToDeg(2 * Math.PI), // 0.5 arc per sec, 2 sec per arc
-    TOLERANCE: 0.02 * 1 * Math.PI,
+    TOLERANCE: 0.04 * 1 * Math.PI,
     playerHealth: 100,
 }
 
