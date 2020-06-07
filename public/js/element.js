@@ -56,6 +56,8 @@ class Element extends Phaser.GameObjects.Sprite {
 
         this.bullet_array = [];
 
+        this.health = gameSettings.playerHealth;
+
         //add player to the scene
         scene.add.existing(this);
         scene.physics.world.enableBody(this);
@@ -64,7 +66,6 @@ class Element extends Phaser.GameObjects.Sprite {
         this.body.setCollideWorldBounds(true);
 
         /*
-        this.health = 100;
         this.hp = new HealthBar(scene, x, y);
         this.score = 0;
         this.element = element;*/

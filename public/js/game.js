@@ -33,6 +33,7 @@ var config = {
 };
 var lastFired = 0;
 var lastshot = 0;
+var lastHealed = 0;
 var lastCollectedP = 0;
 var lastCollectedE = 0;
 var lastCollectedN = 0;
@@ -92,6 +93,17 @@ function create() {
         });
 
     });
+
+    this.socket.on('deleteDeadPlayers', function (playerId) {
+        self.otherElements.getChildren().forEach(function (otherElement) {
+            console.log("player disconnected")
+            if (playerId === otherElement.playerId) {
+                otherElement.destroy();
+                console.log("player destroyed")
+            }
+        });
+    });
+
     this.socket.on('playerMoved', function (playerInfo) {
         //add time delay
         self.otherElements.getChildren().forEach(function (otherElement) {
@@ -103,14 +115,22 @@ function create() {
         });
     });
 
-    this.socket.on('player-hit', function(i){
-        
+    this.socket.on('player-hit', function (healthInfo) {
+
         console.log("there has been a collision");
-        self.element.bullet_array[i].destroy();
-        self.element.bullet_array.splice(i,1);
-        //self.element.health -= 20;
-        
+        self.element.bullet_array[healthInfo.i].destroy();
+        self.element.bullet_array.splice(healthInfo.i, 1);
+        if (healthInfo.id == self.socket.id && self.element.health >= 20) {
+            self.element.health -= 20;
+        }
+        else if (healthInfo.id == self.socket.id) {
+            self.element.health = 0;
+        }
+
     });
+
+
+
 
     // Listen for bullet update events 
     this.socket.on('bullets-update', function (server_bullet_array) {
@@ -157,6 +177,9 @@ function create() {
     this.electronScoreText = this.add.text(16, 50, 'Electrons: ' + (0), { fontSize: '32px', fill: '#FF0000' });
     this.neutronScoreText = this.add.text(16, 80, 'Neutrons: ' + (0), { fontSize: '32px', fill: '#FF0000' });
 
+
+
+
     this.d = new Date();
 
     lastCollectedE = 0;
@@ -181,7 +204,7 @@ function create() {
         self.proton = self.physics.add.image(proton.x, proton.y, 'proton');
         self.proton.setScale(0.08);
         self.physics.add.overlap(self.element, self.proton, function () {
-            if(proton.x != this.oldProtonPosition.x || proton.y != this.oldProtonPosition.y) {
+            if (proton.x != this.oldProtonPosition.x || proton.y != this.oldProtonPosition.y) {
                 this.protonScoreText.text = 'Protons: ' + (++numProtonCollected);
                 this.socket.emit('protonCollected');
                 this.oldProtonPosition = {
@@ -196,7 +219,7 @@ function create() {
         self.electron = self.physics.add.image(electron.x, electron.y, 'electron');
         self.electron.setScale(0.04);
         self.physics.add.overlap(self.element, self.electron, function () {
-            if(electron.x != this.oldElectronPosition.x || electron.y != this.oldElectronPosition.y) {
+            if (electron.x != this.oldElectronPosition.x || electron.y != this.oldElectronPosition.y) {
                 this.electronScoreText.text = 'Electrons: ' + (++numElectronCollected);
                 this.socket.emit('electronCollected');
                 this.oldElectronPosition = {
@@ -211,7 +234,7 @@ function create() {
         self.neutron = self.physics.add.image(neutron.x, neutron.y, 'neutron');
         self.neutron.setScale(0.1);
         self.physics.add.overlap(self.element, self.neutron, function () {
-            if(neutron.x != this.oldNeutronPosition.x || neutron.y != this.oldNeutronPosition.y) {
+            if (neutron.x != this.oldNeutronPosition.x || neutron.y != this.oldNeutronPosition.y) {
                 this.neutronScoreText.text = 'Neutrons: ' + (++numNeutronCollected);
                 this.socket.emit('neutronCollected');
                 this.oldNeutronPosition = {
@@ -242,15 +265,14 @@ function create() {
     //Setting the background to a gray-ish color
     this.cameras.main.backgroundColor.setTo(200, 200, 200);
 
-    this.health = gameSettings.playerHealth;
-
-    this.healthLabel = this.add.text(20, 110, "Health: " + this.health, 16);
 
     //Enabling collisions when an object hits the boundary
     this.physics.world.setBoundsCollision();
 
     //Create group to hold all our projectiles, aka the bullets
     this.projectiles = this.add.group();
+
+    this.healthLabel = this.add.text(20, 110, "Health: 100", { fontSize: '32px', fill: '#FF0000' });
 
     //used too collect information on keys that were pressed - important for moving the player  
     this.cursorKeys = this.input.keyboard.createCursorKeys();
@@ -266,9 +288,12 @@ function update(time) {
 
     //this.socket.emit('timeUpdate', time);
     //console.log(Phaser.Time.Clock.now);
+    //this.healthLabel = this.add.text(20, 110, "Health: " + (this.element.health), { fontSize: '32px', fill: '#FF0000' });
+
 
     if (typeof this.element != "undefined") {
         this.element.movePlayer(this);
+        this.healthLabel.text = "Health: " + this.element.health;
 
         if ((this.input.activePointer.isDown || Phaser.Input.Keyboard.JustDown(this.spacebar)) && lastshot < time) {
             var bullet = this.element.shootBullet(this);
@@ -300,8 +325,30 @@ function update(time) {
             y: this.element.y,
             rotation: this.element.rotation,
         };
+
+        if (time > lastHealed + 1000 /*&& time > lastHurt*/) {
+
+            if (this.element.health <= 97) {
+
+                this.element.health += 3;
+            }
+            else {
+
+                this.element.health = 100;
+            }
+
+            lastHealed = time;
+        }
+
+        if (this.element.health <= 0) {
+            this.element.destroy();
+            this.socket.emit('playerDestroyed');
+            window.alert("Refresh to play again!");
+            //take them back to scene1
+        }
     }
 }
+
 
 // Do not venture past this line!
 
