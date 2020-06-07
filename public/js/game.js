@@ -33,7 +33,9 @@ var config = {
 };
 var lastFired = 0;
 var lastshot = 0;
-
+var lastCollectedP = 0;
+var lastCollectedE = 0;
+var lastCollectedN = 0;
 
 
 var game = new Phaser.Game(config);
@@ -60,6 +62,7 @@ function create() {
     this.otherElements = this.physics.add.group();
     this.otherPlayersHP = [];
     this.socket.on('currentPlayers', function (players) {
+        //add time delay
         Object.keys(players).forEach(function (id) {
             if (players[id].playerId === self.socket.id) {
                 addPlayer(self, players[id]);
@@ -69,9 +72,11 @@ function create() {
         });
     });
     this.socket.on('newPlayer', function (playerInfo) {
+        //add time delay
         addOtherPlayers(self, playerInfo);
     });
-    this.socket.on('disconnect', function (playerId) {        
+    this.socket.on('disconnect', function (playerId) {
+        //add time delay  
         //destroying other elements
         self.otherElements.getChildren().forEach(function (otherElement) {
             console.log("player disconnected")
@@ -83,6 +88,7 @@ function create() {
 
     });
     this.socket.on('playerMoved', function (playerInfo) {
+        //add time delay
         self.otherElements.getChildren().forEach(function (otherElement) {
             if (playerInfo.playerId === otherElement.playerId) {
                 otherElement.rotation = playerInfo.rotation;
@@ -95,6 +101,7 @@ function create() {
 
     // Listen for bullet update events 
     this.socket.on('bullets-update', function (server_bullet_array) {
+        //add time delay
         // If there's not enough bullets on the client, create themfd
         for (var i = 0; i < server_bullet_array.length; i++) {
             if (self.element.bullet_array[i] == undefined) {
@@ -105,6 +112,7 @@ function create() {
 
             } else {
                 //Otherwise, just update it! 
+                self.element.bullet_array[i].enableBody(true, true);
                 self.element.bullet_array[i].x = server_bullet_array[i].x;
                 self.element.bullet_array[i].y = server_bullet_array[i].y;
             }
@@ -118,12 +126,9 @@ function create() {
 
     });
 
-    var numProtons = 0;
-    var numNeutrons = 0;
-    var numElectrons = 0;
-
-    //Displaying the user's current score
-    /* this.scoreLabel = {"proton": this.add.text(20, 20, "protons: 0", {
+    //Old text for
+    /*
+    this.scoreLabel = {"proton": this.add.text(20, 20, "protons: 0", {
        font: "25px Arial",
        fill: "yellow"
      }), "neutron": this.add.text(20, 50, "neutrons: 0", {
@@ -135,46 +140,86 @@ function create() {
      })};
      */
 
-    /*
-    this.protonScoreText = this.add.text(16, 20, 'Protons: ' + (numProtons), { fontSize: '32px', fill: '#FF0000' });
-    this.electonScoreText = this.add.text(16, 50, 'Electrons: ' + (numElectrons), { fontSize: '32px', fill: '#FF0000' });
-    this.neutronScoreText = this.add.text(16, 80, 'Neutrons: ' + (numNeutrons), { fontSize: '32px', fill: '#FF0000' });
 
-    this.socket.on('protonLocation', function (protonLocation) {
+    this.protonScoreText = this.add.text(16, 20, 'Protons: ' + (0), { fontSize: '32px', fill: '#FF0000' });
+    this.electonScoreText = this.add.text(16, 50, 'Electrons: ' + (0), { fontSize: '32px', fill: '#FF0000' });
+    this.neutronScoreText = this.add.text(16, 80, 'Neutrons: ' + (0), { fontSize: '32px', fill: '#FF0000' });
+
+    this.d = new Date();
+
+    lastCollectedE = 0;
+    lastCollectedP = 0;
+    lastCollectedN = 0;
+
+    this.socket.on('protonUpdate', function (proton) {
+        
+        console.log(proton);
         if (self.proton) self.proton.destroy();
-        self.proton = self.physics.add.image(protonLocation.x, protonLocation.y, 'proton');
+        self.proton = self.physics.add.image(proton.x, proton.y, 'proton');
         self.proton.setScale(0.08);
-        self.physics.add.overlap(self.player, self.proton, function () {
-            this.socket.emit('protonCollected');
-            this.protonScoreText.text = 'Protons: ' + (++numProtons);
+        self.physics.add.overlap(self.element, self.proton, function () {
+            //basically here we check if the 200 ms has passed, if it has, then do socket.emit otherwise don't
+            //console.log(self.socket.id);
+            console.log(proton.id);
+            if (self.socket.id == socketid) {
+                this.d = new Date();
+                console.log(this.d.getTime());
+                if (this.d.getTime() - lastCollectedP > 200) {
+                    console.log("overlap gang ")
+                    this.socket.emit('protonCollected');
+                    this.protonScoreText.text = 'Protons: ' + (proton.score);
+                    lastCollectedP = this.d.getTime();
+                }
+            }
         }, null, self);
     });
 
-    this.socket.on('electronLocation', function (electronLocation) {
+    this.socket.on('electronUpdate', function (electron) {
         if (self.electron) self.electron.destroy();
-        self.electron = self.physics.add.image(electronLocation.x, electronLocation.y, 'electron');
+        self.electron = self.physics.add.image(electron.x, electron.y, 'electron');
         self.electron.setScale(0.04);
-        self.physics.add.overlap(self.player, self.electron, function () {
-            this.socket.emit('electronCollected');
-            this.electonScoreText.text = "Electrons: " + (++numElectrons);
+        self.physics.add.overlap(self.element, self.electron, function () {
+            //basically here we check if the 200 ms has passed, if it has, then do socket.emit otherwise don't
+            if (self.socket.id == electron.id) {
+                this.d = new Date();
+                console.log(this.d.getTime());
+                if (this.d.getTime() - lastCollectedE > 200) {
+                    this.socket.emit('electronCollected');
+                    this.electonScoreText.text = 'Electron: ' + (electron.score);
+                    lastCollectedE = this.d.getTime();
+                }
+            }
         }, null, self);
     });
 
-    this.socket.on('neutronLocation', function (neutronLocation) {
+
+
+    this.socket.on('neutronUpdate', function (neutron) {
         if (self.neutron) self.neutron.destroy();
-        self.neutron = self.physics.add.image(neutronLocation.x, neutronLocation.y, 'neutron');
+        self.neutron = self.physics.add.image(neutron.x, neutron.y, 'neutron');
         self.neutron.setScale(0.1);
-        self.physics.add.overlap(self.player, self.neutron, function () {
-            this.socket.emit('neutronCollected');
-            this.neutronScoreText.text = 'Neutrons: ' + (++numNeutrons);
+
+        self.physics.add.overlap(self.element, self.neutron, function () {
+            //basically here we check if the 200 ms has passed, if it has, then do socket.emit otherwise don't
+            if (self.socket.id == neutron.id) {
+                this.d = new Date();
+                console.log(this.d.getTime());
+                if (this.d.getTime() - lastCollectedN > 200) {
+                    this.socket.emit('neutronCollected');
+                    this.neutronScoreText.text = 'Neutron: ' + (neutron.score);
+                    lastCollectedN = this.d.getTime();
+                }
+            }
         }, null, self);
     });
-    */
+
+
+    //
 
     function addPlayer(self, playerInfo) {
         //code for element class
         self.element = new Element(self, playerInfo.x, playerInfo.y, 45, playerInfo.playerId, "hydrogen");
-        
+
         self.element.oldPosition = {
             x: self.element.x,
             y: self.element.y,
@@ -195,7 +240,6 @@ function create() {
 
     this.healthLabel = this.add.text(20, 110, "Health: " + this.health, 16);
 
-
     //Enabling collisions when an object hits the boundary
     this.physics.world.setBoundsCollision();
 
@@ -211,19 +255,23 @@ function create() {
 
 }
 
+
 function update(time) {
 
-  
-    if (typeof this.element != "undefined") {        
+    //this.socket.emit('timeUpdate', time);
+    //console.log(Phaser.Time.Clock.now);
+
+    if (typeof this.element != "undefined") {
         this.element.movePlayer(this);
 
-        if((this.input.activePointer.isDown || Phaser.Input.Keyboard.JustDown(this.spacebar)) && lastshot < time){
+        if ((this.input.activePointer.isDown || Phaser.Input.Keyboard.JustDown(this.spacebar)) && lastshot < time) {
             var bullet = this.element.shootBullet(this);
 
             // Tell the server we shot a bullet 
-            this.socket.emit('shoot-bullet', {x: bullet.x, y: bullet.y, angle: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y })
+            this.socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y })
             lastshot = time + 500;
         }
+
 
         /*
         //call each bullet within the projectiles class and updates its location (basically bullet movement)
@@ -232,7 +280,7 @@ function update(time) {
             bullet.update();
         }
         */
-        
+
         if (typeof this.element.oldPosition != "undefined") {
             var x = this.element.x;
             var y = this.element.y;
@@ -246,7 +294,6 @@ function update(time) {
             y: this.element.y,
             rotation: this.element.rotation,
         };
-
     }
 }
 

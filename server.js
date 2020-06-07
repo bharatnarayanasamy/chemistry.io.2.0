@@ -15,19 +15,25 @@ server.listen(8083, () => {
 
 var players = {};
 var bullet_array = [];
+var score_array = {};
 
 var proton = {
   x: Math.floor(Math.random() * 1100) + 50,
-  y: Math.floor(Math.random() * 700) + 50
-  
+  y: Math.floor(Math.random() * 700) + 50,
+  score: 0,
+  id: 0
 };
 var electron = {
   x: Math.floor(Math.random() * 1100) + 50,
-  y: Math.floor(Math.random() * 700) + 50
+  y: Math.floor(Math.random() * 700) + 50,
+  score: 0,
+  id: 0
 };
 var neutron = {
   x: Math.floor(Math.random() * 1100) + 50,
-  y: Math.floor(Math.random() * 700) + 50
+  y: Math.floor(Math.random() * 700) + 50,
+  score: 0,
+  id: 0
 };
 
 io.on('connection', function (socket) {
@@ -40,16 +46,21 @@ io.on('connection', function (socket) {
     playerId: socket.id,
     team: (Math.floor(Math.random() * 2) == 0) ? 'green' : 'blue',
   };
+  score_array[socket.id] = {
+    proton: proton,
+    electron: electron,
+    neutron: neutron,
+    id: socket.id
+  }
+  
 
   // send the players object to the new player
   socket.emit('currentPlayers', players);
 
   // send the proton/electron/neutron object to the new player
-  socket.emit('protonLocation', proton);
-  
-  socket.emit('electronLocation', electron);
-
-  socket.emit('neutronLocation', neutron);
+  socket.emit('protonUpdate', proton);
+  socket.emit('electronUpdate', electron);
+  socket.emit('neutronUpdate', neutron);
   
   // update all other players of the new player
   socket.broadcast.emit('newPlayer', players[socket.id]);
@@ -58,6 +69,7 @@ io.on('connection', function (socket) {
   socket.on('disconnect', function () {
     console.log('user disconnected: ', socket.id);
     delete players[socket.id];
+    delete score_array[socket.id];
     // emit a message to all players to remove this player
     io.emit('disconnect', socket.id);
   });
@@ -73,19 +85,22 @@ io.on('connection', function (socket) {
   socket.on('protonCollected', function () {
     proton.x = Math.floor(Math.random() * 1100) + 50;
     proton.y = Math.floor(Math.random() * 700) + 50;
-    io.emit('protonLocation', proton);
+    proton.score++;
+    io.emit('protonUpdate', proton, );
   });
   
   socket.on('electronCollected', function () {
     electron.x = Math.floor(Math.random() * 1100) + 50;
     electron.y = Math.floor(Math.random() * 700) + 50;
-    io.emit('electronLocation', electron);
+    electron.score++;
+    io.emit('electronUpdate', electron);
   });
 
   socket.on('neutronCollected', function () {
     neutron.x = Math.floor(Math.random() * 1100) + 50;
     neutron.y = Math.floor(Math.random() * 700) + 50;
-    io.emit('neutronLocation', neutron);
+    neutron.score++;
+    io.emit('neutronUpdate', neutron);
   });
   
   // Listen for shoot-bullet events and add it to our bullet array
@@ -96,6 +111,13 @@ io.on('connection', function (socket) {
     bullet_array.push(new_bullet);
   });
 });
+
+/*
+  socket.on('timeUpdate', function(time){
+    io.emit('newTime', time);
+  })
+  */
+
 
 // Update the bullets 60 times per frame and send updates 
 function ServerGameLoop(){

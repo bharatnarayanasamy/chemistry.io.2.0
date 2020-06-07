@@ -1,5 +1,5 @@
 // 3.1 NOTE dont forget to add this file in the index.html file
-class Bullet extends Phaser.GameObjects.Sprite {
+class Bullet extends Phaser.Physics.Arcade.Sprite {
   //scene = scene2, where everything is happening.
   //taking in a scene allows us to access all the information in that scene
   //angle helps determine the direction bullet will travel in
@@ -39,4 +39,14 @@ class Bullet extends Phaser.GameObjects.Sprite {
     this.speed_y = this.body.velocity.y;
 
   }
+
+  inactive(){
+    this.disableBody(true, true);
+  }
+
+  active(){
+    this.enableBody(true, true);
+  }
+  
+
 }

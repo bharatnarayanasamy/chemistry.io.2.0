@@ -130,6 +130,8 @@ class Element extends Phaser.GameObjects.Sprite {
 
         this.bullet = new Bullet(scene, angle, x_pos, y_pos);
         this.bullet_array.push(this.bullet);
+
+        this.bullet.disableBody(true, true);
         
         return this.bullet;
 
