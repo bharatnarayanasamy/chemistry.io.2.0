@@ -103,6 +103,14 @@ function create() {
         });
     });
 
+    this.socket.on('player-hit', function(i){
+        
+        console.log("there has been a collision");
+        self.element.bullet_array[i].destroy();
+        self.element.bullet_array.splice(i,1);
+        //self.element.health -= 20;
+        
+    });
 
     // Listen for bullet update events 
     this.socket.on('bullets-update', function (server_bullet_array) {

@@ -135,6 +135,20 @@ function ServerGameLoop(){
         bullet_array.splice(i,1);
         i--;
     }
+
+    for(var id in players){
+      if(bullet.owner_id != id){
+        // And your own bullet shouldn't kill you
+        var dx = players[id].x - bullet.x; 
+        var dy = players[id].y - bullet.y;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        if(dist < 70){
+          io.emit('player-hit',i); // Tell everyone this player got hit
+          bullet_array.splice(i,1);
+          i--;
+        }
+      }
+    }
         
   }
   
