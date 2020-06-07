@@ -20,21 +20,22 @@ var score_array = {};
 var proton = {
   x: Math.floor(Math.random() * 1100) + 50,
   y: Math.floor(Math.random() * 700) + 50,
-  score: 0,
-  id: 0
 };
 var electron = {
   x: Math.floor(Math.random() * 1100) + 50,
   y: Math.floor(Math.random() * 700) + 50,
-  score: 0,
-  id: 0
 };
 var neutron = {
   x: Math.floor(Math.random() * 1100) + 50,
   y: Math.floor(Math.random() * 700) + 50,
-  score: 0,
-  id: 0
 };
+var data = {
+  x: 0,
+  y: 0,
+  id: 0,
+  score: 0
+};
+
 
 io.on('connection', function (socket) {
   console.log('a user connected');
@@ -46,11 +47,11 @@ io.on('connection', function (socket) {
     playerId: socket.id,
     team: (Math.floor(Math.random() * 2) == 0) ? 'green' : 'blue',
   };
+
   score_array[socket.id] = {
-    proton: proton,
-    electron: electron,
-    neutron: neutron,
-    id: socket.id
+    protonScore: 0,
+    electronScore: 0,
+    neutronScore: 0,
   }
   
 
@@ -85,21 +86,24 @@ io.on('connection', function (socket) {
   socket.on('protonCollected', function () {
     proton.x = Math.floor(Math.random() * 1100) + 50;
     proton.y = Math.floor(Math.random() * 700) + 50;
-    proton.score++;
-    io.emit('protonUpdate', proton, );
+
+    /*data.x = proton.x;
+    data.y = proton.y;
+    data.score = score_array[socket.id].protonScore;
+    data.id = socket.id;*/
+    io.emit('protonUpdate', proton);
   });
+
   
   socket.on('electronCollected', function () {
     electron.x = Math.floor(Math.random() * 1100) + 50;
     electron.y = Math.floor(Math.random() * 700) + 50;
-    electron.score++;
     io.emit('electronUpdate', electron);
   });
 
   socket.on('neutronCollected', function () {
     neutron.x = Math.floor(Math.random() * 1100) + 50;
     neutron.y = Math.floor(Math.random() * 700) + 50;
-    neutron.score++;
     io.emit('neutronUpdate', neutron);
   });
   

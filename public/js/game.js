@@ -37,6 +37,11 @@ var lastCollectedP = 0;
 var lastCollectedE = 0;
 var lastCollectedN = 0;
 
+var numProtonCollected = 0;
+var numElectronCollected = 0;
+var numNeutronCollected = 0;
+
+
 
 var game = new Phaser.Game(config);
 
@@ -140,9 +145,8 @@ function create() {
      })};
      */
 
-
     this.protonScoreText = this.add.text(16, 20, 'Protons: ' + (0), { fontSize: '32px', fill: '#FF0000' });
-    this.electonScoreText = this.add.text(16, 50, 'Electrons: ' + (0), { fontSize: '32px', fill: '#FF0000' });
+    this.electronScoreText = this.add.text(16, 50, 'Electrons: ' + (0), { fontSize: '32px', fill: '#FF0000' });
     this.neutronScoreText = this.add.text(16, 80, 'Neutrons: ' + (0), { fontSize: '32px', fill: '#FF0000' });
 
     this.d = new Date();
@@ -151,70 +155,64 @@ function create() {
     lastCollectedP = 0;
     lastCollectedN = 0;
 
+    this.oldProtonPosition = {
+        x: -5,
+        y: -5
+    };
+    this.oldElectronPosition = {
+        x: -5,
+        y: -5
+    };
+    this.oldNeutronPosition = {
+        x: -5,
+        y: -5
+    };
+
     this.socket.on('protonUpdate', function (proton) {
-        
-        console.log(proton);
         if (self.proton) self.proton.destroy();
         self.proton = self.physics.add.image(proton.x, proton.y, 'proton');
         self.proton.setScale(0.08);
         self.physics.add.overlap(self.element, self.proton, function () {
-            //basically here we check if the 200 ms has passed, if it has, then do socket.emit otherwise don't
-            //console.log(self.socket.id);
-            console.log(proton.id);
-            if (self.socket.id == socketid) {
-                this.d = new Date();
-                console.log(this.d.getTime());
-                if (this.d.getTime() - lastCollectedP > 200) {
-                    console.log("overlap gang ")
-                    this.socket.emit('protonCollected');
-                    this.protonScoreText.text = 'Protons: ' + (proton.score);
-                    lastCollectedP = this.d.getTime();
-                }
+            if(proton.x != this.oldProtonPosition.x || proton.y != this.oldProtonPosition.y) {
+                this.protonScoreText.text = 'Protons: ' + (++numProtonCollected);
+                this.socket.emit('protonCollected');
+                this.oldProtonPosition = {
+                    x: proton.x,
+                    y: proton.y,
+                };
             }
         }, null, self);
     });
-
     this.socket.on('electronUpdate', function (electron) {
         if (self.electron) self.electron.destroy();
         self.electron = self.physics.add.image(electron.x, electron.y, 'electron');
         self.electron.setScale(0.04);
         self.physics.add.overlap(self.element, self.electron, function () {
-            //basically here we check if the 200 ms has passed, if it has, then do socket.emit otherwise don't
-            if (self.socket.id == electron.id) {
-                this.d = new Date();
-                console.log(this.d.getTime());
-                if (this.d.getTime() - lastCollectedE > 200) {
-                    this.socket.emit('electronCollected');
-                    this.electonScoreText.text = 'Electron: ' + (electron.score);
-                    lastCollectedE = this.d.getTime();
-                }
+            if(electron.x != this.oldElectronPosition.x || electron.y != this.oldElectronPosition.y) {
+                this.electronScoreText.text = 'Electrons: ' + (++numElectronCollected);
+                this.socket.emit('electronCollected');
+                this.oldElectronPosition = {
+                    x: electron.x,
+                    y: electron.y,
+                };
             }
         }, null, self);
     });
-
-
-
     this.socket.on('neutronUpdate', function (neutron) {
         if (self.neutron) self.neutron.destroy();
         self.neutron = self.physics.add.image(neutron.x, neutron.y, 'neutron');
         self.neutron.setScale(0.1);
-
         self.physics.add.overlap(self.element, self.neutron, function () {
-            //basically here we check if the 200 ms has passed, if it has, then do socket.emit otherwise don't
-            if (self.socket.id == neutron.id) {
-                this.d = new Date();
-                console.log(this.d.getTime());
-                if (this.d.getTime() - lastCollectedN > 200) {
-                    this.socket.emit('neutronCollected');
-                    this.neutronScoreText.text = 'Neutron: ' + (neutron.score);
-                    lastCollectedN = this.d.getTime();
-                }
+            if(neutron.x != this.oldNeutronPosition.x || neutron.y != this.oldNeutronPosition.y) {
+                this.neutronScoreText.text = 'Neutrons: ' + (++numNeutronCollected);
+                this.socket.emit('neutronCollected');
+                this.oldNeutronPosition = {
+                    x: neutron.x,
+                    y: neutron.y,
+                };
             }
         }, null, self);
     });
-
-
-    //
 
     function addPlayer(self, playerInfo) {
         //code for element class
