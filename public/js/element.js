@@ -56,8 +56,9 @@ class Element extends Phaser.GameObjects.Sprite {
 
         this.bullet_array = [];
 
-        this.satomicNum = 1;
+        this.atomicNum = 1;
         this.texture = ["hydrogen", "helium"];
+
         this.kills = 0;
         this.health = gameSettings.playerHealth;
 
@@ -125,7 +126,8 @@ class Element extends Phaser.GameObjects.Sprite {
             this.body.setAngularVelocity(Math.sign(angleDelta) * gameSettings.ROTATION_SPEED_DEGREES);
         }
     }
-    shootBullet(scene) {        
+    shootBullet(scene) {    
+
         var angle = Phaser.Math.Angle.Between(this.x, this.y, scene.input.activePointer.worldX, scene.input.activePointer.worldY);
         //var angleInDegrees = (angle * (180 / 3.1415)) + 90;
 
