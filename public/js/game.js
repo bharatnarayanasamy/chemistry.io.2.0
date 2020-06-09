@@ -10,6 +10,7 @@ var gameSettings = {
     ROTATION_SPEED_DEGREES: Phaser.Math.RadToDeg(2 * Math.PI), // 0.5 arc per sec, 2 sec per arc
     TOLERANCE: 0.04 * 1 * Math.PI,
     playerHealth: 100,
+    texture: ["hydrogen", "helium"]
 }
 
 var config = {
@@ -34,7 +35,7 @@ var config = {
 var lastshot = 0;
 var lastHealed = 0;
 var atomicNum = 1;
-var texture = ["hydrogen", "helium"];
+
 
 var game = new Phaser.Game(config);
 
@@ -124,7 +125,7 @@ function create() {
         self.otherElements.getChildren().forEach(function (otherElement) {
             if (playerInfo.playerId === otherElement.playerId) {
                 otherElement.atomicNum = playerInfo.atomicNumServer;
-                otherElement.setTexture(this.texture[otherElement.atomicNum - 1])
+                otherElement.setTexture(this.gameSettings.texture[otherElement.atomicNum - 1])
             }
         });
 
@@ -293,7 +294,7 @@ function create() {
     }
 
     function addOtherPlayers(self, playerInfo) {
-        const otherElement = new Element(self, playerInfo.x, playerInfo.y, 45, playerInfo.playerId, "hydrogen");
+        const otherElement = new Element(self, playerInfo.x, playerInfo.y, 45, playerInfo.playerId, this.gameSettings.texture[playerInfo.atomicNumServer - 1]);
         otherElement.setTint(0x0000ff);
         self.otherElements.add(otherElement);
     }

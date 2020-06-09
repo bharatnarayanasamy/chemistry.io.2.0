@@ -43,10 +43,9 @@ Other stuff
 
 class Element extends Phaser.GameObjects.Sprite {
 
-    constructor(scene, x, y, rotation, id, element) {
+    constructor(scene, x, y, rotation, id, textureCons) {
 
-        super(scene, x, y, "hydrogen");
-
+        super(scene, x, y, textureCons);
 
         this.x = x;
         this.y = y;
@@ -57,7 +56,7 @@ class Element extends Phaser.GameObjects.Sprite {
         this.bullet_array = [];
 
         this.atomicNum = 1;
-        this.texture = ["hydrogen", "helium"];
+        this.texture = gameSettings.texture;
 
         this.kills = 0;
         this.health = gameSettings.playerHealth;
