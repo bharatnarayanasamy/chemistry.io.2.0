@@ -1,6 +1,6 @@
 //This class is used for defining global variables that can be accessed by any class
 
-const e = require("express");
+//const e = require("express");
 
 //Dictionary of game settings
 var gameSettings = {
@@ -36,6 +36,8 @@ var config = {
 var lastshot = 0;
 var lastHealed = 0;
 
+var atomicNum = 1;
+var texture = ["hydrogen", "helium"];
 
 var game = new Phaser.Game(config);
 
@@ -106,6 +108,17 @@ function create() {
                 otherElement.y = playerInfo.y;
             }
         });
+    });
+
+    this.socket.on('playerUpgraded', function(playerInfo){
+
+        self.otherElements.getChildren().forEach(function (otherElement) {
+            if (playerInfo.playerId === otherElement.playerId) {
+                otherElement.atomicNum = playerInfo.atomicNumServer;
+                otherElement.setTexture(this.texture[otherElement.atomicNum - 1])
+            }
+        });
+
     });
 
     this.socket.on('player-hit', function (healthInfo) {
@@ -299,6 +312,13 @@ function update(time) {
     if (typeof this.element != "undefined") {
         this.element.movePlayer(this);
         this.healthLabel.text = "Health: " + this.element.health;
+
+        //change image if space is pressed (this is temporary)
+        if (Phaser.Input.Keyboard.JustDown(this.spacebar)){
+            this.element.atomicNum++;
+            this.element.upgrade();
+            this.socket.emit('upgrade', this.element.atomicNum); 
+        }
 
         if ((this.input.activePointer.isDown || Phaser.Input.Keyboard.JustDown(this.spacebar)) && lastshot < time) {
             var bullet = this.element.shootBullet(this);
