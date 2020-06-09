@@ -1,7 +1,5 @@
 //This class is used for defining global variables that can be accessed by any class
 
-const e = require("express");
-
 //Dictionary of game settings
 var gameSettings = {
     playerSpeed: 200,
@@ -97,6 +95,8 @@ function create() {
         });
     });
 
+
+
     this.socket.on('playerMoved', function (playerInfo) {
         //add time delay
         self.otherElements.getChildren().forEach(function (otherElement) {
@@ -108,19 +108,35 @@ function create() {
         });
     });
 
-    this.socket.on('player-hit', function (healthInfo) {
+    this.socket.on('update-health', function (player) {
+        if (player.playerId == self.socket.id) {
+            self.element.health = player.health;
+        }
+        if (self.element.health <= 0) {
+            if (confirm('Refresh to Play Again')) {
+                window.location.reload();
+            }
+        }
+    });
 
+    /*
+    this.socket.on('player-hit', function (healthInfo) {
+        console.log(self.element.bullet_array[healthInfo.i]);
         console.log("there has been a collision");
-        self.element.bullet_array[healthInfo.i].destroy();
-        self.element.bullet_array.splice(healthInfo.i, 1);
         if (healthInfo.id == self.socket.id && self.element.health >= 20) {
-            self.element.health -= 20;
+            self.element.health -= self.element.bullet_array[healthInfo.i].damage;
         }
         else if (healthInfo.id == self.socket.id) {
             self.element.health = 0;
+            self.element.destroy();
+            self.socket.emit('playerDestroyed');
+            
+            //take them back to scene1
         }
+        //self.element.bullet_array[healthInfo.i].destroy();
+        //self.element.bullet_array.splice(healthInfo.i, 1);
 
-    });
+    });*/
 
 
 
@@ -170,10 +186,7 @@ function create() {
     this.electronScoreText = this.add.text(16, 50, 'Electrons: ' + (0), { fontSize: '32px', fill: '#FF0000' });
     this.neutronScoreText = this.add.text(16, 80, 'Neutrons: ' + (0), { fontSize: '32px', fill: '#FF0000' });
 
-
-
-
-    this.d = new Date();
+    this.killScoreText = this.add.text(16, 140, 'Kills: ' + (0), { fontSize: '25px', fill: '#FF0000' });
 
     this.oldProtonPosition = {
         x: -5,
@@ -195,7 +208,7 @@ function create() {
         self.proton.setScale(0.08);
         self.physics.add.overlap(self.element, self.proton, function () {
             if (proton.x != this.oldProtonPosition.x || proton.y != this.oldProtonPosition.y) {
-                if (typeof proton.score != "undefined"){
+                if (typeof proton.score != "undefined") {
                     this.protonScoreText.text = 'Protons: ' + proton.score[self.socket.id].protonScore;
                 }
                 else {
@@ -215,7 +228,7 @@ function create() {
         self.electron.setScale(0.04);
         self.physics.add.overlap(self.element, self.electron, function () {
             if (electron.x != this.oldElectronPosition.x || electron.y != this.oldElectronPosition.y) {
-                if (typeof electron.score != "undefined"){
+                if (typeof electron.score != "undefined") {
                     this.electronScoreText.text = 'Electrons: ' + electron.score[self.socket.id].electronScore;
                 }
                 else {
@@ -235,7 +248,7 @@ function create() {
         self.neutron.setScale(0.1);
         self.physics.add.overlap(self.element, self.neutron, function () {
             if (neutron.x != this.oldNeutronPosition.x || neutron.y != this.oldNeutronPosition.y) {
-                if (typeof neutron.score != "undefined"){
+                if (typeof neutron.score != "undefined") {
                     this.neutronScoreText.text = 'Neutron: ' + neutron.score[self.socket.id].neutronScore;
                 }
                 else {
@@ -248,6 +261,16 @@ function create() {
                 };
             }
         }, null, self);
+    });
+
+    this.socket.on('updateKills', function (player) {
+        if (self.socket.id == player.playerId) {
+            self.element.kills = player.kills;
+            console.log(player.kills);
+            console.log(self.killScoreText);
+            self.killScoreText.text = 'Kills: ' + player.kills;
+
+        }
     });
 
     function addPlayer(self, playerInfo) {
@@ -277,7 +300,7 @@ function create() {
     //Create group to hold all our projectiles, aka the bullets
     this.projectiles = this.add.group();
 
-    this.healthLabel = this.add.text(20, 110, "Health: 100", { fontSize: '32px', fill: '#FF0000' });
+    this.healthLabel = this.add.text(20, 110, "Health: 100", { fontSize: '25px', fill: '#FF0000' });
 
     //used too collect information on keys that were pressed - important for moving the player  
     this.cursorKeys = this.input.keyboard.createCursorKeys();
@@ -304,7 +327,7 @@ function update(time) {
             var bullet = this.element.shootBullet(this);
 
             // Tell the server we shot a bullet 
-            this.socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y })
+            this.socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage })
             lastshot = time + 500;
         }
 
@@ -325,6 +348,7 @@ function update(time) {
                 this.socket.emit('playerMovement', { x: this.element.x, y: this.element.y, rotation: this.element.rotation });
             }
         }
+
         this.element.oldPosition = {
             x: this.element.x,
             y: this.element.y,
@@ -332,24 +356,15 @@ function update(time) {
         };
 
         if (time > lastHealed + 1000 /*&& time > lastHurt*/) {
-
             if (this.element.health <= 97) {
-
                 this.element.health += 3;
             }
             else {
-
                 this.element.health = 100;
             }
 
+            this.socket.emit('player-heal', { id: this.element.playerId, health: this.element.health });
             lastHealed = time;
-        }
-
-        if (this.element.health <= 0) {
-            this.element.destroy();
-            this.socket.emit('playerDestroyed');
-            window.alert("Refresh to play again!");
-            //take them back to scene1
         }
     }
 }

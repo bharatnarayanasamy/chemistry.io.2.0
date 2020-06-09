@@ -10,7 +10,6 @@ class Bullet extends Phaser.Physics.Arcade.Sprite {
     var x = x + 50 * Math.cos(angle);
     var y = y + 50 * Math.sin(angle);
 
-
     //use the super constructor to make a GameObject sprite
     //set bullet texture to be based off of the player's texture
     var texture = "hydrogenbullet";
@@ -31,6 +30,8 @@ class Bullet extends Phaser.Physics.Arcade.Sprite {
     this.body.velocity.y = Math.sin(angle) * 300;
     var angleInDegrees = (angle * (180 / 3.1415)) + 90;
     this.angle += angleInDegrees;
+
+    this.damage = 20;
 
     //defining some variables needed for the server game loop
     this.x = x;

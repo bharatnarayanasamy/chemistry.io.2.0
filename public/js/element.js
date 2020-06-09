@@ -56,6 +56,8 @@ class Element extends Phaser.GameObjects.Sprite {
 
         this.bullet_array = [];
 
+        this.kills = 0;
+        
         this.health = gameSettings.playerHealth;
 
         //add player to the scene

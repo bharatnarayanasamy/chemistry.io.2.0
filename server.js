@@ -50,6 +50,8 @@ io.on('connection', function (socket) {
     rotation: 0,
     playerId: socket.id,
     team: (Math.floor(Math.random() * 2) == 0) ? 'green' : 'blue',
+    health: 100,
+    kills: 0
   };
 
   score_array[socket.id] = {
@@ -81,57 +83,67 @@ io.on('connection', function (socket) {
   });
 
 
-  socket.on('playerDestroyed', function () {
-    console.log(socket.id, " is a loser because they just died"); 
-      delete players[socket.id];
-      delete score_array[socket.id];
-    io.emit('deleteDeadPlayers', socket.id);
+
+
+  // when a player moves, update the player data
+  socket.on('playerMovement', function (movementData) {
+    if (typeof players[socket.id] != "undefined") {
+      players[socket.id].x = movementData.x;
+      players[socket.id].y = movementData.y;
+      players[socket.id].rotation = movementData.rotation;
+      // emit a message to all players about the player that moved
+      socket.broadcast.emit('playerMoved', players[socket.id]);
+    }
   });
 
-// when a player moves, update the player data
-socket.on('playerMovement', function (movementData) {
-  players[socket.id].x = movementData.x;
-  players[socket.id].y = movementData.y;
-  players[socket.id].rotation = movementData.rotation;
-  // emit a message to all players about the player that moved
-  socket.broadcast.emit('playerMoved', players[socket.id]);
-});
+  socket.on('protonCollected', function () {
+    proton.x = Math.floor(Math.random() * 1100) + 50;
+    proton.y = Math.floor(Math.random() * 700) + 50;
+    score_array[socket.id].protonScore++;
+    proton.score = score_array;
 
-socket.on('protonCollected', function () {
-  proton.x = Math.floor(Math.random() * 1100) + 50;
-  proton.y = Math.floor(Math.random() * 700) + 50;
-  score_array[socket.id].protonScore++;
-  proton.score = score_array;
+    io.emit('protonUpdate', proton);
+  });
 
-  io.emit('protonUpdate', proton);
-});
+  socket.on('player-heal', function (data) {
+    console.log(players);
+    if (typeof players[data.id] != 'undefined') {
+      if (players[data.id].health <= 97) {
+        players[data.id].health += 3;
+        console.log(players[data.id].health);
+      }
+      else {
+        players[data.id].health = 100;
+      }
+    }
+  });
 
 
-socket.on('electronCollected', function () {
-  electron.x = Math.floor(Math.random() * 1100) + 50;
-  electron.y = Math.floor(Math.random() * 700) + 50;
-  score_array[socket.id].electronScore++;
-  electron.score = score_array;
+  socket.on('electronCollected', function () {
+    electron.x = Math.floor(Math.random() * 1100) + 50;
+    electron.y = Math.floor(Math.random() * 700) + 50;
+    score_array[socket.id].electronScore++;
+    electron.score = score_array;
 
-  io.emit('electronUpdate', electron);
-});
+    io.emit('electronUpdate', electron);
+  });
 
-socket.on('neutronCollected', function () {
-  neutron.x = Math.floor(Math.random() * 1100) + 50;
-  neutron.y = Math.floor(Math.random() * 700) + 50;
-  score_array[socket.id].neutronScore++;
-  neutron.score = score_array;
+  socket.on('neutronCollected', function () {
+    neutron.x = Math.floor(Math.random() * 1100) + 50;
+    neutron.y = Math.floor(Math.random() * 700) + 50;
+    score_array[socket.id].neutronScore++;
+    neutron.score = score_array;
 
-  io.emit('neutronUpdate', neutron);
-});
+    io.emit('neutronUpdate', neutron);
+  });
 
-// Listen for shoot-bullet events and add it to our bullet array
-socket.on('shoot-bullet', function (data) {
-  if (players[socket.id] == undefined) return;
-  var new_bullet = data;
-  data.owner_id = socket.id; // Attach id of the player to the bullet 
-  bullet_array.push(new_bullet);
-});
+  // Listen for shoot-bullet events and add it to our bullet array
+  socket.on('shoot-bullet', function (data) {
+    if (players[socket.id] == undefined) return;
+    var new_bullet = data;
+    data.owner_id = socket.id; // Attach id of the player to the bullet 
+    bullet_array.push(new_bullet);
+  });
 });
 
 /*
@@ -160,16 +172,25 @@ function ServerGameLoop() {
         var dx = players[id].x - bullet.x;
         var dy = players[id].y - bullet.y;
         var dist = Math.sqrt(dx * dx + dy * dy);
+        var owner = bullet.owner_id;
         if (dist < 70) {
           healthInfo.i = i;
           healthInfo.id = id;
           io.emit('player-hit', healthInfo); // Tell everyone this player got hit
+          players[id].health -= bullet.damage;
           bullet_array.splice(i, 1);
           i--;
+          io.emit("update-health", players[id]);
+        }
+        if (players[id].health <= 0) {
+          players[owner].kills++;
+          delete players[id];
+          delete score_array[id];
+          io.emit('deleteDeadPlayers', id); 
+          io.emit('updateKills', players[owner]); 
         }
       }
     }
-
   }
 
   // Tell everyone where all the bullets are by sending the whole array
