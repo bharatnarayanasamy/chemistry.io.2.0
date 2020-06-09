@@ -51,7 +51,8 @@ io.on('connection', function (socket) {
     playerId: socket.id,
     team: (Math.floor(Math.random() * 2) == 0) ? 'green' : 'blue',
     health: 100,
-    kills: 0
+    kills: 0,
+    atomicNumServer: 1
   };
 
   score_array[socket.id] = {
@@ -106,11 +107,9 @@ io.on('connection', function (socket) {
   });
 
   socket.on('player-heal', function (data) {
-    console.log(players);
     if (typeof players[data.id] != 'undefined') {
       if (players[data.id].health <= 97) {
         players[data.id].health += 3;
-        console.log(players[data.id].health);
       }
       else {
         players[data.id].health = 100;
@@ -143,6 +142,11 @@ io.on('connection', function (socket) {
     var new_bullet = data;
     data.owner_id = socket.id; // Attach id of the player to the bullet 
     bullet_array.push(new_bullet);
+  });
+  socket.on('upgrade', function(atomicNum){
+      
+    players[socket.id].atomicNumServer = atomicNum;
+    socket.broadcast.emit('playerUpgraded',players[socket.id]);
   });
 });
 

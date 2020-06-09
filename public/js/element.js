@@ -56,8 +56,14 @@ class Element extends Phaser.GameObjects.Sprite {
 
         this.bullet_array = [];
 
+<<<<<<< HEAD
         this.kills = 0;
         
+=======
+        this.atomicNum = 1;
+        this.texture = ["hydrogen", "helium"];
+
+>>>>>>> 754e8af6a9634077583702bd11a658f54c40456d
         this.health = gameSettings.playerHealth;
 
         //add player to the scene
@@ -137,8 +143,12 @@ class Element extends Phaser.GameObjects.Sprite {
         this.bullet.disableBody(true, true);
         
         return this.bullet;
+    }
 
-
+    upgrade(){
+        if (this.atomicNum < 3){
+            this.setTexture(this.texture[this.atomicNum-1]);
+        }
     }
 
 }

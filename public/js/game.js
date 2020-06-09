@@ -33,7 +33,8 @@ var config = {
 };
 var lastshot = 0;
 var lastHealed = 0;
-
+var atomicNum = 1;
+var texture = ["hydrogen", "helium"];
 
 var game = new Phaser.Game(config);
 
@@ -117,6 +118,16 @@ function create() {
                 window.location.reload();
             }
         }
+    });
+    this.socket.on('playerUpgraded', function(playerInfo){
+
+        self.otherElements.getChildren().forEach(function (otherElement) {
+            if (playerInfo.playerId === otherElement.playerId) {
+                otherElement.atomicNum = playerInfo.atomicNumServer;
+                otherElement.setTexture(this.texture[otherElement.atomicNum - 1])
+            }
+        });
+
     });
 
     /*
@@ -266,10 +277,7 @@ function create() {
     this.socket.on('updateKills', function (player) {
         if (self.socket.id == player.playerId) {
             self.element.kills = player.kills;
-            console.log(player.kills);
-            console.log(self.killScoreText);
             self.killScoreText.text = 'Kills: ' + player.kills;
-
         }
     });
 
@@ -323,6 +331,13 @@ function update(time) {
         this.element.movePlayer(this);
         this.healthLabel.text = "Health: " + this.element.health;
 
+        //change image if space is pressed (this is temporary)
+        if (Phaser.Input.Keyboard.JustDown(this.spacebar)){
+            this.element.atomicNum++;
+            this.element.upgrade();
+            this.socket.emit('upgrade', this.element.atomicNum); 
+        }
+        
         if ((this.input.activePointer.isDown || Phaser.Input.Keyboard.JustDown(this.spacebar)) && lastshot < time) {
             var bullet = this.element.shootBullet(this);
 
