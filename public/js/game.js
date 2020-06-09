@@ -1,5 +1,7 @@
 //This class is used for defining global variables that can be accessed by any class
 
+const e = require("express");
+
 //Dictionary of game settings
 var gameSettings = {
     playerSpeed: 200,
@@ -31,17 +33,8 @@ var config = {
         update: update
     }
 };
-var lastFired = 0;
 var lastshot = 0;
 var lastHealed = 0;
-var lastCollectedP = 0;
-var lastCollectedE = 0;
-var lastCollectedN = 0;
-
-var numProtonCollected = 0;
-var numElectronCollected = 0;
-var numNeutronCollected = 0;
-
 
 
 var game = new Phaser.Game(config);
@@ -182,10 +175,6 @@ function create() {
 
     this.d = new Date();
 
-    lastCollectedE = 0;
-    lastCollectedP = 0;
-    lastCollectedN = 0;
-
     this.oldProtonPosition = {
         x: -5,
         y: -5
@@ -200,12 +189,18 @@ function create() {
     };
 
     this.socket.on('protonUpdate', function (proton) {
+        console.log(proton);
         if (self.proton) self.proton.destroy();
         self.proton = self.physics.add.image(proton.x, proton.y, 'proton');
         self.proton.setScale(0.08);
         self.physics.add.overlap(self.element, self.proton, function () {
             if (proton.x != this.oldProtonPosition.x || proton.y != this.oldProtonPosition.y) {
-                this.protonScoreText.text = 'Protons: ' + (++numProtonCollected);
+                if (typeof proton.score != "undefined"){
+                    this.protonScoreText.text = 'Protons: ' + proton.score[self.socket.id].protonScore;
+                }
+                else {
+                    this.protonScoreText.text = 'Protons: ' + 0;
+                }
                 this.socket.emit('protonCollected');
                 this.oldProtonPosition = {
                     x: proton.x,
@@ -220,7 +215,12 @@ function create() {
         self.electron.setScale(0.04);
         self.physics.add.overlap(self.element, self.electron, function () {
             if (electron.x != this.oldElectronPosition.x || electron.y != this.oldElectronPosition.y) {
-                this.electronScoreText.text = 'Electrons: ' + (++numElectronCollected);
+                if (typeof electron.score != "undefined"){
+                    this.electronScoreText.text = 'Electrons: ' + electron.score[self.socket.id].electronScore;
+                }
+                else {
+                    this.electronScoreText.text = 'Electrons: ' + 0;
+                }
                 this.socket.emit('electronCollected');
                 this.oldElectronPosition = {
                     x: electron.x,
@@ -235,7 +235,12 @@ function create() {
         self.neutron.setScale(0.1);
         self.physics.add.overlap(self.element, self.neutron, function () {
             if (neutron.x != this.oldNeutronPosition.x || neutron.y != this.oldNeutronPosition.y) {
-                this.neutronScoreText.text = 'Neutrons: ' + (++numNeutronCollected);
+                if (typeof neutron.score != "undefined"){
+                    this.neutronScoreText.text = 'Neutron: ' + neutron.score[self.socket.id].neutronScore;
+                }
+                else {
+                    this.neutronScoreText.text = 'Neutron: ' + 0;
+                }
                 this.socket.emit('neutronCollected');
                 this.oldNeutronPosition = {
                     x: neutron.x,

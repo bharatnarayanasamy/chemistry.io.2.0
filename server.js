@@ -53,9 +53,10 @@ io.on('connection', function (socket) {
   };
 
   score_array[socket.id] = {
-    protonScore: 0,
-    electronScore: 0,
-    neutronScore: 0,
+    protonScore: 1,
+    electronScore: 1,
+    neutronScore: 1,
+    id: socket.id
   }
 
 
@@ -99,11 +100,9 @@ socket.on('playerMovement', function (movementData) {
 socket.on('protonCollected', function () {
   proton.x = Math.floor(Math.random() * 1100) + 50;
   proton.y = Math.floor(Math.random() * 700) + 50;
+  score_array[socket.id].protonScore++;
+  proton.score = score_array;
 
-  /*data.x = proton.x;
-  data.y = proton.y;
-  data.score = score_array[socket.id].protonScore;
-  data.id = socket.id;*/
   io.emit('protonUpdate', proton);
 });
 
@@ -111,12 +110,18 @@ socket.on('protonCollected', function () {
 socket.on('electronCollected', function () {
   electron.x = Math.floor(Math.random() * 1100) + 50;
   electron.y = Math.floor(Math.random() * 700) + 50;
+  score_array[socket.id].electronScore++;
+  electron.score = score_array;
+
   io.emit('electronUpdate', electron);
 });
 
 socket.on('neutronCollected', function () {
   neutron.x = Math.floor(Math.random() * 1100) + 50;
   neutron.y = Math.floor(Math.random() * 700) + 50;
+  score_array[socket.id].neutronScore++;
+  neutron.score = score_array;
+
   io.emit('neutronUpdate', neutron);
 });
 
