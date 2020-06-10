@@ -56,7 +56,8 @@ class Element extends Phaser.GameObjects.Sprite {
         this.bullet_array = [];
 
         this.atomicNum = 1;
-        this.texture = gameSettings.texture;
+        
+        this.texture1 = gameSettings.texture;
 
         this.kills = 0;
         this.health = gameSettings.playerHealth;
@@ -142,8 +143,14 @@ class Element extends Phaser.GameObjects.Sprite {
     }
 
     upgrade(){
-        if (this.atomicNum < 3){
-            this.setTexture(this.texture[this.atomicNum-1]);
+
+        var text = gameSettings.texture;
+        console.log(this.health);
+        if (this.atomicNum < 4){
+
+            this.setTexture(text[this.atomicNum-1]);
+            
+            
         }
     }
 

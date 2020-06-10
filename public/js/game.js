@@ -10,7 +10,7 @@ var gameSettings = {
     ROTATION_SPEED_DEGREES: Phaser.Math.RadToDeg(2 * Math.PI), // 0.5 arc per sec, 2 sec per arc
     TOLERANCE: 0.04 * 1 * Math.PI,
     playerHealth: 100,
-    texture: ["hydrogen", "helium"]
+    texture: ["hydrogen", "helium", "obstacle"]
 }
 
 var config = {
@@ -34,7 +34,6 @@ var config = {
 };
 var lastshot = 0;
 var lastHealed = 0;
-var atomicNum = 1;
 
 
 var game = new Phaser.Game(config);
@@ -120,12 +119,13 @@ function create() {
             }
         }
     });
-    this.socket.on('playerUpgraded', function(playerInfo){
-
+    this.socket.on('playerUpgraded', function (playerInfo) {
         self.otherElements.getChildren().forEach(function (otherElement) {
-            if (playerInfo.playerId === otherElement.playerId) {
+            if (playerInfo.playerId == otherElement.playerId) {
                 otherElement.atomicNum = playerInfo.atomicNumServer;
-                otherElement.setTexture(this.gameSettings.texture[otherElement.atomicNum - 1])
+                if (playerInfo.atomicNumServer < 4) {
+                    otherElement.setTexture(this.gameSettings.texture[otherElement.atomicNum - 1]);
+                }
             }
         });
 
@@ -279,6 +279,11 @@ function create() {
         if (self.socket.id == player.playerId) {
             self.element.kills = player.kills;
             self.killScoreText.text = 'Kills: ' + player.kills;
+            self.element.atomicNum++;
+            
+            self.element.upgrade();
+            console.log("upgraded!");
+            self.socket.emit('upgrade', self.element.atomicNum);
         }
     });
 
@@ -294,9 +299,17 @@ function create() {
     }
 
     function addOtherPlayers(self, playerInfo) {
-        const otherElement = new Element(self, playerInfo.x, playerInfo.y, 45, playerInfo.playerId, this.gameSettings.texture[playerInfo.atomicNumServer - 1]);
-        otherElement.setTint(0x0000ff);
-        self.otherElements.add(otherElement);
+        if (playerInfo.atomicNumServer < 4) {
+            const otherElement = new Element(self, playerInfo.x, playerInfo.y, 45, playerInfo.playerId, this.gameSettings.texture[playerInfo.atomicNumServer - 1]);
+            otherElement.setTint(0x0000ff);
+            self.otherElements.add(otherElement);
+        }
+        else {
+            const otherElement = new Element(self, playerInfo.x, playerInfo.y, 45, playerInfo.playerId, this.gameSettings.texture[2]);
+            otherElement.setTint(0x0000ff);
+            self.otherElements.add(otherElement);
+        }
+
     }
 
     //Setting the background to a gray-ish color
@@ -332,13 +345,8 @@ function update(time) {
         this.element.movePlayer(this);
         this.healthLabel.text = "Health: " + this.element.health;
 
-        //change image if space is pressed (this is temporary)
-        if (Phaser.Input.Keyboard.JustDown(this.spacebar)){
-            this.element.atomicNum++;
-            this.element.upgrade();
-            this.socket.emit('upgrade', this.element.atomicNum); 
-        }
-        
+
+
         if ((this.input.activePointer.isDown || Phaser.Input.Keyboard.JustDown(this.spacebar)) && lastshot < time) {
             var bullet = this.element.shootBullet(this);
 
