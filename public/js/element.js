@@ -67,12 +67,8 @@ class Element extends Phaser.GameObjects.Sprite {
 
         this.setScale(0.5);
         this.body.setCollideWorldBounds(true);
-
-        /*
-        this.hp = new HealthBar(scene, x, y);
-        this.score = 0;
-        this.element = element;*/
-
+        
+        this.hp = new HealthBar(scene, x-50, y+70);
     }
 
 
@@ -114,6 +110,8 @@ class Element extends Phaser.GameObjects.Sprite {
         } else if (scene.input.keyboard.addKey('S').isDown) {
             this.body.setVelocityY(gameSettings.playerSpeed);
         }
+        this.hp.move(scene, this.body.x+40, this.body.y+120);
+
         
         var angleToPointer = Phaser.Math.Angle.Between(this.x, this.y, scene.input.activePointer.worldX, scene.input.activePointer.worldY);
         var angleDelta = Phaser.Math.Angle.Wrap(angleToPointer - this.rotation);

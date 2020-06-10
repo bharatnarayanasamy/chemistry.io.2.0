@@ -80,6 +80,7 @@ function create() {
         self.otherElements.getChildren().forEach(function (otherElement) {
             console.log("player disconnected")
             if (playerId === otherElement.playerId) {
+                otherElement.hp.destroy()
                 otherElement.destroy();
                 console.log("player destroyed")
             }
@@ -91,6 +92,7 @@ function create() {
         self.otherElements.getChildren().forEach(function (otherElement) {
             console.log("player disconnected")
             if (playerId === otherElement.playerId) {
+                otherElement.hp.destroy()
                 otherElement.destroy();
                 console.log("player destroyed")
             }
@@ -106,22 +108,33 @@ function create() {
                 otherElement.rotation = playerInfo.rotation;
                 otherElement.x = playerInfo.x;
                 otherElement.y = playerInfo.y;
+                otherElement.hp.move(self, otherElement.x - 40, otherElement.y + 70);
             }
         });
     });
 
     this.socket.on('update-health', function (player) {
         if (player.playerId == self.socket.id) {
-            self.element.health = player.health;
+            self.element.hp.set(player.health);
         }
-        if (self.element.health <= 0) {
+        else {
+            self.otherElements.getChildren().forEach(function (otherElement) {
+                if (player.playerId === otherElement.playerId) {
+                    otherElement.hp.set(player.health);
+                }
+            });
+        }
+        if (self.element.hp.value <= 0) {
             if (confirm('Refresh to Play Again')) {
                 window.location.reload();
             }
         }
     });
-    this.socket.on('playerUpgraded', function(playerInfo){
 
+    this.socket.on("update-")
+
+
+    this.socket.on('playerUpgraded', function (playerInfo) {
         self.otherElements.getChildren().forEach(function (otherElement) {
             if (playerInfo.playerId === otherElement.playerId) {
                 otherElement.atomicNum = playerInfo.atomicNumServer;
@@ -322,7 +335,6 @@ function create() {
 
 
 function update(time) {
-
     //this.socket.emit('timeUpdate', time);
     //console.log(Phaser.Time.Clock.now);
     //this.healthLabel = this.add.text(20, 110, "Health: " + (this.element.health), { fontSize: '32px', fill: '#FF0000' });
@@ -330,15 +342,15 @@ function update(time) {
 
     if (typeof this.element != "undefined") {
         this.element.movePlayer(this);
-        this.healthLabel.text = "Health: " + this.element.health;
+        this.healthLabel.text = "Health: " + this.element.hp.value;
 
         //change image if space is pressed (this is temporary)
-        if (Phaser.Input.Keyboard.JustDown(this.spacebar)){
+        if (Phaser.Input.Keyboard.JustDown(this.spacebar)) {
             this.element.atomicNum++;
             this.element.upgrade();
-            this.socket.emit('upgrade', this.element.atomicNum); 
+            this.socket.emit('upgrade', this.element.atomicNum);
         }
-        
+
         if ((this.input.activePointer.isDown || Phaser.Input.Keyboard.JustDown(this.spacebar)) && lastshot < time) {
             var bullet = this.element.shootBullet(this);
 
@@ -356,6 +368,9 @@ function update(time) {
         }
         */
 
+        if(Math.random()<0.5) this.element.x += 0.000000001;
+        else this.element.x -= 0.000000001;
+
         if (typeof this.element.oldPosition != "undefined") {
             var x = this.element.x;
             var y = this.element.y;
@@ -372,14 +387,8 @@ function update(time) {
         };
 
         if (time > lastHealed + 1000 /*&& time > lastHurt*/) {
-            if (this.element.health <= 97) {
-                this.element.health += 3;
-            }
-            else {
-                this.element.health = 100;
-            }
-
-            this.socket.emit('player-heal', { id: this.element.playerId, health: this.element.health });
+            this.element.hp.increment(3);
+            this.socket.emit('player-heal', { id: this.element.playerId, health: this.element.hp.value });
             lastHealed = time;
         }
     }

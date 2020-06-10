@@ -20,7 +20,7 @@ var healthInfo = {
   id: 0,
   i: 0
 }
-
+//Pranav is a dumbass
 var proton = {
   x: Math.floor(Math.random() * 1100) + 50,
   y: Math.floor(Math.random() * 700) + 50,
@@ -114,6 +114,7 @@ io.on('connection', function (socket) {
       else {
         players[data.id].health = 100;
       }
+      io.emit("update-health", players[id]);
     }
   });
 
@@ -148,6 +149,9 @@ io.on('connection', function (socket) {
     players[socket.id].atomicNumServer = atomicNum;
     socket.broadcast.emit('playerUpgraded',players[socket.id]);
   });
+
+  
+
 });
 
 /*
@@ -159,6 +163,8 @@ io.on('connection', function (socket) {
 
 // Update the bullets 60 times per frame and send updates 
 function ServerGameLoop() {
+
+  
   for (var i = 0; i < bullet_array.length; i++) {
     var bullet = bullet_array[i];
     bullet.x += bullet.speed_x / 50;

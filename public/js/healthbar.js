@@ -11,6 +11,7 @@ class HealthBar {
         this.draw();
 
         scene.add.existing(this.bar);
+        scene.physics.world.enableBody(this);
     }
 
     move(scene, x, y) {
@@ -21,9 +22,9 @@ class HealthBar {
 
     }
 
-    decrease (amount)
+    set (value)
     {
-        this.value -= amount;
+        this.value = value;
 
         if (this.value < 0)
         {
@@ -32,7 +33,19 @@ class HealthBar {
 
         this.draw();
 
-        return (this.value === 0);
+    }
+
+    increment (value)
+    {
+        this.value+=value;
+
+        if (this.value > 100)
+        {
+            this.value = 100;
+        }
+
+        this.draw();
+
     }
 
     draw ()
