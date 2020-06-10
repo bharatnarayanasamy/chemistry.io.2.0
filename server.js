@@ -20,7 +20,13 @@ var healthInfo = {
   id: 0,
   i: 0
 }
+<<<<<<< HEAD
 //Pranav is a dumbass
+=======
+
+var socketID;
+
+>>>>>>> cd82031b05a8d4f7b0d4f4cdf3c12f1692298f77
 var proton = {
   x: Math.floor(Math.random() * 1100) + 50,
   y: Math.floor(Math.random() * 700) + 50,
@@ -42,6 +48,7 @@ var data = {
 
 
 io.on('connection', function (socket) {
+  socketID = socket.id;
   console.log('a user connected');
   // create a new player and add it to our players object
   players[socket.id] = {
@@ -100,6 +107,7 @@ io.on('connection', function (socket) {
   socket.on('protonCollected', function () {
     proton.x = Math.floor(Math.random() * 1100) + 50;
     proton.y = Math.floor(Math.random() * 700) + 50;
+
     score_array[socket.id].protonScore++;
     proton.score = score_array;
 
@@ -144,10 +152,9 @@ io.on('connection', function (socket) {
     data.owner_id = socket.id; // Attach id of the player to the bullet 
     bullet_array.push(new_bullet);
   });
-  socket.on('upgrade', function(atomicNum){
-      
+  socket.on('upgrade', function (atomicNum) {
     players[socket.id].atomicNumServer = atomicNum;
-    socket.broadcast.emit('playerUpgraded',players[socket.id]);
+    socket.broadcast.emit('playerUpgraded', players[socket.id]);
   });
 
   
@@ -167,37 +174,50 @@ function ServerGameLoop() {
   
   for (var i = 0; i < bullet_array.length; i++) {
     var bullet = bullet_array[i];
-    bullet.x += bullet.speed_x / 50;
-    bullet.y += bullet.speed_y / 50;
+    if (typeof bullet != "undefined") {
 
-    // Remove if it goes too far off screen 
-    if (bullet.x < -10 || bullet.x > 1200 || bullet.y < -10 || bullet.y > 900) {
-      bullet_array.splice(i, 1);
-      i--;
-    }
+      bullet.x += bullet.speed_x / 50;
+      bullet.y += bullet.speed_y / 50;
 
-    for (var id in players) {
-      if (bullet.owner_id != id) {
-        // And your own bullet shouldn't kill you
-        var dx = players[id].x - bullet.x;
-        var dy = players[id].y - bullet.y;
-        var dist = Math.sqrt(dx * dx + dy * dy);
-        var owner = bullet.owner_id;
-        if (dist < 70) {
-          healthInfo.i = i;
-          healthInfo.id = id;
-          io.emit('player-hit', healthInfo); // Tell everyone this player got hit
-          players[id].health -= bullet.damage;
-          bullet_array.splice(i, 1);
-          i--;
-          io.emit("update-health", players[id]);
-        }
-        if (players[id].health <= 0) {
-          players[owner].kills++;
-          delete players[id];
-          delete score_array[id];
-          io.emit('deleteDeadPlayers', id); 
-          io.emit('updateKills', players[owner]); 
+      // Remove if it goes too far off screen 
+      if (bullet.x < -10 || bullet.x > 1200 || bullet.y < -10 || bullet.y > 900) {
+        bullet_array.splice(i, 1);
+        i--;
+      }
+
+      for (var id in players) {
+        if (bullet.owner_id != id) {
+          // And your own bullet shouldn't kill you
+          var dx = players[id].x - bullet.x;
+          var dy = players[id].y - bullet.y;
+          var dist = Math.sqrt(dx * dx + dy * dy);
+          var owner = bullet.owner_id;
+          if (dist < 70) {
+            healthInfo.i = i;
+            healthInfo.id = id;
+            io.emit('player-hit', healthInfo); // Tell everyone this player got hit
+            players[id].health -= bullet.damage;
+            bullet_array.splice(i, 1);
+            i--;
+            io.emit("update-health", players[id]);
+          }
+          if (players[id].health <= 0) {
+            if (typeof players[owner] != "undefined") {
+              players[owner].kills++;
+              if (id == socketID) {
+                delete players[id];
+                delete score_array[id];
+                io.emit('deleteDeadPlayers', id);
+                io.emit('updateKills', players[owner]);
+              }
+              else {
+                io.emit('deleteDeadPlayers', id);
+                io.emit('updateKills', players[owner]);
+                delete players[id];
+                delete score_array[id];
+              }
+            }
+          }
         }
       }
     }
