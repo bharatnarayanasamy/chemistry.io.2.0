@@ -20,13 +20,8 @@ var healthInfo = {
   id: 0,
   i: 0
 }
-<<<<<<< HEAD
-//Pranav is a dumbass
-=======
-
 var socketID;
 
->>>>>>> cd82031b05a8d4f7b0d4f4cdf3c12f1692298f77
 var proton = {
   x: Math.floor(Math.random() * 1100) + 50,
   y: Math.floor(Math.random() * 700) + 50,
