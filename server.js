@@ -100,16 +100,6 @@ io.on('connection', function (socket) {
     }
   });
 
-  socket.on('protonCollected', function () {
-    proton.x = Math.floor(Math.random() * 1100) + 50;
-    proton.y = Math.floor(Math.random() * 700) + 50;
-
-    score_array[socket.id].protonScore++;
-    proton.score = score_array;
-
-    io.emit('protonUpdate', proton);
-  });
-
   socket.on('player-heal', function (data) {
     if (typeof players[data.id] != 'undefined') {
       if (players[data.id].health <= 97) {
@@ -122,6 +112,15 @@ io.on('connection', function (socket) {
     }
   });
 
+  socket.on('protonCollected', function () {
+    proton.x = Math.floor(Math.random() * 1100) + 50;
+    proton.y = Math.floor(Math.random() * 700) + 50;
+
+    score_array[socket.id].protonScore++;
+    proton.score = score_array;
+
+    io.emit('protonUpdate', proton);
+  });
 
   socket.on('electronCollected', function () {
     electron.x = Math.floor(Math.random() * 1100) + 50;
@@ -129,10 +128,13 @@ io.on('connection', function (socket) {
     score_array[socket.id].electronScore++;
     electron.score = score_array;
 
+
     io.emit('electronUpdate', electron);
   });
 
   socket.on('neutronCollected', function () {
+    if (typeof score_array[socket.id] == "undefined") return;
+
     neutron.x = Math.floor(Math.random() * 1100) + 50;
     neutron.y = Math.floor(Math.random() * 700) + 50;
     score_array[socket.id].neutronScore++;
@@ -148,11 +150,11 @@ io.on('connection', function (socket) {
     data.owner_id = socket.id; // Attach id of the player to the bullet 
     bullet_array.push(new_bullet);
   });
+
   socket.on('upgrade', function (atomicNum) {
     players[socket.id].atomicNumServer = atomicNum;
     socket.broadcast.emit('playerUpgraded', players[socket.id]);
   });
-
   
 
 });

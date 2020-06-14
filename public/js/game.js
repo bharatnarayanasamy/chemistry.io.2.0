@@ -43,7 +43,10 @@ function preload() {
     this.load.image("helium", "./assets/images/helium.png");
     this.load.image("heliumbullet", "./assets/images/heliumBullet.png");
     this.load.image("hydrogenbullet", "./assets/images/hydrogenbullet.png");
-    this.load.image("hydrogen", "./assets/images/hydrogen.png");
+    this.load.image("hydrogen", "./assets/images/hydrogen.png", {
+        frameWidth: 100,
+        frameHeight: 100
+    });
     this.load.image("proton", "./assets/images/proton.png");
     this.load.image("electron", "./assets/images/electron.png");
     this.load.image("neutron", "./assets/images/neutron.png");
@@ -225,14 +228,20 @@ function create() {
     };
 
     this.socket.on('protonUpdate', function (proton) {
-        console.log(proton);
         if (self.proton) self.proton.destroy();
         self.proton = self.physics.add.image(proton.x, proton.y, 'proton');
         self.proton.setScale(0.08);
         self.physics.add.overlap(self.element, self.proton, function () {
             if (proton.x != this.oldProtonPosition.x || proton.y != this.oldProtonPosition.y) {
                 if (typeof proton.score != "undefined") {
-                    this.protonScoreText.text = 'Protons: ' + proton.score[self.socket.id].protonScore;
+                    this.protonScoreText.text = 'Protons: ' + proton.score[self.socket.id].protonScore / 5;
+                    if (proton.score[self.socket.id].protonScore >= 2 &&
+                        proton.score[self.socket.id].electronScore >= 2 &&
+                        proton.score[self.socket.id].neutronScore >= 2) {
+                        self.element.atomicNum++;
+                        self.element.upgrade();
+                        self.socket.emit('upgrade', self.element.atomicNum);
+                    }
                 }
                 else {
                     this.protonScoreText.text = 'Protons: ' + 0;
@@ -242,6 +251,9 @@ function create() {
                     x: proton.x,
                     y: proton.y,
                 };
+                console.log(proton.score[self.socket.id].protonScore - 1,
+                    proton.score[self.socket.id].electronScore - 1,
+                    proton.score[self.socket.id].neutronScore - 1);
             }
         }, null, self);
     });
@@ -252,7 +264,17 @@ function create() {
         self.physics.add.overlap(self.element, self.electron, function () {
             if (electron.x != this.oldElectronPosition.x || electron.y != this.oldElectronPosition.y) {
                 if (typeof electron.score != "undefined") {
-                    this.electronScoreText.text = 'Electrons: ' + electron.score[self.socket.id].electronScore;
+                    this.electronScoreText.text = 'Electrons: ' + electron.score[self.socket.id].electronScore / 5;
+                    if (electron.score[self.socket.id].protonScore >= 2 &&
+                        electron.score[self.socket.id].electronScore >= 2 &&
+                        electron.score[self.socket.id].neutronScore >= 2) {
+                        self.element.atomicNum++;
+                        self.element.upgrade();
+                        self.socket.emit('upgrade', self.element.atomicNum);
+                    }
+                    console.log(electron.score[self.socket.id].protonScore - 1,
+                        electron.score[self.socket.id].electronScore - 1,
+                        electron.score[self.socket.id].neutronScore - 1);
                 }
                 else {
                     this.electronScoreText.text = 'Electrons: ' + 0;
@@ -263,6 +285,7 @@ function create() {
                     y: electron.y,
                 };
             }
+
         }, null, self);
     });
     this.socket.on('neutronUpdate', function (neutron) {
@@ -272,10 +295,21 @@ function create() {
         self.physics.add.overlap(self.element, self.neutron, function () {
             if (neutron.x != this.oldNeutronPosition.x || neutron.y != this.oldNeutronPosition.y) {
                 if (typeof neutron.score != "undefined") {
-                    this.neutronScoreText.text = 'Neutron: ' + neutron.score[self.socket.id].neutronScore;
+                    this.neutronScoreText.text = 'Neutrons: ' + neutron.score[self.socket.id].neutronScore / 5;
+                    if (neutron.score[self.socket.id].protonScore >= 2 &&
+                        neutron.score[self.socket.id].electronScore >= 2 &&
+                        neutron.score[self.socket.id].neutronScore >= 2) {
+
+                        self.element.atomicNum++;
+                        self.element.upgrade();
+                        self.socket.emit('upgrade', self.element.atomicNum);
+                    }
+                    console.log(neutron.score[self.socket.id].protonScore - 1,
+                        neutron.score[self.socket.id].electronScore - 1,
+                        neutron.score[self.socket.id].neutronScore - 1);
                 }
                 else {
-                    this.neutronScoreText.text = 'Neutron: ' + 0;
+                    this.neutronScoreText.text = 'Neutrons: ' + 0;
                 }
                 this.socket.emit('neutronCollected');
                 this.oldNeutronPosition = {
@@ -290,10 +324,9 @@ function create() {
         if (self.socket.id == player.playerId) {
             self.element.kills = player.kills;
             self.killScoreText.text = 'Kills: ' + player.kills;
+
             self.element.atomicNum++;
-            
             self.element.upgrade();
-            console.log("upgraded!");
             self.socket.emit('upgrade', self.element.atomicNum);
         }
     });
@@ -373,7 +406,7 @@ function update(time) {
         }
         */
 
-        if(Math.random()<0.5) this.element.x += 0.000000001;
+        if (Math.random() < 0.5) this.element.x += 0.000000001;
         else this.element.x -= 0.000000001;
 
         if (typeof this.element.oldPosition != "undefined") {
@@ -439,6 +472,3 @@ function hurtPlayerObs(player, obstacle) {
     }
     this.healthLabel.text = "Health: " + this.health;
 }
-
-
-

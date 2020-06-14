@@ -132,7 +132,9 @@ class Element extends Phaser.GameObjects.Sprite {
         var x_pos = this.x + 20 * Math.cos(angle);
         var y_pos = this.y + 20 * Math.sin(angle);
 
-        this.bullet = new Bullet(scene, angle, x_pos, y_pos);
+        var element = this.texture.key;
+
+        this.bullet = new Bullet(scene, angle, x_pos, y_pos, element);
         this.bullet_array.push(this.bullet);
 
         this.bullet.disableBody(true, true);
