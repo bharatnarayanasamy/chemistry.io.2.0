@@ -20,9 +20,13 @@ var healthInfo = {
   id: 0,
   i: 0
 }
+<<<<<<< HEAD
+//Pranav is a dumbass
+=======
 
 var socketID;
 
+>>>>>>> cd82031b05a8d4f7b0d4f4cdf3c12f1692298f77
 var proton = {
   x: Math.floor(Math.random() * 1100) + 50,
   y: Math.floor(Math.random() * 700) + 50,
@@ -108,7 +112,7 @@ io.on('connection', function (socket) {
       else {
         players[data.id].health = 100;
       }
-      io.emit("update-health", players[data.id]);
+      io.emit("update-health", players[id]);
     }
   });
 
@@ -197,9 +201,8 @@ function ServerGameLoop() {
             players[id].health -= bullet.damage;
             bullet_array.splice(i, 1);
             i--;
+            io.emit("update-health", players[id]);
           }
-          io.emit("update-health", players[id]);
-
           if (players[id].health <= 0) {
             if (typeof players[owner] != "undefined") {
               players[owner].kills++;
