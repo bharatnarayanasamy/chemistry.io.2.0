@@ -107,7 +107,7 @@ io.on('connection', function (socket) {
       else {
         players[data.id].health = 100;
       }
-      io.emit("update-health", players[id]);
+      io.emit("update-health", players[data.id]);
     }
   });
 

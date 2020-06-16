@@ -43,7 +43,7 @@ function preload() {
     this.load.image("helium", "./assets/images/helium.png");
     this.load.image("heliumbullet", "./assets/images/heliumBullet.png");
     this.load.image("hydrogenbullet", "./assets/images/hydrogenbullet.png");
-    this.load.image("hydrogen", "./assets/images/hydrogen.png", {
+    this.load.image("hydrogen", "./assets/images/hydrogen1.svg", {
         frameWidth: 100,
         frameHeight: 100
     });
@@ -234,7 +234,7 @@ function create() {
         self.physics.add.overlap(self.element, self.proton, function () {
             if (proton.x != this.oldProtonPosition.x || proton.y != this.oldProtonPosition.y) {
                 if (typeof proton.score != "undefined") {
-                    this.protonScoreText.text = 'Protons: ' + proton.score[self.socket.id].protonScore / 5;
+                    this.protonScoreText.text = 'Protons: ' + proton.score[self.socket.id].protonScore;
                     if (proton.score[self.socket.id].protonScore >= 2 &&
                         proton.score[self.socket.id].electronScore >= 2 &&
                         proton.score[self.socket.id].neutronScore >= 2) {
@@ -251,9 +251,11 @@ function create() {
                     x: proton.x,
                     y: proton.y,
                 };
-                console.log(proton.score[self.socket.id].protonScore - 1,
+                if(typeof proton.score != "undefined"){
+                    console.log(proton.score[self.socket.id].protonScore - 1,
                     proton.score[self.socket.id].electronScore - 1,
                     proton.score[self.socket.id].neutronScore - 1);
+                }
             }
         }, null, self);
     });
@@ -264,7 +266,7 @@ function create() {
         self.physics.add.overlap(self.element, self.electron, function () {
             if (electron.x != this.oldElectronPosition.x || electron.y != this.oldElectronPosition.y) {
                 if (typeof electron.score != "undefined") {
-                    this.electronScoreText.text = 'Electrons: ' + electron.score[self.socket.id].electronScore / 5;
+                    this.electronScoreText.text = 'Electrons: ' + electron.score[self.socket.id].electronScore;
                     if (electron.score[self.socket.id].protonScore >= 2 &&
                         electron.score[self.socket.id].electronScore >= 2 &&
                         electron.score[self.socket.id].neutronScore >= 2) {
@@ -295,7 +297,7 @@ function create() {
         self.physics.add.overlap(self.element, self.neutron, function () {
             if (neutron.x != this.oldNeutronPosition.x || neutron.y != this.oldNeutronPosition.y) {
                 if (typeof neutron.score != "undefined") {
-                    this.neutronScoreText.text = 'Neutrons: ' + neutron.score[self.socket.id].neutronScore / 5;
+                    this.neutronScoreText.text = 'Neutrons: ' + neutron.score[self.socket.id].neutronScore;
                     if (neutron.score[self.socket.id].protonScore >= 2 &&
                         neutron.score[self.socket.id].electronScore >= 2 &&
                         neutron.score[self.socket.id].neutronScore >= 2) {
