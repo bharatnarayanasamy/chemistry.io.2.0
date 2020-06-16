@@ -20,6 +20,7 @@ var healthInfo = {
   id: 0,
   i: 0
 }
+
 var socketID;
 
 var proton = {
@@ -58,9 +59,9 @@ io.on('connection', function (socket) {
   };
 
   score_array[socket.id] = {
-    protonScore: 1,
-    electronScore: 1,
-    neutronScore: 1,
+    protonScore: 0,
+    electronScore: 0,
+    neutronScore: 0,
     id: socket.id
   }
 
@@ -69,6 +70,10 @@ io.on('connection', function (socket) {
   socket.emit('currentPlayers', players);
 
   // send the proton/electron/neutron object to the new player
+  proton.score = score_array;
+  electron.score = score_array;
+  neutron.score = score_array;
+
   socket.emit('protonUpdate', proton);
   socket.emit('electronUpdate', electron);
   socket.emit('neutronUpdate', neutron);
@@ -85,9 +90,6 @@ io.on('connection', function (socket) {
     io.emit('disconnect', socket.id);
   });
 
-
-
-
   // when a player moves, update the player data
   socket.on('playerMovement', function (movementData) {
     if (typeof players[socket.id] != "undefined") {
@@ -97,6 +99,17 @@ io.on('connection', function (socket) {
       // emit a message to all players about the player that moved
       socket.broadcast.emit('playerMoved', players[socket.id]);
     }
+  });
+
+  socket.on('protonCollected', function () {
+    proton.x = Math.floor(Math.random() * 1100) + 50;
+    proton.y = Math.floor(Math.random() * 700) + 50;
+    if (typeof score_array[socket.id] != "undefined") {
+      //console.log("PROTON IS COLLECTED AND UPDATED!");
+      score_array[socket.id].protonScore++;
+      proton.score = score_array;
+    }
+    io.emit('protonUpdate', proton);
   });
 
   socket.on('player-heal', function (data) {
@@ -111,15 +124,6 @@ io.on('connection', function (socket) {
     }
   });
 
-  socket.on('protonCollected', function () {
-    proton.x = Math.floor(Math.random() * 1100) + 50;
-    proton.y = Math.floor(Math.random() * 700) + 50;
-
-    score_array[socket.id].protonScore++;
-    proton.score = score_array;
-
-    io.emit('protonUpdate', proton);
-  });
 
   socket.on('electronCollected', function () {
     electron.x = Math.floor(Math.random() * 1100) + 50;
@@ -127,13 +131,10 @@ io.on('connection', function (socket) {
     score_array[socket.id].electronScore++;
     electron.score = score_array;
 
-
     io.emit('electronUpdate', electron);
   });
 
   socket.on('neutronCollected', function () {
-    if (typeof score_array[socket.id] == "undefined") return;
-
     neutron.x = Math.floor(Math.random() * 1100) + 50;
     neutron.y = Math.floor(Math.random() * 700) + 50;
     score_array[socket.id].neutronScore++;
@@ -149,12 +150,17 @@ io.on('connection', function (socket) {
     data.owner_id = socket.id; // Attach id of the player to the bullet 
     bullet_array.push(new_bullet);
   });
-
   socket.on('upgrade', function (atomicNum) {
     players[socket.id].atomicNumServer = atomicNum;
     socket.broadcast.emit('playerUpgraded', players[socket.id]);
   });
-  
+
+  socket.on('upgrade-powerUp', function (atomicNum) {
+    players[socket.id].atomicNumServer = atomicNum;
+    socket.broadcast.emit('playerUpgraded', players[socket.id]);
+  });
+
+
 
 });
 
@@ -168,7 +174,7 @@ io.on('connection', function (socket) {
 // Update the bullets 60 times per frame and send updates 
 function ServerGameLoop() {
 
-  
+
   for (var i = 0; i < bullet_array.length; i++) {
     var bullet = bullet_array[i];
     if (typeof bullet != "undefined") {
@@ -183,7 +189,7 @@ function ServerGameLoop() {
       }
 
       for (var id in players) {
-        if (bullet.owner_id != id) {
+        if (bullet.owner_id != id && typeof players[id] != "undefined") {
           // And your own bullet shouldn't kill you
           var dx = players[id].x - bullet.x;
           var dy = players[id].y - bullet.y;
@@ -196,8 +202,9 @@ function ServerGameLoop() {
             players[id].health -= bullet.damage;
             bullet_array.splice(i, 1);
             i--;
-            io.emit("update-health", players[id]);
           }
+          io.emit("update-health", players[id]);
+
           if (players[id].health <= 0) {
             if (typeof players[owner] != "undefined") {
               players[owner].kills++;
@@ -225,6 +232,3 @@ function ServerGameLoop() {
 }
 
 setInterval(ServerGameLoop, 16);
-
-
-
