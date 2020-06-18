@@ -214,6 +214,10 @@ function create() {
     this.electronScoreText = this.add.text(16, 50, 'Electrons: ' + (0), { fontSize: '32px', fill: '#FF0000' });
     this.neutronScoreText = this.add.text(16, 80, 'Neutrons: ' + (0), { fontSize: '32px', fill: '#FF0000' });
 
+    this.numProtons = 0;
+    this.numElectrons = 0;
+    this.numNeutrons = 0;
+
     this.killScoreText = this.add.text(16, 140, 'Kills: ' + (0), { fontSize: '25px', fill: '#FF0000' });
 
     this.oldProtonPosition = {
@@ -236,57 +240,73 @@ function create() {
     this.neutronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 40, "neutron");
     this.neutronBarText = this.add.text(config.width / 2 - 60, config.height - 38, 'Neutrons: 0/2', { fontSize: '16px', fill: '#000000' });
 
-
     this.socket.on('protonUpdate', function (proton) {
         if (self.proton) self.proton.destroy();
         self.proton = self.physics.add.image(proton.x, proton.y, 'proton');
         self.proton.setScale(0.08);
         self.physics.add.overlap(self.element, self.proton, function () {
             if (proton.x != this.oldProtonPosition.x || proton.y != this.oldProtonPosition.y) {
+                if(this.numProtons < 2) this.numProtons++;
+                this.protonScoreText.text = 'Protons: ' + this.numProtons;
 
-                if (proton.score[self.socket.id].protonScore < 2) {
-                    proton.score[self.socket.id].protonScore++;
-                    //this.protonBar.set(proton.score[self.socket.id].protonScore * 50, "proton");
-                }
-
-                //this.protonScoreText.text = 'Protons: ' + proton.score[self.socket.id].protonScore;
-                //console.log("proton: " + proton.score[self.socket.id].protonScore);
-
-
-                if (proton.score[self.socket.id].electronScore == 2 &&
-                    proton.score[self.socket.id].protonScore == 2 &&
-                    proton.score[self.socket.id].neutronScore == 2) {
-
-
+                if(this.numNeutrons == 2 && this.numProtons == 2 && this.numElectrons == 2){
                     self.element.atomicNum++;
+                    this.numNeutrons = 0;
+                    this.numProtons = 0;
+                    this.numElectrons = 0;
 
-
-                    proton.score[self.socket.id].protonScore = 0;
-                    proton.score[self.socket.id].electronScore = 0;
-                    proton.score[self.socket.id].neutronScore = 0;
-
-
-                    this.protonScoreText.text = 'Protons: ' + proton.score[self.socket.id].protonScore;
-                    this.electronScoreText.text = 'Electrons: ' + proton.score[self.socket.id].electronScore;
-                    this.neutronScoreText.text = 'Neutrons: ' + proton.score[self.socket.id].neutronScore;
-
-
-                    //console.log("AFTER UPGRADING proton score: " + proton.score[self.socket.id].protonScore );                   
+                    this.neutronScoreText.text = 'Neutrons: ' + this.numNeutrons;
+                    this.protonScoreText.text = 'Protons: ' + this.numProtons;
+                    this.electronScoreText.text = 'Electrons: ' + this.numElectrons;
+                    
                     self.element.upgrade();
-
-
                     self.socket.emit('upgrade', self.element.atomicNum);
+                }                
+
+                // if (proton.score[self.socket.id].protonScore < 2) {
+                //     proton.score[self.socket.id].protonScore++;
+                //     //this.protonBar.set(proton.score[self.socket.id].protonScore * 50, "proton");
+                // }
+
+                // this.protonScoreText.text = 'Protons: ' + proton.score[self.socket.id].protonScore;
+
+                // //console.log("proton: " + proton.score[self.socket.id].protonScore);
+
+
+                // if (proton.score[self.socket.id].electronScore == 2 &&
+                //     proton.score[self.socket.id].protonScore == 2 &&
+                //     proton.score[self.socket.id].neutronScore == 2) {
+
+
+                //     self.element.atomicNum++;
+
+
+                //     proton.score[self.socket.id].protonScore = 0;
+                //     proton.score[self.socket.id].electronScore = 0;
+                //     proton.score[self.socket.id].neutronScore = 0;
+
+
+                //     this.protonScoreText.text = 'Protons: ' + proton.score[self.socket.id].protonScore;
+                //     this.electronScoreText.text = 'Electrons: ' + proton.score[self.socket.id].electronScore;
+                //     this.neutronScoreText.text = 'Neutrons: ' + proton.score[self.socket.id].neutronScore;
+
+
+                //     //console.log("AFTER UPGRADING proton score: " + proton.score[self.socket.id].protonScore );                   
+                //     self.element.upgrade();
+
+
+                //     self.socket.emit('upgrade', self.element.atomicNum);
 
 
 
-                }
-
+                // }
 
                 this.socket.emit('protonCollected');
                 this.oldProtonPosition = {
                     x: proton.x,
                     y: proton.y,
                 };
+
 
 
             }
@@ -298,39 +318,63 @@ function create() {
         self.electron.setScale(0.04);
         self.physics.add.overlap(self.element, self.electron, function () {
             if (electron.x != this.oldElectronPosition.x || electron.y != this.oldElectronPosition.y) {
+                if(this.numElectrons < 2) this.numElectrons++;
+                this.electronScoreText.text = 'Electrons: ' + this.numElectrons;
 
-                if (electron.score[self.socket.id].electronScore < 2) {
-                    electron.score[self.socket.id].electronScore++;
-                }
-
-                this.electronScoreText.text = 'Electrons: ' + electron.score[self.socket.id].electronScore;
-
-                if (electron.score[self.socket.id].electronScore == 2 &&
-                    electron.score[self.socket.id].protonScore == 2 &&
-                    electron.score[self.socket.id].neutronScore == 2) {
-
+                if(this.numNeutrons == 2 && this.numProtons == 2 && this.numElectrons == 2){
                     self.element.atomicNum++;
-                    electron.score[self.socket.id].electronScore = 0;
-                    electron.score[self.socket.id].protonScore = 0;
-                    electron.score[self.socket.id].neutronScore = 0;
+                    this.numNeutrons = 0;
+                    this.numProtons = 0;
+                    this.numElectrons = 0;
 
-                    this.electronScoreText.text = 'Electrons: ' + electron.score[self.socket.id].electronScore;
-                    this.protonScoreText.text = 'Protons: ' + electron.score[self.socket.id].protonScore;
-                    this.neutronScoreText.text = 'Neutrons: ' + electron.score[self.socket.id].neutronScore;
-
-
+                    this.neutronScoreText.text = 'Neutrons: ' + this.numNeutrons;
+                    this.protonScoreText.text = 'Protons: ' + this.numProtons;
+                    this.electronScoreText.text = 'Electrons: ' + this.numElectrons;
+                    
                     self.element.upgrade();
                     self.socket.emit('upgrade', self.element.atomicNum);
-
-
                 }
-
 
                 this.socket.emit('electronCollected');
                 this.oldElectronPosition = {
                     x: electron.x,
                     y: electron.y,
                 };
+                
+
+                // if (electron.score[self.socket.id].electronScore < 2) {
+                //     electron.score[self.socket.id].electronScore++;
+                // }
+
+                // this.electronScoreText.text = 'Electrons: ' + electron.score[self.socket.id].electronScore;
+
+
+                // if (electron.score[self.socket.id].electronScore == 2 &&
+                //     electron.score[self.socket.id].protonScore == 2 &&
+                //     electron.score[self.socket.id].neutronScore == 2) {
+
+                //     self.element.atomicNum++;
+                //     electron.score[self.socket.id].electronScore = 0;
+                //     electron.score[self.socket.id].protonScore = 0;
+                //     electron.score[self.socket.id].neutronScore = 0;
+
+                //     this.electronScoreText.text = 'Electrons: ' + electron.score[self.socket.id].electronScore;
+                //     this.protonScoreText.text = 'Protons: ' + electron.score[self.socket.id].protonScore;
+                //     this.neutronScoreText.text = 'Neutrons: ' + electron.score[self.socket.id].neutronScore;
+
+
+                //     self.element.upgrade();
+                //     self.socket.emit('upgrade', self.element.atomicNum);
+
+
+                // }
+
+                // this.socket.emit('electronCollected');
+                // this.oldElectronPosition = {
+                //     x: electron.x,
+                //     y: electron.y,
+                // };
+
             }
 
         }, null, self);
@@ -341,40 +385,63 @@ function create() {
         self.neutron.setScale(0.1);
         self.physics.add.overlap(self.element, self.neutron, function () {
             if (neutron.x != this.oldNeutronPosition.x || neutron.y != this.oldNeutronPosition.y) {
+                if(this.numNeutrons < 2) this.numNeutrons++;
+                this.neutronScoreText.text = 'Neutrons: ' + this.numNeutrons;
 
+                if(this.numNeutrons == 2 && this.numProtons == 2 && this.numElectrons == 2){
+                    self.element.atomicNum++;
+                    this.numNeutrons = 0;
+                    this.numProtons = 0;
+                    this.numElectrons = 0;
 
-                if (neutron.score[self.socket.id].neutronScore < 2) {
-                    neutron.score[self.socket.id].neutronScore++;
-                }
-                this.neutronScoreText.text = 'Neutrons: ' + neutron.score[self.socket.id].neutronScore;
-
-
-                if (neutron.score[self.socket.id].electronScore == 2 && 
-                    neutron.score[self.socket.id].protonScore == 2 &&
-                    neutron.score[self.socket.id].neutronScore == 2) {
-
-
+                    this.neutronScoreText.text = 'Neutrons: ' + this.numNeutrons;
+                    this.protonScoreText.text = 'Protons: ' + this.numProtons
+                    this.electronScoreText.text = 'Electrons: ' + this.numElectrons;
                     
-
-                        self.element.atomicNum++;
-                        console.log("atomic num" + self.element.atomicNum);
-                        neutron.score[self.socket.id].protonScore = 0;
-                        neutron.score[self.socket.id].electronScore = 0;
-                        neutron.score[self.socket.id].neutronScore = 0;
-
-                        this.neutronScoreText.text = 'Neutrons: ' + neutron.score[self.socket.id].neutronScore;
-                        this.electronScoreText.text = 'Electrons: ' + neutron.score[self.socket.id].electronScore;
-                        this.protonScoreText.text = 'Protons: ' + neutron.score[self.socket.id].protonScore;
-
-                        self.element.upgrade();
-                        self.socket.emit('upgrade', self.element.atomicNum);
-                    
+                    self.element.upgrade();
+                    self.socket.emit('upgrade', self.element.atomicNum);
                 }
+
                 this.socket.emit('neutronCollected');
                 this.oldNeutronPosition = {
                     x: neutron.x,
                     y: neutron.y,
                 };
+
+
+                // if (neutron.score[self.socket.id].neutronScore < 2) {
+                //     neutron.score[self.socket.id].neutronScore++;
+                // }
+
+                // this.neutronScoreText.text = 'Neutrons: ' + neutron.score[self.socket.id].neutronScore;
+
+                // if (neutron.score[self.socket.id].electronScore == 2 &&
+                //     neutron.score[self.socket.id].protonScore == 2 &&
+                //     neutron.score[self.socket.id].neutronScore == 2) {
+
+
+
+
+                //     self.element.atomicNum++;
+                //     neutron.score[self.socket.id].protonScore = 0;
+                //     neutron.score[self.socket.id].electronScore = 0;
+                //     neutron.score[self.socket.id].neutronScore = 0;
+
+                //     this.neutronScoreText.text = 'Neutrons: ' + neutron.score[self.socket.id].neutronScore;
+                //     this.electronScoreText.text = 'Electrons: ' + neutron.score[self.socket.id].electronScore;
+                //     this.protonScoreText.text = 'Protons: ' + neutron.score[self.socket.id].protonScore;
+
+                //     self.element.upgrade();
+                //     self.socket.emit('upgrade', self.element.atomicNum);
+
+                // }
+
+                // this.socket.emit('neutronCollected');
+                // this.oldNeutronPosition = {
+                //     x: neutron.x,
+                //     y: neutron.y,
+                // };
+
             }
         }, null, self);
     });

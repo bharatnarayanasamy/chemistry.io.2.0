@@ -105,10 +105,10 @@ io.on('connection', function (socket) {
     proton.x = Math.floor(Math.random() * 1100) + 50;
     proton.y = Math.floor(Math.random() * 700) + 50;
     if (typeof score_array[socket.id] != "undefined") {
-      //console.log("PROTON IS COLLECTED AND UPDATED!");
       if (score_array[socket.id].protonScore < 2){
         score_array[socket.id].protonScore++;
       }
+      
       proton.score = score_array;
     }
     io.emit('protonUpdate', proton);
@@ -131,11 +131,11 @@ io.on('connection', function (socket) {
     electron.x = Math.floor(Math.random() * 1100) + 50;
     electron.y = Math.floor(Math.random() * 700) + 50;
     if (typeof score_array[socket.id] != "undefined") {
-      electron.score = score_array;
       if (score_array[socket.id].electronScore < 2){
         score_array[socket.id].electronScore++;
       }
-    }
+      electron.score = score_array;
+          }
     io.emit('electronUpdate', electron);
   });
 
@@ -146,8 +146,7 @@ io.on('connection', function (socket) {
       if (score_array[socket.id].neutronScore < 2){
         score_array[socket.id].neutronScore++;
       }
-      neutron.score = score_array;
-    }
+      neutron.score = score_array;    }
     io.emit('neutronUpdate', neutron);
   });
 
@@ -163,6 +162,10 @@ io.on('connection', function (socket) {
     score_array[socket.id].protonScore = 0;
     score_array[socket.id].neutronScore = 0;
     score_array[socket.id].electronScore = 0;
+
+    neutron.score = score_array;
+    proton.score = score_array;
+    electron.score = score_array;
 
     socket.broadcast.emit('playerUpgraded', players[socket.id]);
   });
