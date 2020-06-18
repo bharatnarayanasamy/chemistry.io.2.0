@@ -1,12 +1,12 @@
 class CollectionBar {
 
-    constructor (scene, x, y, type)
+    constructor (scene, x, y, type, value)
     {
         this.bar = new Phaser.GameObjects.Graphics(scene);
 
         this.x = x;
         this.y = y;
-        this.value = 0;
+        this.value = value;
         this.p = 3;
         this.type = type;
         this.width = 300;
@@ -18,7 +18,7 @@ class CollectionBar {
         scene.physics.world.enableBody(this);
     }
 
-    set (value )
+    set (value)
     {
         this.value = value;
 
@@ -26,8 +26,14 @@ class CollectionBar {
         {
             this.value = 0;
         }
-
         this.draw();
+
+    }
+    move(scene, x, y) {
+        this.x = x;
+        this.y = y;
+        this.draw();
+        scene.add.existing(this.bar);
 
     }
 

@@ -233,7 +233,7 @@ function create() {
         y: -5
     };
 
-    this.protonBar = new CollectionBar(this, config.width / 2 - 150, config.height - 120, "proton");
+    this.protonBar = new CollectionBar(this, config.width / 2 - 150, config.height - 120, "proton", 0);
     this.protonBarText = this.add.text(config.width / 2 - 60, config.height - 118, 'Protons: 0/2', { fontSize: '16px', fill: '#000000' });
     this.electronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 80, "electron");
     this.electronBarText = this.add.text(config.width / 2 - 60, config.height - 78, 'Electrons: 0/2', { fontSize: '16px', fill: '#000000' });
@@ -245,11 +245,16 @@ function create() {
         self.proton = self.physics.add.image(proton.x, proton.y, 'proton');
         self.proton.setScale(0.08);
         self.physics.add.overlap(self.element, self.proton, function () {
+
             if (proton.x != this.oldProtonPosition.x || proton.y != this.oldProtonPosition.y) {
-                if(this.numProtons < 2) this.numProtons++;
+                if (this.numProtons < 2) {
+                    this.numProtons++;
+                    this.protonBar = new CollectionBar(this, config.width / 2 - 150, config.height - 120, "proton", this.numProtons * 50);
+                    this.protonBarText = this.add.text(config.width / 2 - 60, config.height - 118, 'Protons: ' + this.numProtons + '/2', { fontSize: '16px', fill: '#000000' });
+                }
                 this.protonScoreText.text = 'Protons: ' + this.numProtons;
 
-                if(this.numNeutrons == 2 && this.numProtons == 2 && this.numElectrons == 2){
+                if (this.numNeutrons == 2 && this.numProtons == 2 && this.numElectrons == 2) {
                     self.element.atomicNum++;
                     this.numNeutrons = 0;
                     this.numProtons = 0;
@@ -258,10 +263,18 @@ function create() {
                     this.neutronScoreText.text = 'Neutrons: ' + this.numNeutrons;
                     this.protonScoreText.text = 'Protons: ' + this.numProtons;
                     this.electronScoreText.text = 'Electrons: ' + this.numElectrons;
-                    
+
+                    this.protonBar = new CollectionBar(this, config.width / 2 - 150, config.height - 120, "proton", 0);
+                    this.protonBarText = this.add.text(config.width / 2 - 60, config.height - 118, 'Protons: 0/2', { fontSize: '16px', fill: '#000000' });
+                    this.electronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 80, "electron");
+                    this.electronBarText = this.add.text(config.width / 2 - 60, config.height - 78, 'Electrons: 0/2', { fontSize: '16px', fill: '#000000' });
+                    this.neutronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 40, "neutron");
+                    this.neutronBarText = this.add.text(config.width / 2 - 60, config.height - 38, 'Neutrons: 0/2', { fontSize: '16px', fill: '#000000' });
+
                     self.element.upgrade();
                     self.socket.emit('upgrade', self.element.atomicNum);
-                }                
+                }
+
 
                 // if (proton.score[self.socket.id].protonScore < 2) {
                 //     proton.score[self.socket.id].protonScore++;
@@ -318,10 +331,15 @@ function create() {
         self.electron.setScale(0.04);
         self.physics.add.overlap(self.element, self.electron, function () {
             if (electron.x != this.oldElectronPosition.x || electron.y != this.oldElectronPosition.y) {
-                if(this.numElectrons < 2) this.numElectrons++;
+                if (this.numElectrons < 2) {
+                    this.numElectrons++;
+                    this.electronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 80, "electron", this.numElectrons * 50);
+                    this.electronBarText = this.add.text(config.width / 2 - 60, config.height - 78, 'Electrons: ' + this.numElectrons + '/2', { fontSize: '16px', fill: '#000000' });
+
+                }
                 this.electronScoreText.text = 'Electrons: ' + this.numElectrons;
 
-                if(this.numNeutrons == 2 && this.numProtons == 2 && this.numElectrons == 2){
+                if (this.numNeutrons == 2 && this.numProtons == 2 && this.numElectrons == 2) {
                     self.element.atomicNum++;
                     this.numNeutrons = 0;
                     this.numProtons = 0;
@@ -330,7 +348,14 @@ function create() {
                     this.neutronScoreText.text = 'Neutrons: ' + this.numNeutrons;
                     this.protonScoreText.text = 'Protons: ' + this.numProtons;
                     this.electronScoreText.text = 'Electrons: ' + this.numElectrons;
-                    
+
+                    this.protonBar = new CollectionBar(this, config.width / 2 - 150, config.height - 120, "proton", 0);
+                    this.protonBarText = this.add.text(config.width / 2 - 60, config.height - 118, 'Protons: 0/2', { fontSize: '16px', fill: '#000000' });
+                    this.electronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 80, "electron");
+                    this.electronBarText = this.add.text(config.width / 2 - 60, config.height - 78, 'Electrons: 0/2', { fontSize: '16px', fill: '#000000' });
+                    this.neutronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 40, "neutron");
+                    this.neutronBarText = this.add.text(config.width / 2 - 60, config.height - 38, 'Neutrons: 0/2', { fontSize: '16px', fill: '#000000' });
+
                     self.element.upgrade();
                     self.socket.emit('upgrade', self.element.atomicNum);
                 }
@@ -340,7 +365,7 @@ function create() {
                     x: electron.x,
                     y: electron.y,
                 };
-                
+
 
                 // if (electron.score[self.socket.id].electronScore < 2) {
                 //     electron.score[self.socket.id].electronScore++;
@@ -385,10 +410,15 @@ function create() {
         self.neutron.setScale(0.1);
         self.physics.add.overlap(self.element, self.neutron, function () {
             if (neutron.x != this.oldNeutronPosition.x || neutron.y != this.oldNeutronPosition.y) {
-                if(this.numNeutrons < 2) this.numNeutrons++;
+                if (this.numNeutrons < 2) {
+                    this.numNeutrons++;
+                    this.neutronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 40, "neutron", this.numNeutrons * 50);
+                    this.neutronBarText = this.add.text(config.width / 2 - 60, config.height - 38, 'Neutrons: ' + this.numNeutrons + '/2', { fontSize: '16px', fill: '#000000' });
+                
+                }
                 this.neutronScoreText.text = 'Neutrons: ' + this.numNeutrons;
 
-                if(this.numNeutrons == 2 && this.numProtons == 2 && this.numElectrons == 2){
+                if (this.numNeutrons == 2 && this.numProtons == 2 && this.numElectrons == 2) {
                     self.element.atomicNum++;
                     this.numNeutrons = 0;
                     this.numProtons = 0;
@@ -397,7 +427,14 @@ function create() {
                     this.neutronScoreText.text = 'Neutrons: ' + this.numNeutrons;
                     this.protonScoreText.text = 'Protons: ' + this.numProtons
                     this.electronScoreText.text = 'Electrons: ' + this.numElectrons;
-                    
+
+                    this.protonBar = new CollectionBar(this, config.width / 2 - 150, config.height - 120, "proton", 0);
+                    this.protonBarText = this.add.text(config.width / 2 - 60, config.height - 118, 'Protons: 0/2', { fontSize: '16px', fill: '#000000' });
+                    this.electronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 80, "electron");
+                    this.electronBarText = this.add.text(config.width / 2 - 60, config.height - 78, 'Electrons: 0/2', { fontSize: '16px', fill: '#000000' });
+                    this.neutronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 40, "neutron");
+                    this.neutronBarText = this.add.text(config.width / 2 - 60, config.height - 38, 'Neutrons: 0/2', { fontSize: '16px', fill: '#000000' });
+
                     self.element.upgrade();
                     self.socket.emit('upgrade', self.element.atomicNum);
                 }
