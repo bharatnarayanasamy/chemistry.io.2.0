@@ -106,7 +106,9 @@ io.on('connection', function (socket) {
     proton.y = Math.floor(Math.random() * 700) + 50;
     if (typeof score_array[socket.id] != "undefined") {
       //console.log("PROTON IS COLLECTED AND UPDATED!");
-      score_array[socket.id].protonScore++;
+      //if (score_array[socket.id].protonScore < 2){
+        score_array[socket.id].protonScore++;
+      //}
       proton.score = score_array;
     }
     io.emit('protonUpdate', proton);
@@ -128,18 +130,20 @@ io.on('connection', function (socket) {
   socket.on('electronCollected', function () {
     electron.x = Math.floor(Math.random() * 1100) + 50;
     electron.y = Math.floor(Math.random() * 700) + 50;
-    score_array[socket.id].electronScore++;
-    electron.score = score_array;
-
+    if (typeof score_array[socket.id] != "undefined") {
+      score_array[socket.id].electronScore++;
+      electron.score = score_array;
+    }
     io.emit('electronUpdate', electron);
   });
 
   socket.on('neutronCollected', function () {
     neutron.x = Math.floor(Math.random() * 1100) + 50;
     neutron.y = Math.floor(Math.random() * 700) + 50;
-    score_array[socket.id].neutronScore++;
-    neutron.score = score_array;
-
+    if (typeof score_array[socket.id] != "undefined") {
+      score_array[socket.id].neutronScore++;
+      neutron.score = score_array;
+    }
     io.emit('neutronUpdate', neutron);
   });
 
@@ -152,6 +156,7 @@ io.on('connection', function (socket) {
   });
   socket.on('upgrade', function (atomicNum) {
     players[socket.id].atomicNumServer = atomicNum;
+    //score_array[socket.id].protonScore = 0;
     socket.broadcast.emit('playerUpgraded', players[socket.id]);
   });
 
@@ -204,21 +209,23 @@ function ServerGameLoop() {
             i--;
           }
           io.emit("update-health", players[id]);
+          if (typeof players[id] != "undefined") {
 
-          if (players[id].health <= 0) {
-            if (typeof players[owner] != "undefined") {
-              players[owner].kills++;
-              if (id == socketID) {
-                delete players[id];
-                delete score_array[id];
-                io.emit('deleteDeadPlayers', id);
-                io.emit('updateKills', players[owner]);
-              }
-              else {
-                io.emit('deleteDeadPlayers', id);
-                io.emit('updateKills', players[owner]);
-                delete players[id];
-                delete score_array[id];
+            if (players[id].health <= 0) {
+              if (typeof players[owner] != "undefined") {
+                players[owner].kills++;
+                if (id == socketID) {
+                  delete players[id];
+                  delete score_array[id];
+                  io.emit('deleteDeadPlayers', id);
+                  io.emit('updateKills', players[owner]);
+                }
+                else {
+                  io.emit('deleteDeadPlayers', id);
+                  io.emit('updateKills', players[owner]);
+                  delete players[id];
+                  delete score_array[id];
+                }
               }
             }
           }
