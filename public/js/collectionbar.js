@@ -1,22 +1,23 @@
 class CollectionBar {
 
-    constructor (scene, x, y)
+    constructor (scene, x, y, type)
     {
         this.bar = new Phaser.GameObjects.Graphics(scene);
 
         this.x = x;
         this.y = y;
-        this.value = 50;
+        this.value = 0;
         this.p = 3;
-        this.draw();
         this.width = 300
         this.height = 20;
+        this.type = type;
+        this.draw(this.type);
 
         scene.add.existing(this.bar);
         scene.physics.world.enableBody(this);
     }
 
-    set (value)
+    set (value, type)
     {
         this.value = value;
 
@@ -25,11 +26,11 @@ class CollectionBar {
             this.value = 0;
         }
 
-        this.draw();
+        this.draw(type);
 
     }
 
-    draw ()
+    draw (type)
     {
         this.bar.clear();
 
@@ -39,9 +40,19 @@ class CollectionBar {
 
         //  Health
 
+        console.log(type);
+        
         this.bar.fillStyle(0xffffff);
         this.bar.fillRect(this.x + 2, this.y + 2, 300, 20);
-        this.bar.fillStyle(0x000000);
+        if (type == "proton") {
+            this.bar.fillStyle(0xff0000);
+        }
+        else if (type == "electron") {
+            this.bar.fillStyle(0xffc0cb);
+        }
+        else {
+            this.bar.fillStyle(0x808080);
+        }
 
 
         var d = Math.floor(this.p * this.value);

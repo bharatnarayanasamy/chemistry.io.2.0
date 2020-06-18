@@ -229,12 +229,12 @@ function create() {
         y: -5
     };
 
-    this.protonBar = new CollectionBar(this, config.width/2 - 150, config.height - 120);
-    this.protonBarText = this.add.text(config.width/2 - 60, config.height - 118, 'Protons: 0/2', { fontSize: '16px', fill: '#000000' });
-    this.electronBar = new CollectionBar(this, config.width/2 - 150, config.height - 80);
-    this.electronBarText = this.add.text(config.width/2 - 60, config.height - 78, 'Electrons: 0/2', { fontSize: '16px', fill: '#000000' });
-    this.neutronBar = new CollectionBar(this, config.width/2 - 150, config.height - 40);
-    this.neutronBarText = this.add.text(config.width/2 - 60, config.height - 38, 'Neutrons: 0/2', { fontSize: '16px', fill: '#000000' });
+    this.protonBar = new CollectionBar(this, config.width / 2 - 150, config.height - 120, "proton");
+    this.protonBarText = this.add.text(config.width / 2 - 60, config.height - 118, 'Protons: 0/2', { fontSize: '16px', fill: '#000000' });
+    this.electronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 80, "electron");
+    this.electronBarText = this.add.text(config.width / 2 - 60, config.height - 78, 'Electrons: 0/2', { fontSize: '16px', fill: '#000000' });
+    this.neutronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 40, "neutron");
+    this.neutronBarText = this.add.text(config.width / 2 - 60, config.height - 38, 'Neutrons: 0/2', { fontSize: '16px', fill: '#000000' });
 
 
     this.socket.on('protonUpdate', function (proton) {
@@ -244,40 +244,41 @@ function create() {
         self.physics.add.overlap(self.element, self.proton, function () {
             if (proton.x != this.oldProtonPosition.x || proton.y != this.oldProtonPosition.y) {
 
-                //if (proton.score[self.socket.id].protonScore < 2){ 
+                if (proton.score[self.socket.id].protonScore < 2) {
+                    proton.score[self.socket.id].protonScore++;
+                    //this.protonBar.set(proton.score[self.socket.id].protonScore * 50, "proton");
+                }
 
-                proton.score[self.socket.id].protonScore++;
-
-                //}
-                this.protonScoreText.text = 'Protons: ' + proton.score[self.socket.id].protonScore;
-                console.log("proton: " + proton.score[self.socket.id].protonScore);
-                
-
-                if (proton.score[self.socket.id].protonScore != 0 && proton.score[self.socket.id].protonScore % 2 == 0) {
-                    protonLevelUp = true;
-                    console.log("electronLevelUp: " + electronLevelUp);
-                    console.log("protonLevelUp: " + protonLevelUp);
-                    console.log("neutronLevelUp: " + neutronLevelUp);
-
-                    if (protonLevelUp && electronLevelUp && neutronLevelUp) {
-                        protonLevelUp = false;
-                        if (proton.score[self.socket.id].electronScore - proton.score[self.socket.id].protonScore < 2) electronLevelUp = false;
-                        if (proton.score[self.socket.id].neutronScore - proton.score[self.socket.id].protonScore < 2) neutronLevelUp = false;
+                //this.protonScoreText.text = 'Protons: ' + proton.score[self.socket.id].protonScore;
+                //console.log("proton: " + proton.score[self.socket.id].protonScore);
 
 
-                        self.element.atomicNum++;
-                       
-                        console.log("atomic num: " + self.element.atomicNum);     
-                        proton.score[self.socket.id].protonScore = 0;
-                        
-                        console.log("AFTER UPGRADING proton score: " + proton.score[self.socket.id].protonScore );                   
-                        self.element.upgrade();
-                        
-                        
-                        self.socket.emit('upgrade', self.element.atomicNum);
+                if (proton.score[self.socket.id].electronScore == 2 &&
+                    proton.score[self.socket.id].protonScore == 2 &&
+                    proton.score[self.socket.id].neutronScore == 2) {
 
 
-                    }
+                    self.element.atomicNum++;
+
+
+                    proton.score[self.socket.id].protonScore = 0;
+                    proton.score[self.socket.id].electronScore = 0;
+                    proton.score[self.socket.id].neutronScore = 0;
+
+
+                    this.protonScoreText.text = 'Protons: ' + proton.score[self.socket.id].protonScore;
+                    this.electronScoreText.text = 'Electrons: ' + proton.score[self.socket.id].electronScore;
+                    this.neutronScoreText.text = 'Neutrons: ' + proton.score[self.socket.id].neutronScore;
+
+
+                    //console.log("AFTER UPGRADING proton score: " + proton.score[self.socket.id].protonScore );                   
+                    self.element.upgrade();
+
+
+                    self.socket.emit('upgrade', self.element.atomicNum);
+
+
+
                 }
 
 
@@ -286,7 +287,7 @@ function create() {
                     x: proton.x,
                     y: proton.y,
                 };
-                
+
 
             }
         }, null, self);
@@ -297,28 +298,33 @@ function create() {
         self.electron.setScale(0.04);
         self.physics.add.overlap(self.element, self.electron, function () {
             if (electron.x != this.oldElectronPosition.x || electron.y != this.oldElectronPosition.y) {
-                electron.score[self.socket.id].electronScore++;
+
+                if (electron.score[self.socket.id].electronScore < 2) {
+                    electron.score[self.socket.id].electronScore++;
+                }
+
                 this.electronScoreText.text = 'Electrons: ' + electron.score[self.socket.id].electronScore;
-                console.log("electrons: " + electron.score[self.socket.id].electronScore);
-                if (electron.score[self.socket.id].electronScore != 0 && electron.score[self.socket.id].electronScore % 2 == 0) {
-                    electronLevelUp = true;
-                    console.log("electronLevelUp: " + electronLevelUp);
-                    console.log("protonLevelUp: " + protonLevelUp);
-                    console.log("neutronLevelUp: " + neutronLevelUp);
 
-                    if (protonLevelUp && electronLevelUp && neutronLevelUp) {
-                        if (electron.score[self.socket.id].protonScore - electron.score[self.socket.id].electronScore < 2) protonLevelUp = false;
-                        if (electron.score[self.socket.id].protonScore - electron.score[self.socket.id].neutronScore < 2) neutronLevelUp = false;
-                        electronLevelUp = false;
+                if (electron.score[self.socket.id].electronScore == 2 &&
+                    electron.score[self.socket.id].protonScore == 2 &&
+                    electron.score[self.socket.id].neutronScore == 2) {
 
-                        self.element.atomicNum++;
-                        console.log("atomic num" +self.element.atomicNum);
-                        self.element.upgrade();
-                        self.socket.emit('upgrade', self.element.atomicNum);
-                    }
+                    self.element.atomicNum++;
+                    electron.score[self.socket.id].electronScore = 0;
+                    electron.score[self.socket.id].protonScore = 0;
+                    electron.score[self.socket.id].neutronScore = 0;
+
+                    this.electronScoreText.text = 'Electrons: ' + electron.score[self.socket.id].electronScore;
+                    this.protonScoreText.text = 'Protons: ' + electron.score[self.socket.id].protonScore;
+                    this.neutronScoreText.text = 'Neutrons: ' + electron.score[self.socket.id].neutronScore;
+
+
+                    self.element.upgrade();
+                    self.socket.emit('upgrade', self.element.atomicNum);
+
 
                 }
-                
+
 
                 this.socket.emit('electronCollected');
                 this.oldElectronPosition = {
@@ -335,32 +341,40 @@ function create() {
         self.neutron.setScale(0.1);
         self.physics.add.overlap(self.element, self.neutron, function () {
             if (neutron.x != this.oldNeutronPosition.x || neutron.y != this.oldNeutronPosition.y) {
-                    neutron.score[self.socket.id].neutronScore++;
-                    this.neutronScoreText.text = 'Neutrons: ' + neutron.score[self.socket.id].neutronScore;
-                    console.log("neutrons: " + neutron.score[self.socket.id].neutronScore);
-                    if (neutron.score[self.socket.id].neutronScore != 0 && neutron.score[self.socket.id].neutronScore % 2 == 0) {
-                        neutronLevelUp = true;
-                        console.log("electronLevelUp: " + electronLevelUp);
-                        console.log("protonLevelUp: " + protonLevelUp);
-                        console.log("neutronLevelUp: " + neutronLevelUp);
-    
-                        if (protonLevelUp && electronLevelUp && neutronLevelUp) {
-                            if (neutron.score[self.socket.id].protonScore - neutron.score[self.socket.id].neutronScore < 2) {protonLevelUp = false;}
-                            if (neutron.score[self.socket.id].electronScore - neutron.score[self.socket.id].neutronScore < 2) {electronLevelUp = false;}
-                            neutronLevelUp = false;
 
-                            self.element.atomicNum++;
-                            console.log("atomic num" +self.element.atomicNum);
-                            self.element.upgrade();
-                            self.socket.emit('upgrade', self.element.atomicNum);
-                        }
-                    }
-                    this.socket.emit('neutronCollected');
-                    this.oldNeutronPosition = {
-                        x: neutron.x,
-                        y: neutron.y,
-                    };
-                
+
+                if (neutron.score[self.socket.id].neutronScore < 2) {
+                    neutron.score[self.socket.id].neutronScore++;
+                }
+                this.neutronScoreText.text = 'Neutrons: ' + neutron.score[self.socket.id].neutronScore;
+
+
+                if (neutron.score[self.socket.id].electronScore == 2 && 
+                    neutron.score[self.socket.id].protonScore == 2 &&
+                    neutron.score[self.socket.id].neutronScore == 2) {
+
+
+                    
+
+                        self.element.atomicNum++;
+                        console.log("atomic num" + self.element.atomicNum);
+                        neutron.score[self.socket.id].protonScore = 0;
+                        neutron.score[self.socket.id].electronScore = 0;
+                        neutron.score[self.socket.id].neutronScore = 0;
+
+                        this.neutronScoreText.text = 'Neutrons: ' + neutron.score[self.socket.id].neutronScore;
+                        this.electronScoreText.text = 'Electrons: ' + neutron.score[self.socket.id].electronScore;
+                        this.protonScoreText.text = 'Protons: ' + neutron.score[self.socket.id].protonScore;
+
+                        self.element.upgrade();
+                        self.socket.emit('upgrade', self.element.atomicNum);
+                    
+                }
+                this.socket.emit('neutronCollected');
+                this.oldNeutronPosition = {
+                    x: neutron.x,
+                    y: neutron.y,
+                };
             }
         }, null, self);
     });
