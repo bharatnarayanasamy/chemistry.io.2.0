@@ -53,7 +53,7 @@ function preload() {
     this.load.image("neutron", "./assets/images/neutron.svg");
     this.load.image("obstacle", "./assets/images/lithium.png");
     this.load.image("vrishabkrishna", "./assets/images/vrishabkrishna.png");
-
+    this.load.image("bg", "./assets/images/dope.png");
 
     //Setting the maximum number of mouse pointerjjs that can be used on the screen to one
     this.input.maxPointers = 1;
