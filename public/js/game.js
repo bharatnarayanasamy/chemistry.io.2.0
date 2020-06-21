@@ -38,6 +38,7 @@ let config = {
 
 var lastShot = 0;
 var lastHealed = 0;
+var a = 0
 
 var game = new Phaser.Game(config);
 
@@ -58,6 +59,20 @@ function preload() {
     this.input.maxPointers = 1;
 }
 function create() {
+
+    //  Set the camera and physics bounds to be the size of 4x4 bg images
+    this.cameras.main.setBounds(0, 0, 1920 * 2, 1080 * 2);
+    this.physics.world.setBounds(0, 0, 1920 * 2, 1080 * 2);
+
+    //  Mash 4 images together to create our background
+    this.add.image(0, 0, 'bg').setOrigin(0);
+    this.add.image(1920, 0, 'bg').setOrigin(0).setFlipX(true);
+    this.add.image(0, 1080, 'bg').setOrigin(0).setFlipY(true);
+    this.add.image(1920, 1080, 'bg').setOrigin(0).setFlipX(true).setFlipY(true);
+
+    //Enabling collisions when an object hits the boundary
+    this.physics.world.setBoundsCollision();
+
     //creates instance of socket.io
     let self = this;
     this.socket = io();
@@ -215,9 +230,9 @@ function create() {
     //creates scorebars at bottom of screen
     this.protonBar = new CollectionBar(this, config.width / 2 - 150, config.height - 120, "proton", 0);
     this.protonBarText = this.add.text(config.width / 2 - 60, config.height - 118, 'Protons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' });
-    this.electronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 80, "electron");
+    this.electronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 80, "electron", 0);
     this.electronBarText = this.add.text(config.width / 2 - 60, config.height - 78, 'Electrons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' });
-    this.neutronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 40, "neutron");
+    this.neutronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 40, "neutron", 0);
     this.neutronBarText = this.add.text(config.width / 2 - 60, config.height - 38, 'Neutrons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' });
 
     this.socket.on('protonUpdate', function (proton) {
@@ -230,8 +245,8 @@ function create() {
             if (proton.x != this.oldProtonPosition.x || proton.y != this.oldProtonPosition.y) {
                 if (this.numProtons < gameSettings.upgradePEN) {
                     this.numProtons++;
-                    this.protonBar = new CollectionBar(this, config.width / 2 - 150, config.height - 120, "proton", this.numProtons * 100 / gameSettings.upgradePEN);
-                    this.protonBarText = this.add.text(config.width / 2 - 60, config.height - 118, 'Protons: ' + this.numProtons + '/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' });
+                    this.protonBar.increment(this.numProtons * 100 / gameSettings.upgradePEN);
+                    this.protonBarText.text = 'Protons: ' + this.numProtons + '/' + gameSettings.upgradePEN;
                 }
                 //level up if player has collected sufficient number of -tons
                 if (this.numNeutrons == gameSettings.upgradePEN && this.numProtons == gameSettings.upgradePEN && this.numElectrons == gameSettings.upgradePEN) {
@@ -240,12 +255,12 @@ function create() {
                     this.numProtons = 0;
                     this.numElectrons = 0;
 
-                    this.protonBar = new CollectionBar(this, config.width / 2 - 150, config.height - 120, "proton", 0);
-                    this.protonBarText = this.add.text(config.width / 2 - 60, config.height - 118, 'Protons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' });
-                    this.electronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 80, "electron");
-                    this.electronBarText = this.add.text(config.width / 2 - 60, config.height - 78, 'Electrons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' });
-                    this.neutronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 40, "neutron");
-                    this.neutronBarText = this.add.text(config.width / 2 - 60, config.height - 38, 'Neutrons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' });
+                    this.protonBar.increment(-100);
+                    this.protonBarText.text = "Protons: 0/' + gameSettings.upgradePEN";
+                    this.electronBar.increment(-100);
+                    this.electronBarText = "Electrons: 0/' + gameSettings.upgradePEN";
+                    this.neutronBar.increment(-100);
+                    this.neutronBarText = "Neutrons: 0/' + gameSettings.upgradePEN";
 
                     self.element.upgrade();
                     self.socket.emit('upgrade', self.element.atomicNum);
@@ -270,7 +285,7 @@ function create() {
             if (electron.x != this.oldElectronPosition.x || electron.y != this.oldElectronPosition.y) {
                 if (this.numElectrons < gameSettings.upgradePEN) {
                     this.numElectrons++;
-                    this.electronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 80, "electron", this.numElectrons * 100 / gameSettings.upgradePEN);
+                    this.electronBar.increment(this.numElectrons * 100 / gameSettings.upgradePEN);
                     this.electronBarText = this.add.text(config.width / 2 - 60, config.height - 78, 'Electrons: ' + this.numElectrons + '/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' });
 
                 }
@@ -281,12 +296,12 @@ function create() {
                     this.numProtons = 0;
                     this.numElectrons = 0;
 
-                    this.protonBar = new CollectionBar(this, config.width / 2 - 150, config.height - 120, "proton", 0);
-                    this.protonBarText = this.add.text(config.width / 2 - 60, config.height - 118, 'Protons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' });
-                    this.electronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 80, "electron");
-                    this.electronBarText = this.add.text(config.width / 2 - 60, config.height - 78, 'Electrons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' });
-                    this.neutronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 40, "neutron");
-                    this.neutronBarText = this.add.text(config.width / 2 - 60, config.height - 38, 'Neutrons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' });
+                    this.protonBar.increment(-100);
+                    this.protonBarText.text = "Protons: 0/' + gameSettings.upgradePEN";
+                    this.electronBar.increment(-100);
+                    this.electronBarText = "Electrons: 0/' + gameSettings.upgradePEN";
+                    this.neutronBar.increment(-100);
+                    this.neutronBarText = "Neutrons: 0/' + gameSettings.upgradePEN";
 
                     self.element.upgrade();
                     self.socket.emit('upgrade', self.element.atomicNum);
@@ -310,7 +325,7 @@ function create() {
             if (neutron.x != this.oldNeutronPosition.x || neutron.y != this.oldNeutronPosition.y) {
                 if (this.numNeutrons < gameSettings.upgradePEN) {
                     this.numNeutrons++;
-                    this.neutronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 40, "neutron", this.numNeutrons * 100 / gameSettings.upgradePEN);
+                    this.neutronBar.increment(this.numNeutrons * 100 / gameSettings.upgradePEN);
                     this.neutronBarText = this.add.text(config.width / 2 - 60, config.height - 38, 'Neutrons: ' + this.numNeutrons + '/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' });
 
                 }
@@ -321,12 +336,12 @@ function create() {
                     this.numProtons = 0;
                     this.numElectrons = 0;
 
-                    this.protonBar = new CollectionBar(this, config.width / 2 - 150, config.height - 120, "proton", 0);
-                    this.protonBarText = this.add.text(config.width / 2 - 60, config.height - 118, 'Protons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' });
-                    this.electronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 80, "electron");
-                    this.electronBarText = this.add.text(config.width / 2 - 60, config.height - 78, 'Electrons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' });
-                    this.neutronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 40, "neutron");
-                    this.neutronBarText = this.add.text(config.width / 2 - 60, config.height - 38, 'Neutrons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' });
+                    this.protonBar.increment(-100);
+                    this.protonBarText.text = "Protons: 0/' + gameSettings.upgradePEN";
+                    this.electronBar.increment(-100);
+                    this.electronBarText = "Electrons: 0/' + gameSettings.upgradePEN";
+                    this.neutronBar.increment(-100);
+                    this.neutronBarText = "Neutrons: 0/' + gameSettings.upgradePEN";
 
                     self.element.upgrade();
                     self.socket.emit('upgrade', self.element.atomicNum);
@@ -395,19 +410,6 @@ function create() {
 
     }
 
-    //  Set the camera and physics bounds to be the size of 4x4 bg images
-    this.cameras.main.setBounds(0, 0, 1920 * 2, 1080 * 2);
-    this.physics.world.setBounds(0, 0, 1920 * 2, 1080 * 2);
-
-    //  Mash 4 images together to create our background
-    this.add.image(0, 0, 'bg').setOrigin(0);
-    this.add.image(1920, 0, 'bg').setOrigin(0).setFlipX(true);
-    this.add.image(0, 1080, 'bg').setOrigin(0).setFlipY(true);
-    this.add.image(1920, 1080, 'bg').setOrigin(0).setFlipX(true).setFlipY(true);
-
-    //Enabling collisions when an object hits the boundary
-    this.physics.world.setBoundsCollision();
-
     //Create group to hold all our projectiles, aka the bullets
     this.projectiles = this.add.group();
 
@@ -422,11 +424,23 @@ function create() {
 
 
 function update(time) {
-
     if (typeof this.element != "undefined") {
 
         this.cameras.main.startFollow(this.element, true, 1, 1, 0, 0);
-        
+        //console.log(this.cameras.main.scrollX);
+        //console.log(this.cameras.main.scrollY);
+
+        this.protonBar.move(this, this.cameras.main.scrollX + config.width / 2 - 150, this.cameras.main.scrollY + config.height - 120);
+        this.protonBarText.x = this.cameras.main.scrollX + config.width / 2 - 60;
+        this.protonBarText.y = this.cameras.main.scrollX + config.height - 118;
+        this.electronBar.move(this, this.cameras.main.scrollX + config.width / 2 - 150, this.cameras.main.scrollY + config.height - 80);
+        this.electronBarText.x = this.cameras.main.scrollX + config.width / 2 - 60;
+        this.electronBarText.y = this.cameras.main.scrollX + config.height - 78;
+        this.neutronBar.move(this, this.cameras.main.scrollX + config.width / 2 - 150, this.cameras.main.scrollY + config.height - 40);
+        this.neutronBarText.x = this.cameras.main.scrollX + config.width / 2 - 60;
+        this.neutronBarText.y = this.cameras.main.scrollX + config.height - 38;
+
+
         this.element.movePlayer(this);
         this.healthLabel.text = "Health: " + this.element.hp.value;
 
@@ -467,31 +481,3 @@ function update(time) {
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

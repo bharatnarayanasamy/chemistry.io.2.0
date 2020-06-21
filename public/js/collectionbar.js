@@ -29,6 +29,20 @@ class CollectionBar {
         this.draw();
 
     }
+
+    increment (value)
+    {
+        this.value+=value;
+
+        if (this.value > 100)
+        {
+            this.value = 100;
+        }
+
+        this.draw();
+
+    }
+    
     move(scene, x, y) {
         this.x = x;
         this.y = y;
