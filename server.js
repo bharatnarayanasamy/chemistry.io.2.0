@@ -1,3 +1,4 @@
+//technical server stuff
 let express = require('express');
 let app = express();
 let server = require('http').Server(app);
@@ -9,33 +10,34 @@ app.get('/', function (req, res) {
   res.sendFile(__dirname + '/index.html');
 });
 
+//Access server on localhost:8083
 server.listen(8083, () => {
   console.log(`Listening on ${server.address().port}`);
 });
 
-var players = {};
-var bullet_array = [];
-var score_array = {};
-var healthInfo = {
+let players = {};
+let bullet_array = [];
+let score_array = {};
+let healthInfo = {
   id: 0,
   i: 0
 }
 
-var socketID;
+let socketID;
 
-var proton = {
+let proton = {
   x: Math.floor(Math.random() * 1100) + 50,
   y: Math.floor(Math.random() * 700) + 50,
 };
-var electron = {
+let electron = {
   x: Math.floor(Math.random() * 1100) + 50,
   y: Math.floor(Math.random() * 700) + 50,
 };
-var neutron = {
+let neutron = {
   x: Math.floor(Math.random() * 1100) + 50,
   y: Math.floor(Math.random() * 700) + 50,
 };
-var data = {
+let data = {
   x: 0,
   y: 0,
   id: 0,
@@ -50,6 +52,8 @@ io.on('connection', function (socket) {
   players[socket.id] = {
     x: Math.floor(Math.random() * 1100) + 50,
     y: Math.floor(Math.random() * 700) + 50,
+    vx: 0,
+    vy: 0,
     rotation: 0,
     playerId: socket.id,
     team: (Math.floor(Math.random() * 2) == 0) ? 'green' : 'blue',
@@ -95,25 +99,55 @@ io.on('connection', function (socket) {
     if (typeof players[socket.id] != "undefined") {
       players[socket.id].x = movementData.x;
       players[socket.id].y = movementData.y;
+      players[socket.id].vy = movementData.vy;
+      players[socket.id].vx = movementData.vx;
       players[socket.id].rotation = movementData.rotation;
       // emit a message to all players about the player that moved
       socket.broadcast.emit('playerMoved', players[socket.id]);
     }
   });
 
+  //when protons get collected, this resets its position and increases the score in the entire score array
   socket.on('protonCollected', function () {
     proton.x = Math.floor(Math.random() * 1100) + 50;
     proton.y = Math.floor(Math.random() * 700) + 50;
     if (typeof score_array[socket.id] != "undefined") {
-      if (score_array[socket.id].protonScore < 2){
+      if (score_array[socket.id].protonScore < 2) {
         score_array[socket.id].protonScore++;
       }
-      
+
       proton.score = score_array;
     }
     io.emit('protonUpdate', proton);
   });
 
+  //when electrons get collected, this resets its position and increases the score in the entire score array
+  socket.on('electronCollected', function () {
+    electron.x = Math.floor(Math.random() * 1100) + 50;
+    electron.y = Math.floor(Math.random() * 700) + 50;
+    if (typeof score_array[socket.id] != "undefined") {
+      if (score_array[socket.id].electronScore < 2) {
+        score_array[socket.id].electronScore++;
+      }
+      electron.score = score_array;
+    }
+    io.emit('electronUpdate', electron);
+  });
+
+  //when neutrons get collected, this resets its position and increases the score in the entire score array
+  socket.on('neutronCollected', function () {
+    neutron.x = Math.floor(Math.random() * 1100) + 50;
+    neutron.y = Math.floor(Math.random() * 700) + 50;
+    if (typeof score_array[socket.id] != "undefined") {
+      if (score_array[socket.id].neutronScore < 2) {
+        score_array[socket.id].neutronScore++;
+      }
+      neutron.score = score_array;
+    }
+    io.emit('neutronUpdate', neutron);
+  });
+
+  //
   socket.on('player-heal', function (data) {
     if (typeof players[data.id] != 'undefined') {
       if (players[data.id].health <= 97) {
@@ -126,74 +160,39 @@ io.on('connection', function (socket) {
     }
   });
 
-
-  socket.on('electronCollected', function () {
-    electron.x = Math.floor(Math.random() * 1100) + 50;
-    electron.y = Math.floor(Math.random() * 700) + 50;
-    if (typeof score_array[socket.id] != "undefined") {
-      if (score_array[socket.id].electronScore < 2){
-        score_array[socket.id].electronScore++;
-      }
-      electron.score = score_array;
-          }
-    io.emit('electronUpdate', electron);
-  });
-
-  socket.on('neutronCollected', function () {
-    neutron.x = Math.floor(Math.random() * 1100) + 50;
-    neutron.y = Math.floor(Math.random() * 700) + 50;
-    if (typeof score_array[socket.id] != "undefined") {
-      if (score_array[socket.id].neutronScore < 2){
-        score_array[socket.id].neutronScore++;
-      }
-      neutron.score = score_array;    }
-    io.emit('neutronUpdate', neutron);
-  });
-
   // Listen for shoot-bullet events and add it to our bullet array
   socket.on('shoot-bullet', function (data) {
     if (players[socket.id] == undefined) return;
-    var new_bullet = data;
+    let new_bullet = data;
     data.owner_id = socket.id; // Attach id of the player to the bullet 
     bullet_array.push(new_bullet);
   });
+
+  //gets called once a player is ready to upgrade
   socket.on('upgrade', function (atomicNum) {
-    players[socket.id].atomicNumServer = atomicNum;
-    score_array[socket.id].protonScore = 0;
-    score_array[socket.id].neutronScore = 0;
-    score_array[socket.id].electronScore = 0;
+    if (players[socket.id] != undefined) {
+      players[socket.id].atomicNumServer = atomicNum;
+      score_array[socket.id].protonScore = 0;
+      score_array[socket.id].neutronScore = 0;
+      score_array[socket.id].electronScore = 0;
 
-    neutron.score = score_array;
-    proton.score = score_array;
-    electron.score = score_array;
+      neutron.score = score_array;
+      proton.score = score_array;
+      electron.score = score_array;
 
-    socket.broadcast.emit('playerUpgraded', players[socket.id]);
+      socket.broadcast.emit('playerUpgraded', players[socket.id]);
+    }
   });
-
-  socket.on('upgrade-powerUp', function (atomicNum) {
-    players[socket.id].atomicNumServer = atomicNum;
-    socket.broadcast.emit('playerUpgraded', players[socket.id]);
-  });
-
-
 
 });
-
-/*
-  socket.on('timeUpdate', function(time){
-    io.emit('newTime', time);
-  })
-  */
-
 
 // Update the bullets 60 times per frame and send updates 
 function ServerGameLoop() {
 
 
-  for (var i = 0; i < bullet_array.length; i++) {
-    var bullet = bullet_array[i];
+  for (let i = 0; i < bullet_array.length; i++) {
+    let bullet = bullet_array[i];
     if (typeof bullet != "undefined") {
-
       bullet.x += bullet.speed_x / 50;
       bullet.y += bullet.speed_y / 50;
 
@@ -203,13 +202,13 @@ function ServerGameLoop() {
         i--;
       }
 
-      for (var id in players) {
+      for (let id in players) {
         if (bullet.owner_id != id && typeof players[id] != "undefined") {
           // And your own bullet shouldn't kill you
-          var dx = players[id].x - bullet.x;
-          var dy = players[id].y - bullet.y;
-          var dist = Math.sqrt(dx * dx + dy * dy);
-          var owner = bullet.owner_id;
+          let dx = players[id].x - bullet.x;
+          let dy = players[id].y - bullet.y;
+          let dist = Math.sqrt(dx * dx + dy * dy);
+          let owner = bullet.owner_id;
           if (dist < 70) {
             healthInfo.i = i;
             healthInfo.id = id;
