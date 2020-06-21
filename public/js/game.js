@@ -52,10 +52,7 @@ function preload() {
     this.load.image("neutron", "./assets/images/neutron.svg");
     this.load.image("obstacle", "./assets/images/lithium.png");
     this.load.image("vrishabkrishna", "./assets/images/vrishabkrishna.png");
-<<<<<<< HEAD
     this.load.image("bg", "./assets/images/dope.png");
-=======
->>>>>>> 1dccc816aed86dc82b255773c7fe71f731a09c9a
 
     //Setting the maximum number of mouse pointerjjs that can be used on the screen to one
     this.input.maxPointers = 1;
@@ -398,16 +395,21 @@ function create() {
 
     }
 
-    //Setting the background to a gray-ish color
-    this.cameras.main.backgroundColor.setTo(200, 200, 200);
+    //  Set the camera and physics bounds to be the size of 4x4 bg images
+    this.cameras.main.setBounds(0, 0, 1920 * 2, 1080 * 2);
+    this.physics.world.setBounds(0, 0, 1920 * 2, 1080 * 2);
 
+    //  Mash 4 images together to create our background
+    this.add.image(0, 0, 'bg').setOrigin(0);
+    this.add.image(1920, 0, 'bg').setOrigin(0).setFlipX(true);
+    this.add.image(0, 1080, 'bg').setOrigin(0).setFlipY(true);
+    this.add.image(1920, 1080, 'bg').setOrigin(0).setFlipX(true).setFlipY(true);
 
     //Enabling collisions when an object hits the boundary
     this.physics.world.setBoundsCollision();
 
     //Create group to hold all our projectiles, aka the bullets
     this.projectiles = this.add.group();
-
 
     //used too collect information on keys that were pressed - important for moving the player  
     this.cursorKeys = this.input.keyboard.createCursorKeys();
@@ -422,6 +424,9 @@ function create() {
 function update(time) {
 
     if (typeof this.element != "undefined") {
+
+        this.cameras.main.startFollow(this.element, true, 1, 1, 0, 0);
+        
         this.element.movePlayer(this);
         this.healthLabel.text = "Health: " + this.element.hp.value;
 
