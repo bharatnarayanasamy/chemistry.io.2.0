@@ -11,7 +11,7 @@ app.get('/', function (req, res) {
 });
 
 //Access server on localhost:8083
-server.listen(8084, () => {
+server.listen(8083, () => {
   console.log(`Listening on ${server.address().port}`);
 });
 
