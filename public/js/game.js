@@ -245,7 +245,7 @@ function create() {
             if (proton.x != this.oldProtonPosition.x || proton.y != this.oldProtonPosition.y) {
                 if (this.numProtons < gameSettings.upgradePEN) {
                     this.numProtons++;
-                    this.protonBar.increment(this.numProtons * 100 / gameSettings.upgradePEN);
+                    this.protonBar.increment(100 / gameSettings.upgradePEN);
                     this.protonBarText.text = 'Protons: ' + this.numProtons + '/' + gameSettings.upgradePEN;
                 }
                 //level up if player has collected sufficient number of -tons
@@ -258,9 +258,9 @@ function create() {
                     this.protonBar.increment(-100);
                     this.protonBarText.text = "Protons: 0/' + gameSettings.upgradePEN";
                     this.electronBar.increment(-100);
-                    this.electronBarText = "Electrons: 0/' + gameSettings.upgradePEN";
+                    this.electronBarText.text = "Electrons: 0/' + gameSettings.upgradePEN";
                     this.neutronBar.increment(-100);
-                    this.neutronBarText = "Neutrons: 0/' + gameSettings.upgradePEN";
+                    this.neutronBarText.text = "Neutrons: 0/' + gameSettings.upgradePEN";
 
                     self.element.upgrade();
                     self.socket.emit('upgrade', self.element.atomicNum);
@@ -285,8 +285,8 @@ function create() {
             if (electron.x != this.oldElectronPosition.x || electron.y != this.oldElectronPosition.y) {
                 if (this.numElectrons < gameSettings.upgradePEN) {
                     this.numElectrons++;
-                    this.electronBar.increment(this.numElectrons * 100 / gameSettings.upgradePEN);
-                    this.electronBarText = this.add.text(config.width / 2 - 60, config.height - 78, 'Electrons: ' + this.numElectrons + '/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' });
+                    this.electronBar.increment(100 / gameSettings.upgradePEN);
+                    this.electronBarText.text = 'Electrons: ' + this.numElectrons + '/' + gameSettings.upgradePEN;
 
                 }
 
@@ -299,9 +299,9 @@ function create() {
                     this.protonBar.increment(-100);
                     this.protonBarText.text = "Protons: 0/' + gameSettings.upgradePEN";
                     this.electronBar.increment(-100);
-                    this.electronBarText = "Electrons: 0/' + gameSettings.upgradePEN";
+                    this.electronBarText.text = "Electrons: 0/' + gameSettings.upgradePEN";
                     this.neutronBar.increment(-100);
-                    this.neutronBarText = "Neutrons: 0/' + gameSettings.upgradePEN";
+                    this.neutronBarText.text = "Neutrons: 0/' + gameSettings.upgradePEN";
 
                     self.element.upgrade();
                     self.socket.emit('upgrade', self.element.atomicNum);
@@ -325,9 +325,8 @@ function create() {
             if (neutron.x != this.oldNeutronPosition.x || neutron.y != this.oldNeutronPosition.y) {
                 if (this.numNeutrons < gameSettings.upgradePEN) {
                     this.numNeutrons++;
-                    this.neutronBar.increment(this.numNeutrons * 100 / gameSettings.upgradePEN);
-                    this.neutronBarText = this.add.text(config.width / 2 - 60, config.height - 38, 'Neutrons: ' + this.numNeutrons + '/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' });
-
+                    this.neutronBar.increment(100 / gameSettings.upgradePEN);
+                    this.neutronBarText.text = 'Neutrons: ' + this.numNeutrons + '/' + gameSettings.upgradePEN;
                 }
 
                 if (this.numNeutrons == gameSettings.upgradePEN && this.numProtons == gameSettings.upgradePEN && this.numElectrons == gameSettings.upgradePEN) {
@@ -339,9 +338,9 @@ function create() {
                     this.protonBar.increment(-100);
                     this.protonBarText.text = "Protons: 0/' + gameSettings.upgradePEN";
                     this.electronBar.increment(-100);
-                    this.electronBarText = "Electrons: 0/' + gameSettings.upgradePEN";
+                    this.electronBarText.text = "Electrons: 0/' + gameSettings.upgradePEN";
                     this.neutronBar.increment(-100);
-                    this.neutronBarText = "Neutrons: 0/' + gameSettings.upgradePEN";
+                    this.neutronBarText.text = "Neutrons: 0/' + gameSettings.upgradePEN";
 
                     self.element.upgrade();
                     self.socket.emit('upgrade', self.element.atomicNum);
@@ -431,19 +430,23 @@ function update(time) {
         //console.log(this.cameras.main.scrollY);
 
         this.protonBar.move(this, this.cameras.main.scrollX + config.width / 2 - 150, this.cameras.main.scrollY + config.height - 120);
-        this.protonBarText.x = this.cameras.main.scrollX + config.width / 2 - 60;
-        this.protonBarText.y = this.cameras.main.scrollX + config.height - 118;
+        this.protonBarText.x = this.protonBar.x + 90;
+        this.protonBarText.y = this.protonBar.y+2;
         this.electronBar.move(this, this.cameras.main.scrollX + config.width / 2 - 150, this.cameras.main.scrollY + config.height - 80);
-        this.electronBarText.x = this.cameras.main.scrollX + config.width / 2 - 60;
-        this.electronBarText.y = this.cameras.main.scrollX + config.height - 78;
+        this.electronBarText.x = this.electronBar.x + 85;
+        this.electronBarText.y = this.electronBar.y+2;
         this.neutronBar.move(this, this.cameras.main.scrollX + config.width / 2 - 150, this.cameras.main.scrollY + config.height - 40);
-        this.neutronBarText.x = this.cameras.main.scrollX + config.width / 2 - 60;
-        this.neutronBarText.y = this.cameras.main.scrollX + config.height - 38;
+        this.neutronBarText.x = this.neutronBar.x + 90;
+        this.neutronBarText.y = this.neutronBar.y+2;
 
 
         this.element.movePlayer(this);
         this.healthLabel.text = "Health: " + this.element.hp.value;
+        this.healthLabel.x = this.cameras.main.scrollX + 10;
+        this.healthLabel.y = this.cameras.main.scrollY + 10;
 
+        this.killScoreText.x = this.cameras.main.scrollX + 10;
+        this.killScoreText.y = this.cameras.main.scrollY + 50;
 
         if ((this.input.activePointer.isDown || Phaser.Input.Keyboard.JustDown(this.spacebar)) && lastShot + 500 < time) {
             let bullet = this.element.shootBullet(this);
