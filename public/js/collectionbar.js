@@ -29,6 +29,20 @@ class CollectionBar {
         this.draw();
 
     }
+
+    increment (value)
+    {
+        this.value+=value;
+
+        if (this.value > 100)
+        {
+            this.value = 100;
+        }
+
+        this.draw();
+
+    }
+    
     move(scene, x, y) {
         this.x = x;
         this.y = y;
@@ -50,7 +64,6 @@ class CollectionBar {
         this.bar.fillStyle(0xffffff);
         this.bar.fillRect(this.x + 2, this.y + 2, 300, 20);
         if (this.type == "proton") {
-            console.log("hi");
             this.bar.fillStyle(0xff0000);
         }
         else if (this.type == "electron") {
