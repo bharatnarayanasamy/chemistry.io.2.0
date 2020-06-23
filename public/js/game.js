@@ -3,6 +3,7 @@
 //Dictionary of game settings
 var gameSettings = {
     playerSpeed: 300,
+    bulletSpeed: 350,
     maxPowerups: 10,
     maxObstacles: 2,
     powerUpVel: 50,
@@ -43,15 +44,19 @@ var game = new Phaser.Game(config);
 
 function preload() {
     //Loading the images for the bullet types, players, proton, electron and neutrons
-    this.load.image("helium", "./assets/images/helium.png");
-    this.load.image("heliumbullet", "./assets/images/heliumbullet.png");
     this.load.image("hydrogenbullet", "./assets/images/hydrogenbullet.png");
+    this.load.image("heliumbullet", "./assets/images/heliumbullet.png");
+    this.load.image("obstaclebullet", "./assets/images/obstacle.png");
+
     this.load.image("hydrogen", "./assets/images/hydrogen.png");
+    this.load.image("helium", "./assets/images/helium.png");
+    this.load.image("obstacle", "./assets/images/lithium.png");
+    this.load.image("vrishabkrishna", "./assets/images/vrishabkrishna.png");
+
+
     this.load.image("proton", "./assets/images/proton.svg");
     this.load.image("electron", "./assets/images/electron.svg");
     this.load.image("neutron", "./assets/images/neutron.svg");
-    this.load.image("obstacle", "./assets/images/lithium.png");
-    this.load.image("vrishabkrishna", "./assets/images/vrishabkrishna.png");
 
     //Setting the maximum number of mouse pointerjjs that can be used on the screen to one
     this.input.maxPointers = 1;
@@ -107,7 +112,7 @@ function create() {
         //add time delay
         self.otherElements.getChildren().forEach(function (otherElement) {
             if (playerInfo.playerId === otherElement.playerId) {
-                
+
                 otherElement.body.setVelocity(0);
                 otherElement.body.setVelocityX(playerInfo.vx);
                 otherElement.body.setVelocityY(playerInfo.vy);
@@ -156,29 +161,26 @@ function create() {
             if (self.element.bullet_array[i] == undefined) {
 
                 let angle = Phaser.Math.Angle.Between(self.element.x, self.element.y, self.input.activePointer.worldX, self.input.activePointer.worldY);
-                self.element.bullet_array[i] = new Bullet(self, angle, server_bullet_array[i].x, server_bullet_array[i].y);
+                self.element.bullet_array[i] = new Bullet(self, angle, server_bullet_array[i].x, server_bullet_array[i].y, gameSettings.texture[server_bullet_array[i].atomicNumber - 1]);
+                //self.element.bullet_array[i] = new Bullet(self, angle, server_bullet_array[i].x, server_bullet_array[i].y + 50, gameSettings.texture[server_bullet_array[i].atomicNumber-1]);
+
                 /*
                 console.log(self.socket.id);
                 console.log(server_bullet_array[i].owner_id)
                 console.log(self.socket.id == server_bullet_array[i].owner_id)
                 */
-                if (self.socket.id != server_bullet_array[i].owner_id) {
-                    self.element.bullet_array[i].setTint(0xff0000);
-                }
+                // if (self.socket.id != server_bullet_array[i].owner_id) {
+                //     self.element.bullet_array[i].setTint(0xff0000);
+                // }
 
             } else {
                 //Otherwise, just update it! 
-
                 self.element.bullet_array[i].enableBody(true, true);
+                self.element.bullet_array[i].setTexture(gameSettings.texture[server_bullet_array[i].atomicNumber - 1] + "bullet");
 
-                if (self.element.bullet_array[i].texture == 'helium') {
-                    console.log("player has changed to helium");
-                    //self.element.bullet_array[i].changeProperty()
-
-
-
-
-                }
+                // if (self.element.bullet_array[i].texture == 'helium') {
+                //     console.log("player has changed to helium");
+                // }
                 self.element.bullet_array[i].x = server_bullet_array[i].x;
                 self.element.bullet_array[i].y = server_bullet_array[i].y;
             }
@@ -218,6 +220,10 @@ function create() {
     this.electronBarText = this.add.text(config.width / 2 - 60, config.height - 78, 'Electrons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' });
     this.neutronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 40, "neutron");
     this.neutronBarText = this.add.text(config.width / 2 - 60, config.height - 38, 'Neutrons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' });
+
+    //create proton group/array?
+    //find way to destroy protons that were collected from the array
+    //change overlap from self.proton to proton group
 
     this.socket.on('protonUpdate', function (proton) {
         if (self.proton) self.proton.destroy(); //prevents duplicates?
@@ -351,12 +357,18 @@ function create() {
             self.socket.emit('upgrade', self.element.atomicNum);
         }
     });
-    this.socket.on('player-hit', function(player){
-        if (self.socket.id == player.playerID){
-            self.element.lastHurt = new Date();
-            self.element.lastHurt = self.element.lastHurt.getTime();
+    this.socket.on('player-hit', function (player) {
+        if (self.socket.id == player.id) {
+            date_obj = new Date();
+            self.element.lastHurt = date_obj.getTime()
+            //if (date_obj.getTime() > self.element.lastHurt + 600) {
+            //    self.element.lastHurt = date_obj.getTime()
+            //}
+            console.log(self.element.lastHurt)
+            //self.element.lastHurt = self.element.lastHurt.getTime();
         }
-        console.log('time' + self.element.lastHurt)
+        //console.log('time' + self.element.lastHurt)
+
     });
     function addPlayer(self, playerInfo) {
         //code for element class
@@ -379,17 +391,16 @@ function create() {
     function addOtherPlayers(self, playerInfo) {
         if (playerInfo.atomicNumServer < 5) {
             const otherElement = new Element(self, playerInfo.x, playerInfo.y, 45, playerInfo.playerId, this.gameSettings.texture[playerInfo.atomicNumServer - 1]);
-            otherElement.setTint(0x0000ff);
+            //otherElement.setTint(0x0000ff);
             self.otherElements.add(otherElement);
             otherElement.body.enable = true;
         }
         else {
-            const otherElement = new Element(self, playerInfo.x, playerInfo.y, 45, playerInfo.playerId, this.gameSettings.texture[2]);
-            otherElement.setTint(0x0000ff);
+            const otherElement = new Element(self, playerInfo.x, playerInfo.y, 45, playerInfo.playerId, this.gameSettings.texture[this.gameSettings.texture.length - 1]);
+            //otherElement.setTint(0x0000ff);
             self.otherElements.add(otherElement);
             otherElement.body.enable = true;
         }
-
 
 
     }
@@ -417,6 +428,7 @@ function create() {
 
 function update(time) {
 
+
     if (typeof this.element != "undefined") {
         this.element.movePlayer(this);
         this.healthLabel.text = "Health: " + this.element.hp.value;
@@ -426,7 +438,77 @@ function update(time) {
             let bullet = this.element.shootBullet(this);
 
             // Tell the server we shot a bullet 
-            this.socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage })
+
+            //bullet.speed_x = 50;
+            bullet.changeProperty(this.element.atomicNum);
+            let distance = Math.sqrt((bullet.x - this.element.x) * (bullet.x - this.element.x) + (bullet.y - this.element.y) * (bullet.y - this.element.y));
+            let tempangle1 = 0, tempangle2 = 0, tempangle = 0, bulletx1 = 0, bulletx2 = 0, bullety1 = 0, bullety2 = 0;
+
+            if (this.element.atomicNum > 2) {
+                if (bullet.x > this.element.x && bullet.y > this.element.y) {
+                    tempangle = Math.atan((bullet.x - this.element.x) / (bullet.y - this.element.y));
+                    tempangle1 = tempangle + 0.2;
+                    tempangle2 = tempangle - 0.2;
+
+                    x1 = Math.sin(tempangle1) * distance;
+                    x2 = Math.sin(tempangle2) * distance;
+                    y1 = Math.cos(tempangle1) * distance;
+                    y2 = Math.cos(tempangle2) * distance;
+
+                    this.socket.emit('shoot-bullet', { x: this.element.x + x1, y: this.element.y + y1, y1: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
+                    this.socket.emit('shoot-bullet', { x: this.element.x + x2, y: this.element.y + y2, y2: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
+                }
+                else if (bullet.x > this.element.x && this.element.y > bullet.y) {
+                    tempangle = Math.atan((this.element.y - bullet.y) / (bullet.x - this.element.x));
+                    tempangle1 = tempangle + 0.2;
+                    tempangle2 = tempangle - 0.2;
+
+                    x1 = Math.cos(tempangle1) * distance;
+                    x2 = Math.cos(tempangle2) * distance;
+                    y1 = Math.sin(tempangle1) * distance;
+                    y2 = Math.sin(tempangle2) * distance;
+
+                    this.socket.emit('shoot-bullet', { x: this.element.x + x1, y: this.element.y - y1, y1: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
+                    this.socket.emit('shoot-bullet', { x: this.element.x + x2, y: this.element.y - y2, y2: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
+
+                }
+                else if (this.element.x > bullet.x && bullet.y > this.element.y) {
+                    tempangle = Math.atan((this.element.x - bullet.x) / (bullet.y - this.element.y));
+                    tempangle1 = tempangle + 0.2;
+                    tempangle2 = tempangle - 0.2;
+
+                    x1 = Math.sin(tempangle1) * distance;
+                    x2 = Math.sin(tempangle2) * distance;
+                    y1 = Math.cos(tempangle1) * distance;
+                    y2 = Math.cos(tempangle2) * distance;
+
+                    this.socket.emit('shoot-bullet', { x: this.element.x - x1, y: this.element.y + y1, y1: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
+                    this.socket.emit('shoot-bullet', { x: this.element.x - x2, y: this.element.y + y2, y2: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
+                }
+                else if (this.element.x > bullet.x && this.element.y > bullet.y) {
+                    tempangle = Math.atan((this.element.y - bullet.y) / (this.element.x - bullet.x));
+                    tempangle1 = tempangle + 0.2;
+                    tempangle2 = tempangle - 0.2;
+
+                    x1 = Math.cos(tempangle1) * distance;
+                    x2 = Math.cos(tempangle2) * distance;
+                    y1 = Math.sin(tempangle1) * distance;
+                    y2 = Math.sin(tempangle2) * distance;
+
+                    this.socket.emit('shoot-bullet', { x: this.element.x - x1, y: this.element.y - y1, y1: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
+                    this.socket.emit('shoot-bullet', { x: this.element.x - x2, y: this.element.y - y2, y2: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
+                }
+            }
+
+            else {
+                this.socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum })
+            }
+
+
+
+
+
+
             lastShot = time;
         }
 
@@ -450,8 +532,11 @@ function update(time) {
             rotation: this.element.rotation,
         };
 
-        if (time > lastHealed + 1000 && time > lastShot + 3000 && time > this.element.lastHurt + 10000) {
-            console.log(time, this.element.lastHurt)
+        upDate = new Date()
+
+        if (time > lastHealed + 1000 && time > lastShot + 3000 && upDate.getTime() > this.element.lastHurt + 10000) {
+            //console.log(time, this.element.lastHurt)
+            console.log(upDate.getTime() - this.element.lastHurt)
             this.element.hp.increment(3);
             this.socket.emit('player-heal', { id: this.element.playerId, health: this.element.hp.value });
             lastHealed = time;
