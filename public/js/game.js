@@ -4,7 +4,7 @@
 var gameSettings = {
     playerSpeed: 300,
     bulletSpeed: 350,
-    maxPowerups: 15,
+    maxPowerups: 14,
     maxObstacles: 2,
     powerUpVel: 50,
     obstacleVel: 0,
