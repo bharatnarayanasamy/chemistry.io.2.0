@@ -55,10 +55,31 @@ var proton_array = [];
 for (let i = 0; i < 15; i++) {
 
     proton_array.push({
-      x: -5,
-      y: -5,
+      x: -1,
+      y: -1,
     });
     
+}
+
+var electron_array = [];
+
+for (let i = 0; i < 15; i++) {
+
+    electron_array.push({
+      x: -1,
+      y: -1,
+    });
+    
+}
+
+var neutron_array = [];
+
+for (let i = 0; i < 15; i++) {
+
+    neutron_array.push({
+      x: -1,
+      y: -1,
+    });
     
 }
 
@@ -105,9 +126,31 @@ function create() {
 
     for (let i = 0; i < 15; i++) {
     
-        var bb = this.physics.add.image(0, 0, 'proton');
+        var bb = this.physics.add.image(-1000, -1000, 'proton');
+        bb.setScale(0.03);
         proton_array.push(bb);
     }
+
+
+    this.electron_array = [];
+
+    for (let i = 0; i < 15; i++) {
+    
+        var bb2 = this.physics.add.image(-1000, -1000, 'electron');
+        bb2.setScale(0.03);
+        electron_array.push(bb2);
+    }
+    
+
+    this.neutron_array = [];
+
+    for (let i = 0; i < 15; i++) {
+    
+        var bb3 = this.physics.add.image(-1000, -1000, 'neutron');
+        bb3.setScale(0.03);
+        neutron_array.push(bb3);
+    }
+    
     
     
 
@@ -155,9 +198,9 @@ function create() {
         self.otherElements.getChildren().forEach((otherElement) => {
             console.log("player disconnected")
             if (playerId === otherElement.playerId) {
-                otherElement.hp.destroy()
+                otherElement.hp.destroy();
                 otherElement.destroy();
-                console.log("player destroyed")
+                console.log("player destroyed");
             }
         });
     });
@@ -242,25 +285,32 @@ function create() {
 
     //initialize proton position objects
     this.oldProtonPosition = [];
-
-
     for (let i = 0; i < 15; i++) {
-        //@chris??
         this.oldProtonPosition.push({
-            x: -Math.floor(Math.random()),
-            y: -Math.floor(Math.random())
+            x: -1000,
+            y: -1000
         }); 
     }
 
-    this.oldElectronPosition = {
-        x: -5,
-        y: -5
-    };
-    this.oldNeutronPosition = {
-        x: -5,
-        y: -5
-    };
+    this.oldElectronPosition = [];
+    for (let i = 0; i < 15; i++) {
+        this.oldElectronPosition.push({
+            x: -1000,
+            y: -1000
+        }); 
+    }
 
+
+    this.oldNeutronPosition = [];
+    for (let i = 0; i < 15; i++) {
+        this.oldNeutronPosition.push({
+            x: -1000,
+            y: -1000
+        }); 
+    }
+
+    this.score = 0;
+    this.killScore = 15;
     //creates scorebars at bottom of screen
     this.protonBar = new CollectionBar(this, config.width / 2 - 150, config.height - 120, "proton", 0);
     this.protonBarText = this.add.text(config.width / 2 - 60, config.height - 118, 'Protons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' });
@@ -276,20 +326,33 @@ function create() {
     //change overlap from self.proton to proton group
 
     this.socket.on('protonUpdate', function(server_proton_array) {
-        
+
         for (let i = 0; i < server_proton_array.length; i++) {
 
             if (self.proton_array[i]) self.proton_array[i].destroy();
 
+            //console.log("X: " + server_proton_array[i].x + " " + "Y: " + server_proton_array[i].y);
             self.proton_array[i] = self.physics.add.image(server_proton_array[i].x, server_proton_array[i].y, 'proton');
             self.proton_array[i].setScale(0.08);
 
             
 
-            self.physics.add.overlap(self.element, server_proton_array[i], function () {
+            self.physics.add.overlap(self.element, self.proton_array[i], function () {
+                // console.log("entered proton overlap");
+                // console.log("overlap gang!");
+                // console.log("i" + i);
+                // console.log(server_proton_array[i].x);
+                // console.log(this.oldProtonPosition[i].x);
+                // console.log(this.oldProtonPosition[i]);
+
+
+
                 if (server_proton_array[i].x != this.oldProtonPosition[i].x || server_proton_array[i].y != this.oldProtonPosition[i].y) {
+                    console.log(this.killScore);
                     this.score += this.killScore / (gameSettings.upgradePEN * 3);
                     this.scoreText.text = 'Score: ' + this.score;
+                    console.log(this.score);
+
                     if (this.numProtons < gameSettings.upgradePEN) {
                         this.numProtons++;
                         this.protonBar.increment(100 / gameSettings.upgradePEN);
@@ -322,27 +385,30 @@ function create() {
             }, null, self);
         }
     }); 
-        /*for (let i = 0; i < server_proton_array.length; i++) {
+     
 
-            console.log("entered proton upgrade");
+    //repeat of protonUpdate for electrons
+    this.socket.on('electronUpdate', function (server_electron_array) {
+        
+        
+        for (let i = 0; i < server_electron_array.length; i++) {
 
-            if (self.proton_array[i]) self.proton_array[i].destroy(); //prevents duplicates?ds
-            
-            server_proton_array[i] = self.physics.add.image(server_proton_array[i].x, server_proton_array[i].y, 'proton');
-            server_proton_array[i].setScale(0.08);
-            //code for when players and protons overlap
-            //loop through protonarray
+            if (self.electron_array[i]) self.electron_array[i].destroy();
 
-            self.physics.add.overlap(self.element, server_proton_array[i], function () {
+            //console.log("X: " + server_electron_array[i].x + " " + "Y: " + server_electron_array[i].y);
+            self.electron_array[i] = self.physics.add.image(server_electron_array[i].x, server_electron_array[i].y, 'electron');
+            self.electron_array[i].setScale(0.04);
 
-                //if proton is not in same position, update the score bar
-                if (server_proton_array[i].x != this.oldProtonPosition[i].x || server_proton_array[i].y != this.oldProtonPosition[i].y) {
+            self.physics.add.overlap(self.element, self.electron_array[i], function () {
+                
+                if (server_electron_array[i].x != this.oldElectronPosition[i].x || server_electron_array[i].y != this.oldElectronPosition[i].y) {
                     this.score += this.killScore / (gameSettings.upgradePEN * 3);
                     this.scoreText.text = 'Score: ' + this.score;
-                    if (this.numProtons < gameSettings.upgradePEN) {
-                        this.numProtons++;
-                        this.protonBar.increment(100 / gameSettings.upgradePEN);
-                        this.protonBarText.text = 'Protons: ' + this.numProtons + '/' + gameSettings.upgradePEN;
+                    console.log(this.score);
+                    if (this.numElectrons < gameSettings.upgradePEN) {
+                        this.numElectrons++;
+                        this.electronBar.increment(100 / gameSettings.upgradePEN);
+                        this.electronBarText.text = 'Electrons: ' + this.numElectrons + '/' + gameSettings.upgradePEN;
                     }
                     //level up if player has collected sufficient number of protons, neutrons, and electrons (PENs)
                     if (this.numNeutrons == gameSettings.upgradePEN && this.numProtons == gameSettings.upgradePEN && this.numElectrons == gameSettings.upgradePEN) {
@@ -362,106 +428,76 @@ function create() {
                         self.socket.emit('upgrade', self.element.atomicNum);
                     }
 
-                    this.socket.emit('protonCollected', i);
-                    this.oldProtonPosition[i] = {
-                        x: server_proton_array[i].x,
-                        y: server_proton_array[i].y,
+                    this.socket.emit('electronCollected', i);
+                    this.oldElectronPosition[i] = {
+                        x: server_electron_array[i].x,
+                        y: server_electron_array[i].y,
                     };
-
                 }
-                */
-            
-            
+            }, null, self);
+        }
+
         
-
-
-    
-
-    //repeat of protonUpdate for electrons
-    this.socket.on('electronUpdate', function (electron) {
-        if (self.electron) self.electron.destroy();
-        self.electron = self.physics.add.image(electron.x, electron.y, 'electron');
-        self.electron.setScale(0.04);
-        self.physics.add.overlap(self.element, self.electron, () => {
-            if (electron.x != this.oldElectronPosition.x || electron.y != this.oldElectronPosition.y) {
-                this.score += this.killScore / (gameSettings.upgradePEN * 3);
-                this.scoreText.text = 'Score: ' + this.score;
-
-                if (this.numElectrons < gameSettings.upgradePEN) {
-                    this.numElectrons++;
-                    this.electronBar.increment(100 / gameSettings.upgradePEN);
-                    this.electronBarText.text = 'Electrons: ' + this.numElectrons + '/' + gameSettings.upgradePEN;
-                }
-
-                if (this.numNeutrons == gameSettings.upgradePEN && this.numProtons == gameSettings.upgradePEN && this.numElectrons == gameSettings.upgradePEN) {
-                    self.element.atomicNum++;
-                    this.numNeutrons = 0;
-                    this.numProtons = 0;
-                    this.numElectrons = 0;
-
-                    this.protonBar.increment(-100);
-                    this.protonBarText.text = "Protons: 0/" + gameSettings.upgradePEN;
-                    this.electronBar.increment(-100);
-                    this.electronBarText.text = "Electrons: 0/" + gameSettings.upgradePEN;
-                    this.neutronBar.increment(-100);
-                    this.neutronBarText.text = "Neutrons: 0/" + gameSettings.upgradePEN;
-
-                    self.element.upgrade();
-                    self.socket.emit('upgrade', self.element.atomicNum);
-                }
-
-                this.socket.emit('electronCollected');
-                this.oldElectronPosition = {
-                    x: electron.x,
-                    y: electron.y,
-                };
-
-            }
-
-        }, null, self);
+      
     });
 
     //repeat of protonUpdate for neutrons
-    this.socket.on('neutronUpdate', function (neutron) {
-        if (self.neutron) self.neutron.destroy();
-        self.neutron = self.physics.add.image(neutron.x, neutron.y, 'neutron');
-        self.neutron.setScale(0.1);
-        self.physics.add.overlap(self.element, self.neutron, () => {
-            if (neutron.x != this.oldNeutronPosition.x || neutron.y != this.oldNeutronPosition.y) {
-                this.score += this.killScore / (gameSettings.upgradePEN * 3);
-                this.scoreText.text = 'Score: ' + this.score;
+    this.socket.on('neutronUpdate', function (server_neutron_array) {
 
-                if (this.numNeutrons < gameSettings.upgradePEN) {
-                    this.numNeutrons++;
-                    this.neutronBar.increment(100 / gameSettings.upgradePEN);
-                    this.neutronBarText.text = 'Neutrons: ' + this.numNeutrons + '/' + gameSettings.upgradePEN;
+
+
+        for (let i = 0; i < server_neutron_array.length; i++) {
+
+            if (self.neutron_array[i]) self.neutron_array[i].destroy();
+
+            //console.log("X: " + server_proton_array[i].x + " " + "Y: " + server_proton_array[i].y);
+            self.neutron_array[i] = self.physics.add.image(server_neutron_array[i].x, server_neutron_array[i].y, 'neutron');
+            self.neutron_array[i].setScale(0.08);
+
+            
+
+            self.physics.add.overlap(self.element, self.neutron_array[i], function () {
+        
+
+                if (server_neutron_array[i].x != this.oldNeutronPosition[i].x || server_neutron_array[i].y != this.oldNeutronPosition[i].y) {
+                    this.score += this.killScore / (gameSettings.upgradePEN * 3);
+                    this.scoreText.text = 'Score: ' + this.score;
+                    console.log(this.score);
+                    if (this.numNeutrons < gameSettings.upgradePEN) {
+                        this.numNeutrons++;
+                        this.neutronBar.increment(100 / gameSettings.upgradePEN);
+                        this.neutronBarText.text = 'Neutrons: ' + this.numNeutrons + '/' + gameSettings.upgradePEN;
+                    }
+                    //level up if player has collected sufficient number of protons, neutrons, and electrons (PENs)
+                    if (this.numNeutrons == gameSettings.upgradePEN && this.numProtons == gameSettings.upgradePEN && this.numElectrons == gameSettings.upgradePEN) {
+                        self.element.atomicNum++;
+                        this.numNeutrons = 0;
+                        this.numProtons = 0;
+                        this.numElectrons = 0;
+
+                        this.protonBar.increment(-100);
+                        this.protonBarText.text = "Protons: 0/" + gameSettings.upgradePEN;
+                        this.electronBar.increment(-100);
+                        this.electronBarText.text = "Electrons: 0/" + gameSettings.upgradePEN;
+                        this.neutronBar.increment(-100);
+                        this.neutronBarText.text = "Neutrons: 0/" + gameSettings.upgradePEN;
+
+                        self.element.upgrade();
+                        self.socket.emit('upgrade', self.element.atomicNum);
+                    }
+
+                    this.socket.emit('neutronCollected', i);
+                    this.oldNeutronPosition[i] = {
+                        x: server_neutron_array[i].x,
+                        y: server_neutron_array[i].y,
+                    };
                 }
-
-                if (this.numNeutrons == gameSettings.upgradePEN && this.numProtons == gameSettings.upgradePEN && this.numElectrons == gameSettings.upgradePEN) {
-                    self.element.atomicNum++;
-                    this.numNeutrons = 0;
-                    this.numProtons = 0;
-                    this.numElectrons = 0;
-
-                    this.protonBar.increment(-100);
-                    this.protonBarText.text = "Protons: 0/" + gameSettings.upgradePEN;
-                    this.electronBar.increment(-100);
-                    this.electronBarText.text = "Electrons: 0/" + gameSettings.upgradePEN;
-                    this.neutronBar.increment(-100);
-                    this.neutronBarText.text = "Neutrons: 0/" + gameSettings.upgradePEN;
-
-                    self.element.upgrade();
-                    self.socket.emit('upgrade', self.element.atomicNum);
-                }
-
-                this.socket.emit('neutronCollected');
-                this.oldNeutronPosition = {
-                    x: neutron.x,
-                    y: neutron.y,
-                };
-            }
-        }, null, self);
+            }, null, self);
+        }
     });
+
+
+        
 
     //Updates the kill count once this player kills someone  
     this.socket.on('updateKills', (player) => {
@@ -569,7 +605,7 @@ function update(time) {
             let distance = Math.sqrt((bullet.x - this.element.x) * (bullet.x - this.element.x) + (bullet.y - this.element.y) * (bullet.y - this.element.y));
 
             if (this.element.atomicNum > 2) {
-                doubleBullet(bullet, distance, this.element);
+                doubleBullet(bullet, distance, this.element, this.socket);
             }
             else {
                 this.socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum })
@@ -610,7 +646,7 @@ function update(time) {
 
 
 
-function doubleBullet(bullet, distance, element0) {
+function doubleBullet(bullet, distance, element0, socket0) {
     this.element = element0;
 
     if (bullet.x > this.element.x && bullet.y > this.element.y) {
@@ -623,8 +659,8 @@ function doubleBullet(bullet, distance, element0) {
         let y1 = Math.cos(tempangle1) * distance;
         let y2 = Math.cos(tempangle2) * distance;
 
-        this.socket.emit('shoot-bullet', { x: this.element.x + x1, y: this.element.y + y1, y1: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
-        this.socket.emit('shoot-bullet', { x: this.element.x + x2, y: this.element.y + y2, y2: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
+        socket0.emit('shoot-bullet', { x: this.element.x + x1, y: this.element.y + y1, y1: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
+        socket0.emit('shoot-bullet', { x: this.element.x + x2, y: this.element.y + y2, y2: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
     }
     else if (bullet.x > this.element.x && this.element.y > bullet.y) {
         tempangle = Math.atan((this.element.y - bullet.y) / (bullet.x - this.element.x));
@@ -636,8 +672,8 @@ function doubleBullet(bullet, distance, element0) {
         y1 = Math.sin(tempangle1) * distance;
         y2 = Math.sin(tempangle2) * distance;
 
-        this.socket.emit('shoot-bullet', { x: this.element.x + x1, y: this.element.y - y1, y1: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
-        this.socket.emit('shoot-bullet', { x: this.element.x + x2, y: this.element.y - y2, y2: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
+        socket0.emit('shoot-bullet', { x: this.element.x + x1, y: this.element.y - y1, y1: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
+        socket0.emit('shoot-bullet', { x: this.element.x + x2, y: this.element.y - y2, y2: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
 
     }
     else if (this.element.x > bullet.x && bullet.y > this.element.y) {
@@ -650,8 +686,8 @@ function doubleBullet(bullet, distance, element0) {
         y1 = Math.cos(tempangle1) * distance;
         y2 = Math.cos(tempangle2) * distance;
 
-        this.socket.emit('shoot-bullet', { x: this.element.x - x1, y: this.element.y + y1, y1: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
-        this.socket.emit('shoot-bullet', { x: this.element.x - x2, y: this.element.y + y2, y2: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
+        socket0.emit('shoot-bullet', { x: this.element.x - x1, y: this.element.y + y1, y1: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
+        socket0.emit('shoot-bullet', { x: this.element.x - x2, y: this.element.y + y2, y2: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
     }
     else if (this.element.x > bullet.x && this.element.y > bullet.y) {
         tempangle = Math.atan((this.element.y - bullet.y) / (this.element.x - bullet.x));
@@ -663,7 +699,7 @@ function doubleBullet(bullet, distance, element0) {
         y1 = Math.sin(tempangle1) * distance;
         y2 = Math.sin(tempangle2) * distance;
 
-        this.socket.emit('shoot-bullet', { x: this.element.x - x1, y: this.element.y - y1, y1: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
-        this.socket.emit('shoot-bullet', { x: this.element.x - x2, y: this.element.y - y2, y2: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
+        socket0.emit('shoot-bullet', { x: this.element.x - x1, y: this.element.y - y1, y1: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
+        socket0.emit('shoot-bullet', { x: this.element.x - x2, y: this.element.y - y2, y2: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
     }
 }

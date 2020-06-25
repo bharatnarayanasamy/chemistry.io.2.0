@@ -55,6 +55,33 @@ let data = {
   score: 0
 };
 
+for (let i = 0; i < 15; i++) {
+
+  proton_array.push({
+    x: Math.floor(Math.random() * 3840) + 50,
+    y: Math.floor(Math.random() * 2080) + 50
+  });
+  
+}
+
+for (let i = 0; i < 15; i++) {
+
+  electron_array.push({
+    x: Math.floor(Math.random() * 3840) + 50,
+    y: Math.floor(Math.random() * 2080) + 50
+  });
+  
+}
+
+for (let i = 0; i < 15; i++) {
+
+  neutron_array.push({
+    x: Math.floor(Math.random() * 3840) + 50,
+    y: Math.floor(Math.random() * 2080) + 50
+  });
+  
+}
+
 //Initialize function for what happens when connection occurs
 io.on('connection', (socket) => {
   socketID = socket.id;
@@ -81,14 +108,7 @@ io.on('connection', (socket) => {
   }
   
 
-  for (let i = 0; i < 15; i++) {
-
-    proton_array.push({
-      x: Math.floor(Math.random() * 1100) + 50,
-      y: Math.floor(Math.random() * 700) + 50
-    });
-    
-  }
+  
 
 
   //Tell client which players are currently in the game so it can create them
@@ -101,8 +121,8 @@ io.on('connection', (socket) => {
 
   //tell client to create proton, electron and neutron
   socket.emit('protonUpdate', proton_array);
-  socket.emit('electronUpdate', electron);
-  socket.emit('neutronUpdate', neutron);
+  socket.emit('electronUpdate', electron_array);
+  socket.emit('neutronUpdate', neutron_array);
 
   //Inform all clients that a new player joined
   socket.broadcast.emit('newPlayer', players[socket.id]);
@@ -144,29 +164,29 @@ io.on('connection', (socket) => {
   });
 
   //when electrons get collected, this resets its position and increases the score in the entire score array
-  socket.on('electronCollected', () => {
-    electron.x = Math.floor(Math.random() * 3840) + 50;
-    electron.y = Math.floor(Math.random() * 2080) + 50;
+  socket.on('electronCollected', function(i) {
+    electron_array[i].x = Math.floor(Math.random() * 3840) + 50;
+    electron_array[i].y = Math.floor(Math.random() * 2080) + 50;
     if (typeof score_array[socket.id] != "undefined") {
       //if (score_array[socket.id].electronScore < 2) {
         score_array[socket.id].electronScore++;
      // }
       electron.score = score_array;
     }
-    io.emit('electronUpdate', electron);
+    io.emit('electronUpdate', electron_array);
   });
 
   //when neutrons get collected, this resets its position and increases the score in the entire score array
-  socket.on('neutronCollected', () => {
-    neutron.x = Math.floor(Math.random() * 3840) + 50;
-    neutron.y = Math.floor(Math.random() * 2080) + 50;
+  socket.on('neutronCollected', function(i) {
+    neutron_array[i].x = Math.floor(Math.random() * 3840) + 50;
+    neutron_array[i].y = Math.floor(Math.random() * 2080) + 50;
     if (typeof score_array[socket.id] != "undefined") {
       //if (score_array[socket.id].neutronScore < 2) {
         score_array[socket.id].neutronScore++;
      // }
       neutron.score = score_array;
     }
-    io.emit('neutronUpdate', neutron);
+    io.emit('neutronUpdate', neutron_array);
   });
 
   //Player's health regen
