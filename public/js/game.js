@@ -174,6 +174,14 @@ function create() {
                 console.log("player destroyed")
             }
         });
+        for (let i = 0; i < self.leaderboard.length; i++) {
+            console.log(self.leaderboard[i].text.substring(0, 20))
+            console.log(playerId);
+            if (self.leaderboard[i].text.substring(0, 20) == playerId) {
+                console.log("beep bop test");
+                self.leaderboard[i].text = '';
+            }
+        }
     });
 
     //removes dead players from the screen
@@ -516,8 +524,14 @@ function create() {
         }
     });
 
-    this.socket.on('update-leaderboard', function (player_scores) {
-        console.log(player_scores);
+    this.leaderboard = [self.add.text(200, 20,''), self.add.text(200,40,''), self.add.text(200,60,''), self.add.text(200,80,''), self.add.text(200,100,'')];
+    this.socket.on('update-leaderboard', function (items) {
+        //self.killScoreText = self.add.text(16, 40, 'Kills: ' + (0), { fontSize: '25px', fill: '#00FF00' });
+        
+        for (let i  = 0; i < Math.min(5, items.length); i++) {            
+            self.leaderboard[i].text = String(items[i][0]) + ': ' + String(items[i][1]);
+            //if (self.leaderboard[i].text[:20] )
+        }
     });
 
     //used for managing the lastHurt variable, player can only heal after not being damaged for some time
@@ -564,21 +578,28 @@ function create() {
     //Create group to hold all our projectiles, aka the bullets
     this.projectiles = this.add.group();
 
+    this.rect = new Phaser.Geom.Rectangle(900, 0, 300, 250);
+    this.graphics = this.add.graphics({ fillStyle: { color: 0x000000 } });
+    this.graphics.fillRectShape(this.rect);
+    this.graphics.alpha = .3;
+    this.leaderboardBg = this.graphics.generateTexture("leaderboardBg");
 
     //used too collect information on keys that were pressed - important for moving the player  
     this.cursorKeys = this.input.keyboard.createCursorKeys();
     this.cursors = this.input.keyboard.createCursorKeys();
     //collecting information on space bar
     this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+
 }
 
 
 function update(time) {
     if (typeof this.element != "undefined") {
 
-        this.cameras.main.startFollow(this.element, true, 1, 1, 0, 0);
+        this.cameras.main.startFollow(this.element);
+        this.cameras.main.followOffset.set(10, 0);
         this.element.movePlayer(this);
-
+    
         //try to test this stuff with   
         this.protonBar.move(this, this.cameras.main.scrollX + config.width / 2 - 150, this.cameras.main.scrollY + config.height - 120);
         this.protonBarText.x = this.protonBar.x + 90;
@@ -590,6 +611,13 @@ function update(time) {
         this.neutronBarText.x = this.neutronBar.x + 90;
         this.neutronBarText.y = this.neutronBar.y + 2;
 
+        this.leaderboardBg.x = this.cameras.main.scrollX + 10;
+        this.leaderboardBg.y = this.cameras.main.scrollY;
+
+        for (let i  = 0; i < Math.min(5, this.otherElements.getChildren().length + 1); i++) {
+            this.leaderboard[i].x = this.leaderboardBg.x + 925;
+            this.leaderboard[i].y = this.leaderboardBg.y + 20 + 20 * i;
+        }
 
         this.healthLabel.text = "Health: " + this.element.hp.value;
         this.healthLabel.x = this.cameras.main.scrollX + 10;
