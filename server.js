@@ -228,8 +228,6 @@ io.on('connection', (socket) => {
 
 // Update the bullets 60 times per frame and send updates 
 function ServerGameLoop() {
-
-
   for (let i = 0; i < bullet_array.length; i++) {
     let bullet = bullet_array[i];
     if (typeof bullet != "undefined") {
@@ -293,4 +291,12 @@ function ServerGameLoop() {
   io.emit("bullets-update", bullet_array);
 }
 
+// Update the bullets 60 times per frame and send updates 
+function UpdateLeaderboard() {
+  
+  // Tell everyone where all the bullets are by sending the whole array
+  io.emit("update-leaderboard", bullet_array);
+}
+
 setInterval(ServerGameLoop, 16);
+setInterval(UpdateLeaderboard, 100);

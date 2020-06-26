@@ -505,7 +505,7 @@ function create() {
             self.element.kills = player.kills;
             self.killScoreText.text = 'Kills: ' + player.kills;
 
-            self.score += self.killScore / (gameSettings.upgradePEN * 3);
+            self.score += self.killScore;
             self.scoreText.text = 'Score: ' + self.score;
 
             self.element.atomicNum++;
