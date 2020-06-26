@@ -18,7 +18,10 @@ server.listen(8083, () => {
 //Creating data storage objects
 let players = {};
 let bullet_array = [];
+//score_array stores the scores for the protons/electrons/neutrons
 let score_array = {};
+//player_scores stores
+let player_scores = {};
 let healthInfo = {
   id: 0,
   i: 0
@@ -46,22 +49,12 @@ let neutron = {
   y: Math.floor(Math.random() * 700) + 50,
 };
 
-
-//Test if we need this data structure later
-let data = {
-  x: 0,
-  y: 0,
-  id: 0,
-  score: 0
-};
-
 for (let i = 0; i < 15; i++) {
-
   proton_array.push({
     x: Math.floor(Math.random() * 3840) + 50,
     y: Math.floor(Math.random() * 2080) + 50
   });
-  
+
 }
 
 for (let i = 0; i < 15; i++) {
@@ -70,7 +63,7 @@ for (let i = 0; i < 15; i++) {
     x: Math.floor(Math.random() * 3840) + 50,
     y: Math.floor(Math.random() * 2080) + 50
   });
-  
+
 }
 
 for (let i = 0; i < 15; i++) {
@@ -79,7 +72,7 @@ for (let i = 0; i < 15; i++) {
     x: Math.floor(Math.random() * 3840) + 50,
     y: Math.floor(Math.random() * 2080) + 50
   });
-  
+
 }
 
 //Initialize function for what happens when connection occurs
@@ -88,8 +81,8 @@ io.on('connection', (socket) => {
   console.log('a user connected');
   // create a new player and add it to our players object
   players[socket.id] = {
-    x: Math.floor(Math.random() * gameWidth-100) + 50, //initialize positions
-    y: Math.floor(Math.random() * gameHeight-100) + 50,
+    x: Math.floor(Math.random() * gameWidth - 100) + 50, //initialize positions
+    y: Math.floor(Math.random() * gameHeight - 100) + 50,
     vx: 0, //initial player velocity =  0
     vy: 0,
     rotation: 0,
@@ -98,6 +91,7 @@ io.on('connection', (socket) => {
     kills: 0,
     atomicNumServer: 1 //player level
   };
+  player_scores[socket.id] = 0;
 
   //create new entry in the score_array object for this specific player, initialize scores into 0
   score_array[socket.id] = {
@@ -106,9 +100,9 @@ io.on('connection', (socket) => {
     neutronScore: 0,
     id: socket.id
   }
-  
 
-  
+
+
 
 
   //Tell client which players are currently in the game so it can create them
@@ -128,10 +122,11 @@ io.on('connection', (socket) => {
   socket.broadcast.emit('newPlayer', players[socket.id]);
 
   // when a player disconnects, remove them from our players object
-  socket.on('disconnect',  () => {
+  socket.on('disconnect', () => {
     console.log('user disconnected: ', socket.id);
     delete players[socket.id];
     delete score_array[socket.id];
+    delete player_scores[socket.id];
     // emit a message to all players to remove this player from their client
     io.emit('disconnect', socket.id);
   });
@@ -150,12 +145,12 @@ io.on('connection', (socket) => {
   });
 
   //when protons get collected, this resets its position and increases the score in the entire score array
-  socket.on('protonCollected', function(i) {
+  socket.on('protonCollected', function (i) {
     proton_array[i].x = Math.floor(Math.random() * 3840) + 50;
     proton_array[i].y = Math.floor(Math.random() * 2080) + 50;
     if (typeof score_array[socket.id] != "undefined") {
       //if (score_array[socket.id].protonScore < 2) {
-        score_array[socket.id].protonScore++;
+      score_array[socket.id].protonScore++;
       //}
 
       proton.score = score_array;
@@ -164,26 +159,26 @@ io.on('connection', (socket) => {
   });
 
   //when electrons get collected, this resets its position and increases the score in the entire score array
-  socket.on('electronCollected', function(i) {
+  socket.on('electronCollected', function (i) {
     electron_array[i].x = Math.floor(Math.random() * 3840) + 50;
     electron_array[i].y = Math.floor(Math.random() * 2080) + 50;
     if (typeof score_array[socket.id] != "undefined") {
       //if (score_array[socket.id].electronScore < 2) {
-        score_array[socket.id].electronScore++;
-     // }
+      score_array[socket.id].electronScore++;
+      // }
       electron.score = score_array;
     }
     io.emit('electronUpdate', electron_array);
   });
 
   //when neutrons get collected, this resets its position and increases the score in the entire score array
-  socket.on('neutronCollected', function(i) {
+  socket.on('neutronCollected', function (i) {
     neutron_array[i].x = Math.floor(Math.random() * 3840) + 50;
     neutron_array[i].y = Math.floor(Math.random() * 2080) + 50;
     if (typeof score_array[socket.id] != "undefined") {
       //if (score_array[socket.id].neutronScore < 2) {
-        score_array[socket.id].neutronScore++;
-     // }
+      score_array[socket.id].neutronScore++;
+      // }
       neutron.score = score_array;
     }
     io.emit('neutronUpdate', neutron_array);
@@ -221,6 +216,12 @@ io.on('connection', (socket) => {
       score_array[socket.id].electronScore = 0;
 
       socket.broadcast.emit('playerUpgraded', players[socket.id]);
+    }
+  });
+
+  socket.on('scoreUpdate', function(player) {
+    if (player_scores[player.id] != undefined) {
+      player_scores[player.id] = player.sc;
     }
   });
 
@@ -293,9 +294,18 @@ function ServerGameLoop() {
 
 // Update the bullets 60 times per frame and send updates 
 function UpdateLeaderboard() {
-  
+  // Create items array
+  var items = Object.keys(player_scores).map(function (key) {
+    return [key, player_scores[key]];
+  });
+
+  // Sort the array based on the second element
+  items.sort(function (first, second) {
+    return second[1] - first[1];
+  });
+
   // Tell everyone where all the bullets are by sending the whole array
-  io.emit("update-leaderboard", bullet_array);
+  io.emit("update-leaderboard", items);
 }
 
 setInterval(ServerGameLoop, 16);

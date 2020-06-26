@@ -42,10 +42,6 @@ let config = {
 var lastShot = 0;
 var lastHealed = 0;
 
-//creates a global variable "score"
-var score = 0;
-var killScore = 15;
-
 //creates the game itself
 var game = new Phaser.Game(config);
 var element = null;
@@ -123,38 +119,25 @@ function create() {
     
     //creating proton array
     this.proton_array = [];
-
     for (let i = 0; i < 15; i++) {
-    
         var bb = this.physics.add.image(-1000, -1000, 'proton');
         bb.setScale(0.03);
         proton_array.push(bb);
     }
 
-
     this.electron_array = [];
-
-    for (let i = 0; i < 15; i++) {
-    
+    for (let i = 0; i < 15; i++) {   
         var bb2 = this.physics.add.image(-1000, -1000, 'electron');
         bb2.setScale(0.03);
         electron_array.push(bb2);
     }
     
-
     this.neutron_array = [];
-
     for (let i = 0; i < 15; i++) {
-    
         var bb3 = this.physics.add.image(-1000, -1000, 'neutron');
         bb3.setScale(0.03);
         neutron_array.push(bb3);
     }
-    
-    
-    
-
-    
 
     //creates instance of socket.io
     let self = this;
@@ -162,7 +145,7 @@ function create() {
     this.otherPlayers = this.physics.add.group();
     this.otherElements = this.physics.add.group();
     this.otherPlayersHP = [];
-    this.socket.on('currentPlayers', (players) => {
+    this.socket.on('currentPlayers', function (players) {
         //add time delay
         Object.keys(players).forEach((id) => {
             if (players[id].playerId === self.socket.id) {
@@ -174,13 +157,13 @@ function create() {
     });
 
     //adds new player to screen
-    this.socket.on('newPlayer', (playerInfo) => {
+    this.socket.on('newPlayer', function (playerInfo) {
         //add time delay
         addOtherPlayers(self, playerInfo);
     });
 
     //disconnects from the game
-    this.socket.on('disconnect', (playerId) => {
+    this.socket.on('disconnect', function (playerId) {
         //add time delay  
         //destroying other elements
         self.otherElements.getChildren().forEach((otherElement) => {
@@ -194,7 +177,7 @@ function create() {
     });
 
     //removes dead players from the screen
-    this.socket.on('deleteDeadPlayers', (playerId) => {
+    this.socket.on('deleteDeadPlayers', function (playerId) {
         self.otherElements.getChildren().forEach((otherElement) => {
             console.log("player disconnected")
             if (playerId === otherElement.playerId) {
@@ -206,7 +189,7 @@ function create() {
     });
 
     //displays other players' movement on screen
-    this.socket.on('playerMoved', (playerInfo) => {
+    this.socket.on('playerMoved', function (playerInfo) {
         //add time delay
         self.otherElements.getChildren().forEach((otherElement) => {
             if (playerInfo.playerId === otherElement.playerId) {
@@ -222,7 +205,7 @@ function create() {
     });
 
     //updates a player's health 
-    this.socket.on('update-health', (player) => {
+    this.socket.on('update-health', function (player) {
         if (player.playerId == self.socket.id) {
             self.element.hp.set(player.health);
         }
@@ -241,7 +224,7 @@ function create() {
     });
 
     // upgrades a player
-    this.socket.on('playerUpgraded', (playerInfo) => {
+    this.socket.on('playerUpgraded', function (playerInfo) {
         self.otherElements.getChildren().forEach((otherElement) => {
             if (playerInfo.playerId == otherElement.playerId) {
                 otherElement.atomicNum = playerInfo.atomicNumServer;
@@ -254,7 +237,7 @@ function create() {
     });
 
     // Listen for bullet update events 
-    this.socket.on('bullets-update', (server_bullet_array) => {
+    this.socket.on('bullets-update', function (server_bullet_array) {
         // If there's client and server bullet arrays have mismatch, fix mismatch
         for (let i = 0; i < server_bullet_array.length; i++) {
             if (self.element.bullet_array[i] == undefined) {
@@ -351,7 +334,6 @@ function create() {
                     console.log(this.killScore);
                     this.score += this.killScore / (gameSettings.upgradePEN * 3);
                     this.scoreText.text = 'Score: ' + this.score;
-                    console.log(this.score);
 
                     if (this.numProtons < gameSettings.upgradePEN) {
                         this.numProtons++;
@@ -381,6 +363,11 @@ function create() {
                         x: server_proton_array[i].x,
                         y: server_proton_array[i].y,
                     };
+                    var idScore = {
+                        id: self.socket.id,
+                        sc: self.score
+                    };
+                    this.socket.emit('scoreUpdate', idScore)
                 }
             }, null, self);
         }
@@ -404,7 +391,6 @@ function create() {
                 if (server_electron_array[i].x != this.oldElectronPosition[i].x || server_electron_array[i].y != this.oldElectronPosition[i].y) {
                     this.score += this.killScore / (gameSettings.upgradePEN * 3);
                     this.scoreText.text = 'Score: ' + this.score;
-                    console.log(this.score);
                     if (this.numElectrons < gameSettings.upgradePEN) {
                         this.numElectrons++;
                         this.electronBar.increment(100 / gameSettings.upgradePEN);
@@ -433,6 +419,11 @@ function create() {
                         x: server_electron_array[i].x,
                         y: server_electron_array[i].y,
                     };
+                    idScore = {
+                        id: self.socket.id,
+                        sc: self.score
+                    }
+                    this.socket.emit('scoreUpdate',idScore)
                 }
             }, null, self);
         }
@@ -443,8 +434,6 @@ function create() {
 
     //repeat of protonUpdate for neutrons
     this.socket.on('neutronUpdate', function (server_neutron_array) {
-
-
 
         for (let i = 0; i < server_neutron_array.length; i++) {
 
@@ -462,7 +451,7 @@ function create() {
                 if (server_neutron_array[i].x != this.oldNeutronPosition[i].x || server_neutron_array[i].y != this.oldNeutronPosition[i].y) {
                     this.score += this.killScore / (gameSettings.upgradePEN * 3);
                     this.scoreText.text = 'Score: ' + this.score;
-                    console.log(this.score);
+
                     if (this.numNeutrons < gameSettings.upgradePEN) {
                         this.numNeutrons++;
                         this.neutronBar.increment(100 / gameSettings.upgradePEN);
@@ -491,6 +480,12 @@ function create() {
                         x: server_neutron_array[i].x,
                         y: server_neutron_array[i].y,
                     };
+
+                    idScore = {
+                        id: self.socket.id,
+                        sc: self.score
+                    }
+                    this.socket.emit('scoreUpdate',idScore)
                 }
             }, null, self);
         }
@@ -500,7 +495,7 @@ function create() {
         
 
     //Updates the kill count once this player kills someone  
-    this.socket.on('updateKills', (player) => {
+    this.socket.on('updateKills', function (player) {
         if (self.socket.id == player.playerId) {
             self.element.kills = player.kills;
             self.killScoreText.text = 'Kills: ' + player.kills;
@@ -512,7 +507,17 @@ function create() {
 
             self.element.upgrade();
             self.socket.emit('upgrade', self.element.atomicNum);
+
+            idScore = {
+                id: self.socket.id,
+                sc: self.score
+            }
+            this.socket.emit('scoreUpdate',idScore)
         }
+    });
+
+    this.socket.on('update-leaderboard', function (player_scores) {
+        console.log(player_scores);
     });
 
     //used for managing the lastHurt variable, player can only heal after not being damaged for some time
