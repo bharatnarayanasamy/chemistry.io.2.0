@@ -175,6 +175,7 @@ function create() {
                 console.log("player destroyed")
             }
         });
+
         for (let i = 0; i < self.leaderboard.length; i++) {
             console.log(self.leaderboard[i].text.substring(0, 20))
             console.log(playerId);
@@ -199,7 +200,6 @@ function create() {
 
     //displays other players' movement on screen
     this.socket.on('playerMoved', function (playerInfo) {
-        //add time delay
         self.otherElements.getChildren().forEach((otherElement) => {
             if (playerInfo.playerId === otherElement.playerId) {
                 //update other player's locations
