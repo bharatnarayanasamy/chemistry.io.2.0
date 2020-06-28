@@ -6,8 +6,22 @@ let io = require('socket.io').listen(server);
 
 app.use(express.static(__dirname + '/public'));
 
-app.get('/', (req, res) => {
+app.get('/status', (req, res, next) => {
+  res.status(200);
+  res.json({ 'status': 'ok' });
   res.sendFile(__dirname + '/index.html');
+});
+
+// catch all other routes
+app.use((req, res, next) => {
+  res.status(404);
+  res.json({ message: '404 - Not Found' });
+});
+
+// handle errors
+app.use((err, req, res, next) => {
+  res.status(err.status || 500);
+  res.json({ error : err });
 });
 
 //Access server on localhost:8083
@@ -30,10 +44,11 @@ let socketID;
 let proton_array = [];
 let electron_array = [];
 let neutron_array = [];
+
 let gameWidth = 3840;
 let gameHeight = 2080;
 
-
+let leaderboardArray = {};
 
 let proton = {
   x: Math.floor(Math.random() * 1100) + 50,
@@ -92,6 +107,7 @@ io.on('connection', (socket) => {
     atomicNumServer: 1 //player level
   };
   player_scores[socket.id] = 0;
+  leaderboardArray[socket.id] = "";
 
   //create new entry in the score_array object for this specific player, initialize scores into 0
   score_array[socket.id] = {
@@ -118,6 +134,8 @@ io.on('connection', (socket) => {
   socket.emit('electronUpdate', electron_array);
   socket.emit('neutronUpdate', neutron_array);
 
+  socket.emit('updateTheLeaderboard');
+
   //Inform all clients that a new player joined
   socket.broadcast.emit('newPlayer', players[socket.id]);
 
@@ -127,6 +145,8 @@ io.on('connection', (socket) => {
     delete players[socket.id];
     delete score_array[socket.id];
     delete player_scores[socket.id];
+    delete leaderboardArray[socket.id];
+
     // emit a message to all players to remove this player from their client
     io.emit('disconnect', socket.id);
   });
@@ -225,6 +245,11 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on('usernameInfo', function(usernameInfo) {
+
+    leaderboardArray[usernameInfo.id] = usernameInfo.username;
+  });
+
 });
 
 // Update the bullets 60 times per frame and send updates 
@@ -296,7 +321,7 @@ function ServerGameLoop() {
 function UpdateLeaderboard() {
   // Create items array
   var items = Object.keys(player_scores).map(function (key) {
-    return [key, player_scores[key]];
+    return [leaderboardArray[key], player_scores[key]];
   });
 
   // Sort the array based on the second element

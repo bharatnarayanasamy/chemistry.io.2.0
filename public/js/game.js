@@ -45,6 +45,7 @@ var lastHealed = 0;
 //creates the game itself
 var game = new Phaser.Game(config);
 var element = null;
+var username0 = a;
 
 var proton_array = [];
 
@@ -520,7 +521,7 @@ function create() {
                 id: self.socket.id,
                 sc: self.score
             }
-            this.socket.emit('scoreUpdate',idScore)
+            this.socket.emit('scoreUpdate', idScore);
         }
     });
 
@@ -532,6 +533,14 @@ function create() {
             self.leaderboard[i].text = String(items[i][0]) + ': ' + String(items[i][1]);
             //if (self.leaderboard[i].text[:20] )
         }
+    });
+
+    this.socket.on('updateTheLeaderboard', function () {
+        usernameInfo = {
+            username: username0,
+            id: self.socket.id
+        }
+        self.socket.emit('usernameInfo', usernameInfo);
     });
 
     //used for managing the lastHurt variable, player can only heal after not being damaged for some time
