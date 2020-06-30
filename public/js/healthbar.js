@@ -70,7 +70,7 @@ class HealthBar {
             this.bar.fillStyle(0x00ff00);
         }
 
-        var d = Math.floor(this.p * this.value);
+        let d = Math.floor(this.p * this.value);
 
         this.bar.fillRect(this.x + 2, this.y + 2, d, 12);
     }

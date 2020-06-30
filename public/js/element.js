@@ -10,34 +10,23 @@ score
 
 /*Vrishab Notes
 Element.js
-
 shoot() 
 	-creates new bullet
 	-pass the elect of the player class into bullet
     -bullet class takes that element
     bro dis is what i said, yall stay ignoring me
-
 move()
  	-WASD controls
-
 render()
 	-Calls the code for drawing the player (not sure if we need this with Phaser’s stuff)
-
-
     
 Bullet.js
-
 Have a mapping —> some file does rendering for a bullet depending on the element —> call renderBullet & moveBullet
-
 Render bullet() —> has methods for drawing all types of bullets
-
 Movebullet() —> methods for moving all types of bullets
-
-
 Other stuff
 -Use Arrow functions
 -Use SVGs
-
 */
 
 
@@ -66,16 +55,17 @@ class Element extends Phaser.GameObjects.Sprite {
         scene.add.existing(this);
         scene.physics.world.enableBody(this);
 
-        this.setScale(0.5);
         this.body.setCollideWorldBounds(true);
         
         this.hp = new HealthBar(scene, x-50, y+70);
+
+        this.lastHurt = 0;
     }
 
 
 
     /*
-    //if a player gets hitw
+    //if a player gets hit
     takeBulletDamage(damage) {
         //change player's healthbar
         this.health -= damage;
@@ -114,8 +104,8 @@ class Element extends Phaser.GameObjects.Sprite {
         this.hp.move(scene, this.body.x+40, this.body.y+120);
 
         
-        var angleToPointer = Phaser.Math.Angle.Between(this.x, this.y, scene.input.activePointer.worldX, scene.input.activePointer.worldY);
-        var angleDelta = Phaser.Math.Angle.Wrap(angleToPointer - this.rotation);
+        let angleToPointer = Phaser.Math.Angle.Between(this.x, this.y, scene.input.activePointer.worldX, scene.input.activePointer.worldY);
+        let angleDelta = Phaser.Math.Angle.Wrap(angleToPointer - this.rotation);
         //some fancy math stuff I got from online
         if (Phaser.Math.Within(angleDelta, 0, gameSettings.TOLERANCE)) {
             this.rotation = angleToPointer;
@@ -126,15 +116,13 @@ class Element extends Phaser.GameObjects.Sprite {
     }
     shootBullet(scene) {    
 
-        var angle = Phaser.Math.Angle.Between(this.x, this.y, scene.input.activePointer.worldX, scene.input.activePointer.worldY);
-        //var angleInDegrees = (angle * (180 / 3.1415)) + 90;
+        let angle = Phaser.Math.Angle.Between(this.x, this.y, scene.input.activePointer.worldX, scene.input.activePointer.worldY);
+        //let angleInDegrees = (angle * (180 / 3.1415)) + 90;
 
-        var x_pos = this.x + 20 * Math.cos(angle);
-        var y_pos = this.y + 20 * Math.sin(angle);
+        let x_pos = this.x + 20 * Math.cos(angle);
+        let y_pos = this.y + 20 * Math.sin(angle);
 
-        var element = this.texture.key;
-
-        this.bullet = new Bullet(scene, angle, x_pos, y_pos, element);
+        this.bullet = new Bullet(scene, angle, x_pos, y_pos);
         this.bullet_array.push(this.bullet);
 
         this.bullet.disableBody(true, true);
@@ -144,9 +132,9 @@ class Element extends Phaser.GameObjects.Sprite {
 
     upgrade(){
 
-        var text = gameSettings.texture;
+        let text = gameSettings.texture;
         console.log(this.health);
-        if (this.atomicNum < 4){
+        if (this.atomicNum < 5){
 
             this.setTexture(text[this.atomicNum-1]);
             
