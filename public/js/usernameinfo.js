@@ -1,7 +1,6 @@
-var a = prompt("What's your username?")
-            
-while (a == ""){
-    document.write("<h1> BRUHHHHHH</h1>")
-    a = prompt("What's your username?")
+function getValue(id) {
+    a = document.getElementById(id).value; //value of the text input
+    localStorage.setItem("vOneLocalStorage", a);  
+    window.location.replace('/game.html');
+    return false;
 }
-

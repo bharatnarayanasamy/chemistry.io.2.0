@@ -45,7 +45,8 @@ var lastHealed = 0;
 //creates the game itself
 var game = new Phaser.Game(config);
 var element = null;
-var username0 = a;
+console.log(localStorage.getItem("vOneLocalStorage"));
+var username0 = localStorage.getItem("vOneLocalStorage");
 
 var proton_array = [];
 

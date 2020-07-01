@@ -2,44 +2,67 @@
 <html lang="en">
 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title>Login Page</title>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-  <link href="assets/css/main.css" rel="stylesheet">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  <script src="/socket.io/socket.io.js"></script>
 </head>
 
 <body class="text-center">
-  <form class="form-signin">
-    <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
-    <label for="email" class="sr-only">Email address</label>
-    <input type="email" id="email" class="form-control" placeholder="Email address" required autofocus>
-    <label for="password" class="sr-only">Password</label>
-    <input type="password" id="password" class="form-control" placeholder="Password" required>
-    <a class="btn btn-lg btn-primary btn-block" onClick="signIn()">Sign in</a>
-    <a href="/signup.html">Don't have an account? Sign up here.</a>
-  </form>
-  <script>
-    function signIn() {
-      var data = {
-        email: document.forms[0].elements[0].value,
-        password: document.forms[0].elements[1].value
-      };
-      $.ajax({
-        type: 'POST',
-        url: '/login',
-        data,
-        success: function (data) {
-          window.location.replace('/game.html');
-        },
-        error: function (xhr) {
-          window.alert(JSON.stringify(xhr));
-          window.location.replace('/index.html');
-        }
-      });
+  <script type="text/javascript" src="js/usernameinfo.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <style>
+    body {
+      background-image: url('assets/images/chemBack.png');
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      background-size: cover;
     }
+
+    .signin {
+      margin: 0;
+      position: absolute;
+      top: 30px;
+      right: -50px;
+      -ms-transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%);
+    }
+
+    .entergame {
+      margin: 0;
+      position: absolute;
+      top: 550px;
+      right: 600px;
+      -ms-transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%);
+    }
+
+    .button {
+      background-color: #4CAF50;
+      /* Green */
+      border: none;
+      color: white;
+      padding: 15px 32px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+    }
+  </style>
+  <div class="signin">
+    <button id="myButton" class="button">Sign In!</button>
+  </div>
+
+  <div class="entergame">
+    <form onsubmit="return getValue('commands')">
+      <label for="fname">Username:</label><br>
+      <input type="text" name="commands" size="20" id="commands" maxlength = "20">
+      <input type="submit" value="Enter Game" class="button">
+
+    </form>
+  </div>
+
+
+  <script type="text/javascript">
+    document.getElementById("myButton").onclick = function () {
+      location.href = "/index2.html";
+    };
   </script>
 </body>
 
