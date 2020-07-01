@@ -32,6 +32,8 @@ Other stuff
 
 class Element extends Phaser.GameObjects.Sprite {
 
+
+
     constructor(scene, x, y, rotation, id, textureCons) {
 
         super(scene, x, y, textureCons);
@@ -133,12 +135,8 @@ class Element extends Phaser.GameObjects.Sprite {
     upgrade(){
 
         let text = gameSettings.texture;
-        console.log(this.health);
         if (this.atomicNum < 5){
-
             this.setTexture(text[this.atomicNum-1]);
-            
-            
         }
     }
 
