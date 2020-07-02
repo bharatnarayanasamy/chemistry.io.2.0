@@ -10,9 +10,9 @@ router.post('/submit-score', asyncMiddleware(async (req, res, next) => {
   res.status(200).json({ status: 'ok' });
 }));
 
-router.get('/scores', asyncMiddleware(async (req, res, next) => {
+router.get('/scores', async (req, res, next) => {
   const users = await UserModel.find({}, 'name highScore -_id').sort({ highScore: -1}).limit(10);
   res.status(200).json(users);
-}));
+});
 
 module.exports = router;

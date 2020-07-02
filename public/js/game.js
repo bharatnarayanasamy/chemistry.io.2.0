@@ -14,20 +14,20 @@ var gameSettings = {
     texture: ["hydrogen", "helium", "obstacle", "vrishabkrishna"],
     upgradePEN: 1,
     group1: [1, 3, 11, 19, 37, 55, 87],
-    group2: [   4, 12, 20, 38, 56, 88],
-    group3: [   5, 13, 31, 49, 81, 113],
-    group4: [   6, 14, 32, 50, 82, 114],
-    group5: [   7, 15, 33, 51, 83, 115],
-    group6: [   8, 16, 34, 52, 84, 116],
-    group7: [   9, 17, 35, 53, 85, 117],
-    group8: [2,10, 18, 36, 54, 86, 118],
+    group2: [4, 12, 20, 38, 56, 88],
+    group3: [5, 13, 31, 49, 81, 113],
+    group4: [6, 14, 32, 50, 82, 114],
+    group5: [7, 15, 33, 51, 83, 115],
+    group6: [8, 16, 34, 52, 84, 116],
+    group7: [9, 17, 35, 53, 85, 117],
+    group8: [2, 10, 18, 36, 54, 86, 118],
     transitionmetals: [21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
-    39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
-    72, 73, 74, 75, 76, 77, 78, 79, 80,
-    104, 105, 106, 107, 108, 109, 110, 111, 112],
+        39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
+        72, 73, 74, 75, 76, 77, 78, 79, 80,
+        104, 105, 106, 107, 108, 109, 110, 111, 112],
     lanthanides: [57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71],
     actinides: [89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103]
-            
+
 }
 
 //includes all the necessary phaser information
@@ -58,13 +58,15 @@ let scores;
 $.ajax({
     type: 'GET',
     url: '/scores',
-    success: function(data) {
-      scores = data;
+    success: function (data) {
+        scores = data;
+        console.log(data)
+        console.log("success!");
     },
-    error: function(xhr) {
-      console.log(xhr);
+    error: function (xhr) {
+        console.log(xhr);
     }
-  });
+});
 
 //used in update to make sure healing does not occur when shot/shooting
 var lastShot = 0;
@@ -84,10 +86,10 @@ var proton_array = [];
 for (let i = 0; i < 15; i++) {
 
     proton_array.push({
-      x: -1,
-      y: -1,
+        x: -1,
+        y: -1,
     });
-    
+
 }
 
 var electron_array = [];
@@ -95,10 +97,10 @@ var electron_array = [];
 for (let i = 0; i < 15; i++) {
 
     electron_array.push({
-      x: -1,
-      y: -1,
+        x: -1,
+        y: -1,
     });
-    
+
 }
 
 var neutron_array = [];
@@ -106,15 +108,15 @@ var neutron_array = [];
 for (let i = 0; i < 15; i++) {
 
     neutron_array.push({
-      x: -1,
-      y: -1,
+        x: -1,
+        y: -1,
     });
-    
+
 }
 
 function preload() {
 
-    
+
 
     //Loading the images for the bullet types, players, proton, electron and neutrons
     this.load.image("hydrogenbullet", "./assets/images/hydrogenbullet.png");
@@ -139,15 +141,16 @@ function preload() {
 // Built-in Phaser function that runs only once at the beginning of the game
 function create() {
 
-    this.add.bitmapText(100, 110, 'arcade', 'RANK  SCORE   NAME').setTint(0xffffff);
+    //this.add.bitmapText(100, 110, 'arcade', 'RANK  SCORE   NAME').setTint(0xffffff);
 
-    for (let i = 1; i < 6; i++) {
-      if (scores[i-1]) {
-        this.add.bitmapText(100, 160 + 50 * i, 'arcade', ` ${i}      ${scores[i-1].highScore}    ${scores[i-1].name}`).setTint(0xffffff);
-      } else {
-        this.add.bitmapText(100, 160 + 50 * i, 'arcade', ` ${i}      0    ---`).setTint(0xffffff);
-      }
-    }
+    /**for (let i = 1; i < 6; i++) {
+        if (scores[i - 1]) {
+            this.add.bitmapText(100, 160 + 50 * i, 'arcade', ` ${i}      ${scores[i - 1].highScore}    ${scores[i - 1].name}`).setTint(0xffffff);
+        } else {
+            this.add.bitmapText(100, 160 + 50 * i, 'arcade', ` ${i}      0    ---`).setTint(0xffffff);
+        }
+    }**/
+    console.log(scores);
 
     //  Set the camera and physics bounds to be the size of 4x4 bg images
     this.cameras.main.setBounds(0, 0, 1920 * 2, 1080 * 2);
@@ -161,7 +164,7 @@ function create() {
 
     //Enabling collisions when an object hits the boundary
     this.physics.world.setBoundsCollision();
-    
+
     //creating proton array
     this.proton_array = [];
     for (let i = 0; i < 15; i++) {
@@ -171,12 +174,12 @@ function create() {
     }
 
     this.electron_array = [];
-    for (let i = 0; i < 15; i++) {   
+    for (let i = 0; i < 15; i++) {
         var bb2 = this.physics.add.image(-1000, -1000, 'electron');
         bb2.setScale(0.03);
         electron_array.push(bb2);
     }
-    
+
     this.neutron_array = [];
     for (let i = 0; i < 15; i++) {
         var bb3 = this.physics.add.image(-1000, -1000, 'neutron');
@@ -325,7 +328,7 @@ function create() {
         this.oldProtonPosition.push({
             x: -1000,
             y: -1000
-        }); 
+        });
     }
 
     this.oldElectronPosition = [];
@@ -333,7 +336,7 @@ function create() {
         this.oldElectronPosition.push({
             x: -1000,
             y: -1000
-        }); 
+        });
     }
 
 
@@ -342,7 +345,7 @@ function create() {
         this.oldNeutronPosition.push({
             x: -1000,
             y: -1000
-        }); 
+        });
     }
 
     this.score = 0;
@@ -361,7 +364,7 @@ function create() {
     //find way to destroy protons that were collected from the array
     //change overlap from self.proton to proton group
 
-    this.socket.on('protonUpdate', function(server_proton_array) {
+    this.socket.on('protonUpdate', function (server_proton_array) {
 
         for (let i = 0; i < server_proton_array.length; i++) {
 
@@ -371,7 +374,7 @@ function create() {
             self.proton_array[i] = self.physics.add.image(server_proton_array[i].x, server_proton_array[i].y, 'proton');
             self.proton_array[i].setScale(0.08);
 
-            
+
 
             self.physics.add.overlap(self.element, self.proton_array[i], function () {
                 // console.log("entered proton overlap");
@@ -424,13 +427,13 @@ function create() {
                 }
             }, null, self);
         }
-    }); 
-     
+    });
+
 
     //repeat of protonUpdate for electrons
     this.socket.on('electronUpdate', function (server_electron_array) {
-        
-        
+
+
         for (let i = 0; i < server_electron_array.length; i++) {
 
             if (self.electron_array[i]) self.electron_array[i].destroy();
@@ -440,7 +443,7 @@ function create() {
             self.electron_array[i].setScale(0.04);
 
             self.physics.add.overlap(self.element, self.electron_array[i], function () {
-                
+
                 if (server_electron_array[i].x != this.oldElectronPosition[i].x || server_electron_array[i].y != this.oldElectronPosition[i].y) {
                     this.score += this.killScore / (gameSettings.upgradePEN * 3);
                     this.scoreText.text = 'Score: ' + this.score;
@@ -476,13 +479,13 @@ function create() {
                         id: self.socket.id,
                         sc: self.score
                     }
-                    this.socket.emit('scoreUpdate',idScore)
+                    this.socket.emit('scoreUpdate', idScore)
                 }
             }, null, self);
         }
 
-        
-      
+
+
     });
 
     //repeat of protonUpdate for neutrons
@@ -496,10 +499,10 @@ function create() {
             self.neutron_array[i] = self.physics.add.image(server_neutron_array[i].x, server_neutron_array[i].y, 'neutron');
             self.neutron_array[i].setScale(0.08);
 
-            
+
 
             self.physics.add.overlap(self.element, self.neutron_array[i], function () {
-        
+
 
                 if (server_neutron_array[i].x != this.oldNeutronPosition[i].x || server_neutron_array[i].y != this.oldNeutronPosition[i].y) {
                     this.score += this.killScore / (gameSettings.upgradePEN * 3);
@@ -538,14 +541,14 @@ function create() {
                         id: self.socket.id,
                         sc: self.score
                     }
-                    this.socket.emit('scoreUpdate',idScore)
+                    this.socket.emit('scoreUpdate', idScore)
                 }
             }, null, self);
         }
     });
 
 
-        
+
 
     //Updates the kill count once this player kills someone  
     this.socket.on('updateKills', function (player) {
@@ -569,11 +572,11 @@ function create() {
         }
     });
 
-    this.leaderboard = [self.add.text(200, 20,''), self.add.text(200,40,''), self.add.text(200,60,''), self.add.text(200,80,''), self.add.text(200,100,'')];
+    this.leaderboard = [self.add.text(200, 20, ''), self.add.text(200, 40, ''), self.add.text(200, 60, ''), self.add.text(200, 80, ''), self.add.text(200, 100, '')];
     this.socket.on('update-leaderboard', function (items) {
         //self.killScoreText = self.add.text(16, 40, 'Kills: ' + (0), { fontSize: '25px', fill: '#00FF00' });
-        
-        for (let i  = 0; i < Math.min(5, items.length); i++) {            
+
+        for (let i = 0; i < Math.min(5, items.length); i++) {
             self.leaderboard[i].text = String(items[i][0]) + ': ' + String(items[i][1]);
             //if (self.leaderboard[i].text[:20] )
         }
@@ -652,7 +655,7 @@ function update(time) {
         this.cameras.main.startFollow(this.element);
         this.cameras.main.followOffset.set(10, 0);
         this.element.movePlayer(this);
-    
+
         //try to test this stuff with   
         this.protonBar.move(this, this.cameras.main.scrollX + config.width / 2 - 150, this.cameras.main.scrollY + config.height - 120);
         this.protonBarText.x = this.protonBar.x + 90;
@@ -667,7 +670,7 @@ function update(time) {
         this.leaderboardBg.x = this.cameras.main.scrollX + 10;
         this.leaderboardBg.y = this.cameras.main.scrollY;
 
-        for (let i  = 0; i < Math.min(5, this.otherElements.getChildren().length + 1); i++) {
+        for (let i = 0; i < Math.min(5, this.otherElements.getChildren().length + 1); i++) {
             this.leaderboard[i].x = this.leaderboardBg.x + 925;
             this.leaderboard[i].y = this.leaderboardBg.y + 20 + 20 * i;
         }

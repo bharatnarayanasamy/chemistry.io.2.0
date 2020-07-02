@@ -1,6 +1,8 @@
 const passport = require('passport');
 const express = require('express');
 const jwt = require('jsonwebtoken');
+const UserModel = require('../models/userModel');
+
 
 const tokenList = {};
 const router = express.Router();
@@ -11,6 +13,11 @@ router.get('/status', (req, res, next) => {
 
 router.post('/signup', passport.authenticate('signup', { session: false }), async (req, res, next) => {
   res.status(200).json({ message: 'signup successful' });
+});
+
+router.get('/scores', async (req, res, next) => {
+  const users = await UserModel.find({}, 'name highScore -_id').sort({ highScore: -1}).limit(10);
+  res.status(200).json(users);
 });
 
 router.post('/login', async (req, res, next) => {
