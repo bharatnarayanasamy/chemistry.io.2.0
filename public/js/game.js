@@ -12,7 +12,22 @@ var gameSettings = {
     TOLERANCE: 0.04 * 1 * Math.PI,
     playerHealth: 100,
     texture: ["hydrogen", "helium", "obstacle", "vrishabkrishna"],
-    upgradePEN: 5
+    upgradePEN: 1,
+    group1: [1, 3, 11, 19, 37, 55, 87],
+    group2: [   4, 12, 20, 38, 56, 88],
+    group3: [   5, 13, 31, 49, 81, 113],
+    group4: [   6, 14, 32, 50, 82, 114],
+    group5: [   7, 15, 33, 51, 83, 115],
+    group6: [   8, 16, 34, 52, 84, 116],
+    group7: [   9, 17, 35, 53, 85, 117],
+    group8: [2,10, 18, 36, 54, 86, 118],
+    transitionmetals: [21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
+    39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
+    72, 73, 74, 75, 76, 77, 78, 79, 80,
+    104, 105, 106, 107, 108, 109, 110, 111, 112],
+    lanthanides: [57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71],
+    actinides: [89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103]
+            
 }
 
 //includes all the necessary phaser information
@@ -50,6 +65,9 @@ var username0 = localStorage.getItem("vOneLocalStorage");
 
 var proton_array = [];
 
+
+
+
 for (let i = 0; i < 15; i++) {
 
     proton_array.push({
@@ -82,6 +100,8 @@ for (let i = 0; i < 15; i++) {
 }
 
 function preload() {
+
+    
 
     //Loading the images for the bullet types, players, proton, electron and neutrons
     this.load.image("hydrogenbullet", "./assets/images/hydrogenbullet.png");
@@ -522,7 +542,7 @@ function create() {
                 id: self.socket.id,
                 sc: self.score
             }
-            this.socket.emit('scoreUpdate', idScore);
+            self.socket.emit('scoreUpdate', idScore);
         }
     });
 
@@ -647,11 +667,13 @@ function update(time) {
             bullet.changeProperty(this.element.atomicNum);
             let distance = Math.sqrt((bullet.x - this.element.x) * (bullet.x - this.element.x) + (bullet.y - this.element.y) * (bullet.y - this.element.y));
 
-            if (this.element.atomicNum > 2) {
-                doubleBullet(bullet, distance, this.element, this.socket);
+            if (this.element.atomicNum > 1) {
+                //group2Bullet(bullet, distance, this.element, this.socket);
+                group4Bullet(bullet, this.element, this.socket);
+                //group6Bullet(bullet, distance, this.element, this.socket);
             }
             else {
-                this.socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum })
+                this.socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
             }
             lastShot = time;
         }
@@ -688,61 +710,3 @@ function update(time) {
 
 
 
-
-function doubleBullet(bullet, distance, element0, socket0) {
-    this.element = element0;
-
-    if (bullet.x > this.element.x && bullet.y > this.element.y) {
-        let tempangle = Math.atan((bullet.x - this.element.x) / (bullet.y - this.element.y));
-        let tempangle1 = tempangle + 0.2;
-        let tempangle2 = tempangle - 0.2;
-
-        let x1 = Math.sin(tempangle1) * distance;
-        let x2 = Math.sin(tempangle2) * distance;
-        let y1 = Math.cos(tempangle1) * distance;
-        let y2 = Math.cos(tempangle2) * distance;
-
-        socket0.emit('shoot-bullet', { x: this.element.x + x1, y: this.element.y + y1, y1: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
-        socket0.emit('shoot-bullet', { x: this.element.x + x2, y: this.element.y + y2, y2: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
-    }
-    else if (bullet.x > this.element.x && this.element.y > bullet.y) {
-        tempangle = Math.atan((this.element.y - bullet.y) / (bullet.x - this.element.x));
-        tempangle1 = tempangle + 0.2;
-        tempangle2 = tempangle - 0.2;
-
-        x1 = Math.cos(tempangle1) * distance;
-        x2 = Math.cos(tempangle2) * distance;
-        y1 = Math.sin(tempangle1) * distance;
-        y2 = Math.sin(tempangle2) * distance;
-
-        socket0.emit('shoot-bullet', { x: this.element.x + x1, y: this.element.y - y1, y1: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
-        socket0.emit('shoot-bullet', { x: this.element.x + x2, y: this.element.y - y2, y2: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
-
-    }
-    else if (this.element.x > bullet.x && bullet.y > this.element.y) {
-        tempangle = Math.atan((this.element.x - bullet.x) / (bullet.y - this.element.y));
-        tempangle1 = tempangle + 0.2;
-        tempangle2 = tempangle - 0.2;
-
-        x1 = Math.sin(tempangle1) * distance;
-        x2 = Math.sin(tempangle2) * distance;
-        y1 = Math.cos(tempangle1) * distance;
-        y2 = Math.cos(tempangle2) * distance;
-
-        socket0.emit('shoot-bullet', { x: this.element.x - x1, y: this.element.y + y1, y1: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
-        socket0.emit('shoot-bullet', { x: this.element.x - x2, y: this.element.y + y2, y2: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
-    }
-    else if (this.element.x > bullet.x && this.element.y > bullet.y) {
-        tempangle = Math.atan((this.element.y - bullet.y) / (this.element.x - bullet.x));
-        tempangle1 = tempangle + 0.2;
-        tempangle2 = tempangle - 0.2;
-
-        x1 = Math.cos(tempangle1) * distance;
-        x2 = Math.cos(tempangle2) * distance;
-        y1 = Math.sin(tempangle1) * distance;
-        y2 = Math.sin(tempangle2) * distance;
-
-        socket0.emit('shoot-bullet', { x: this.element.x - x1, y: this.element.y - y1, y1: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
-        socket0.emit('shoot-bullet', { x: this.element.x - x2, y: this.element.y - y2, y2: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
-    }
-}
