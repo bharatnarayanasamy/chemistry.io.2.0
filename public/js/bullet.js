@@ -32,6 +32,9 @@ class Bullet extends Phaser.Physics.Arcade.Sprite {
   
     this.body.velocity.x = Math.cos(angle) * gameSettings.bulletSpeed;
     this.body.velocity.y = Math.sin(angle) * gameSettings.bulletSpeed;
+    console.log(this.body.velocity.x + ": x");
+    console.log(this.body.velocity.y + ": y");
+
     
     this.angle2 = angle;
 
@@ -50,12 +53,12 @@ class Bullet extends Phaser.Physics.Arcade.Sprite {
     //console.log(this.texture);
   }
 
-  changeProperty(atomicNum){
-    this.body.velocity.x = Math.cos(this.angle2) * atomicNum * 1.5 * gameSettings.bulletSpeed;
-    this.body.velocity.y = Math.sin(this.angle2) * atomicNum * 1.5 * gameSettings.bulletSpeed;
-    this.speed_x = this.body.velocity.x;
-    this.speed_y = this.body.velocity.y;
-  }
+  // changeProperty(ang){
+  //   this.body.velocity.x = Math.cos(this.angle2) * atomicNum * 1.5 * gameSettings.bulletSpeed;
+  //   this.body.velocity.y = Math.sin(this.angle2) * atomicNum * 1.5 * gameSettings.bulletSpeed;
+  //   this.speed_x = this.body.velocity.x;
+  //   this.speed_y = this.body.velocity.y;
+  // }
 
   inactive(){
     this.disableBody(true, true);

@@ -52,22 +52,6 @@ let config = {
         update: update
     }
 };
-
-let scores;
-
-$.ajax({
-    type: 'GET',
-    url: '/scores',
-    success: function (data) {
-        scores = data;
-        console.log(data)
-        console.log("success!");
-    },
-    error: function (xhr) {
-        console.log(xhr);
-    }
-});
-
 //used in update to make sure healing does not occur when shot/shooting
 var lastShot = 0;
 var lastHealed = 0;
@@ -75,21 +59,42 @@ var lastHealed = 0;
 //creates the game itself
 var game = new Phaser.Game(config);
 var element = null;
-console.log(localStorage.getItem("vOneLocalStorage"));
+console.log(localStorage.getItem("vTwoLocalStorage"));
 var username0 = localStorage.getItem("vOneLocalStorage");
+if (username0 == "") {
+    username0 = "Anonymous Player";
+}
 
+let users;
+var emaill;
+
+
+$.ajax({
+    type: 'GET',
+    url: '/users',
+    success: function (data) {
+        users = data;
+        console.log("booty!");
+        if (typeof localStorage.getItem("vTwoLocalStorage") != null) {
+            for (var i = 0; i < users.length; i++) {
+                if (users[i].email == localStorage.getItem("vTwoLocalStorage")) {
+                    username0 = users[i].name;
+                    email = users[i].email;
+                }
+            }
+        }
+    },
+    error: function (xhr) {
+        console.log(xhr);
+    }
+});
 var proton_array = [];
 
-
-
-
 for (let i = 0; i < 15; i++) {
-
     proton_array.push({
         x: -1,
         y: -1,
     });
-
 }
 
 var electron_array = [];
@@ -115,9 +120,6 @@ for (let i = 0; i < 15; i++) {
 }
 
 function preload() {
-
-
-
     //Loading the images for the bullet types, players, proton, electron and neutrons
     this.load.image("hydrogenbullet", "./assets/images/hydrogenbullet.png");
     this.load.image("heliumbullet", "./assets/images/heliumbullet.png");
@@ -150,7 +152,8 @@ function create() {
             this.add.bitmapText(100, 160 + 50 * i, 'arcade', ` ${i}      0    ---`).setTint(0xffffff);
         }
     }**/
-    console.log(scores);
+    console.log(users);
+
 
     //  Set the camera and physics bounds to be the size of 4x4 bg images
     this.cameras.main.setBounds(0, 0, 1920 * 2, 1080 * 2);
@@ -227,9 +230,24 @@ function create() {
             console.log(self.leaderboard[i].text.substring(0, 20))
             console.log(playerId);
             if (self.leaderboard[i].text.substring(0, 20) == playerId) {
-                console.log("beep bop test");
+                window.alert("you LOL")
                 self.leaderboard[i].text = '';
             }
+        }
+        if (typeof email != "undefined") {
+            const data = {
+                email: email,
+                score: self.score,
+            };
+            $.ajax({
+                type: 'POST',
+                url: '/submit-score',
+                data,
+                success: function (data) {
+                },
+                error: function (xhr) {
+                }
+            });
         }
     });
 
@@ -297,8 +315,8 @@ function create() {
         // If there's client and server bullet arrays have mismatch, fix mismatch
         for (let i = 0; i < server_bullet_array.length; i++) {
             if (self.element.bullet_array[i] == undefined) {
-                let angle = Phaser.Math.Angle.Between(self.element.x, self.element.y, self.input.activePointer.worldX, self.input.activePointer.worldY);
-                self.element.bullet_array[i] = new Bullet(self, angle, server_bullet_array[i].x, server_bullet_array[i].y, gameSettings.texture[server_bullet_array[i].atomicNumber - 1]);
+                //let angle = Phaser.Math.Angle.Between(self.element.x, self.element.y, self.input.activePointer.worldX, self.input.activePointer.worldY);
+                self.element.bullet_array[i] = new Bullet(self, server_bullet_array[i].angle, server_bullet_array[i].x, server_bullet_array[i].y, gameSettings.texture[server_bullet_array[i].atomicNumber - 1]);
             }
             else {
                 //Otherwise, just update bullet locations
@@ -650,6 +668,7 @@ function create() {
 
 
 function update(time) {
+    
     if (typeof this.element != "undefined") {
 
         this.cameras.main.startFollow(this.element);
@@ -687,19 +706,20 @@ function update(time) {
 
         if ((this.input.activePointer.isDown || Phaser.Input.Keyboard.JustDown(this.spacebar)) && lastShot + 500 < time) {
             let bullet = this.element.shootBullet(this);
+            let bulletAngle = Phaser.Math.Angle.Between(this.element.x, this.element.y, this.input.activePointer.worldX, this.input.activePointer.worldY)
             console.log("Bullet Shot!")
             // Tell the server we shot a bullet 
 
-            bullet.changeProperty(this.element.atomicNum);
+            //bullet.changePdroperty(this.element.atomicNum);
             let distance = Math.sqrt((bullet.x - this.element.x) * (bullet.x - this.element.x) + (bullet.y - this.element.y) * (bullet.y - this.element.y));
 
             if (this.element.atomicNum > 1) {
-                //group2Bullet(bullet, distance, this.element, this.socket);
-                group4Bullet(bullet, this.element, this.socket);
-                //group6Bullet(bullet, distance, this.element, this.socket);
+                group2Bullet(bullet, distance, this.element, this.socket, bulletAngle);
+                //group4Bullet(bullet, this.element, this.socket, bulletAngle);
+                //group6Bullet(bullet, distance, this.element, this.socket, bulletAngle);
             }
             else {
-                this.socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
+                this.socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed, damage: bullet.damage, atomicNumber: this.element.atomicNum });
             }
             lastShot = time;
         }
@@ -731,6 +751,8 @@ function update(time) {
             this.socket.emit('player-heal', { id: this.element.playerId, health: this.element.hp.value });
             lastHealed = time;
         }
+
+
     }
 }
 

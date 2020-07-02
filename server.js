@@ -16,7 +16,7 @@ const secureRoutes = require('./routes/secure');
 
 // setup mongo connection
 const uri = process.env.MONGO_CONNECTION_URL;
-mongoose.connect(uri, { useNewUrlParser : true, useCreateIndex: true });
+mongoose.connect(uri, { useNewUrlParser: true, useCreateIndex: true });
 mongoose.connection.on('error', (error) => {
   console.log(error);
   process.exit(1);
@@ -45,7 +45,7 @@ app.get('/', function (req, res) {
 
 // main routes
 app.use('/', routes);
-app.use('/', passport.authenticate('jwt', { session : false }), secureRoutes);
+app.use('/', passport.authenticate('jwt', { session: false }), secureRoutes);
 
 // catch all other routes
 app.use((req, res, next) => {
@@ -274,13 +274,13 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('scoreUpdate', function(player) {
+  socket.on('scoreUpdate', function (player) {
     if (player_scores[player.id] != undefined) {
       player_scores[player.id] = player.sc;
     }
   });
 
-  socket.on('usernameInfo', function(usernameInfo) {
+  socket.on('usernameInfo', function (usernameInfo) {
 
     leaderboardArray[usernameInfo.id] = usernameInfo.username;
   });
@@ -292,8 +292,14 @@ function ServerGameLoop() {
   for (let i = 0; i < bullet_array.length; i++) {
     let bullet = bullet_array[i];
     if (typeof bullet != "undefined") {
-      bullet.x += bullet.speed_x / 50; //update bullet position
-      bullet.y += bullet.speed_y / 50;
+      
+      let speed = bullet.bulletSpeed;
+
+      let speedY = speed * Math.sin(bullet.angle);
+      let speedX = speed * Math.cos(bullet.angle);
+
+      bullet.x += speedX / 50; //update bullet position
+      bullet.y += speedY / 50;
 
       // Remove if it goes off screen
       if (bullet.x < -10 || bullet.x > gameWidth + 10 || bullet.y < -10 || bullet.y > gameHeight + 10) {

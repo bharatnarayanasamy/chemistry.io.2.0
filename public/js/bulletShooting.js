@@ -1,4 +1,4 @@
-function group2Bullet(bullet, distance, element0, socket0) {
+function group2Bullet(bullet, distance, element0, socket0, bulletAngle) {
         this.element = element0;
     
         if (bullet.x > this.element.x && bullet.y > this.element.y) {
@@ -11,8 +11,8 @@ function group2Bullet(bullet, distance, element0, socket0) {
             let y1 = Math.cos(tempangle1) * distance;
             let y2 = Math.cos(tempangle2) * distance;
     
-            socket0.emit('shoot-bullet', { x: this.element.x + x1, y: this.element.y + y1, y1: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
-            socket0.emit('shoot-bullet', { x: this.element.x + x2, y: this.element.y + y2, y2: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
+            socket0.emit('shoot-bullet', { x: this.element.x + x1, y: this.element.y + y1, angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed, damage: bullet.damage, atomicNumber: this.element.atomicNum });
+            socket0.emit('shoot-bullet', { x: this.element.x + x2, y: this.element.y + y2, angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed, damage: bullet.damage, atomicNumber: this.element.atomicNum });
         }
         else if (bullet.x > this.element.x && this.element.y > bullet.y) {
             tempangle = Math.atan((this.element.y - bullet.y) / (bullet.x - this.element.x));
@@ -24,8 +24,8 @@ function group2Bullet(bullet, distance, element0, socket0) {
             y1 = Math.sin(tempangle1) * distance;
             y2 = Math.sin(tempangle2) * distance;
     
-            socket0.emit('shoot-bullet', { x: this.element.x + x1, y: this.element.y - y1, y1: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
-            socket0.emit('shoot-bullet', { x: this.element.x + x2, y: this.element.y - y2, y2: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
+            socket0.emit('shoot-bullet', { x: this.element.x + x1, y: this.element.y - y1, angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed, damage: bullet.damage, atomicNumber: this.element.atomicNum });
+            socket0.emit('shoot-bullet', { x: this.element.x + x2, y: this.element.y - y2, angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed, damage: bullet.damage, atomicNumber: this.element.atomicNum });
     
         }
         else if (this.element.x > bullet.x && bullet.y > this.element.y) {
@@ -38,8 +38,8 @@ function group2Bullet(bullet, distance, element0, socket0) {
             y1 = Math.cos(tempangle1) * distance;
             y2 = Math.cos(tempangle2) * distance;
     
-            socket0.emit('shoot-bullet', { x: this.element.x - x1, y: this.element.y + y1, y1: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
-            socket0.emit('shoot-bullet', { x: this.element.x - x2, y: this.element.y + y2, y2: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
+            socket0.emit('shoot-bullet', { x: this.element.x - x1, y: this.element.y + y1, angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed, damage: bullet.damage, atomicNumber: this.element.atomicNum });
+            socket0.emit('shoot-bullet', { x: this.element.x - x2, y: this.element.y + y2, angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed, damage: bullet.damage, atomicNumber: this.element.atomicNum });
         }
         else if (this.element.x > bullet.x && this.element.y > bullet.y) {
             tempangle = Math.atan((this.element.y - bullet.y) / (this.element.x - bullet.x));
@@ -51,110 +51,41 @@ function group2Bullet(bullet, distance, element0, socket0) {
             y1 = Math.sin(tempangle1) * distance;
             y2 = Math.sin(tempangle2) * distance;
     
-            socket0.emit('shoot-bullet', { x: this.element.x - x1, y: this.element.y - y1, y1: bullet.angle, 
-                speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
+            socket0.emit('shoot-bullet', { x: this.element.x - x1, y: this.element.y - y1, angle: bulletAngle, 
+                bulletSpeed: gameSettings.bulletSpeed, damage: bullet.damage, atomicNumber: this.element.atomicNum });
 
-            socket0.emit('shoot-bullet', { x: this.element.x - x2, y: this.element.y - y2, y2: bullet.angle, 
-                speed_x: bullet.speed_x, speed_y: bullet.speed_y, damage: bullet.damage, atomicNumber: this.element.atomicNum });
+            socket0.emit('shoot-bullet', { x: this.element.x - x2, y: this.element.y - y2, angle: bulletAngle, 
+                bulletSpeed: gameSettings.bulletSpeed, damage: bullet.damage, atomicNumber: this.element.atomicNum });
         }
 }
 
-function group6Bullet(bullet, distance, element, socket){
-    let speedY = bullet.speed_y;
-    let speedX = bullet.speed_x;
-    let speed = Math.sqrt(speedX*speedX + speedY*speedY);
-
-    let tempAngle = Math.atan(speedY/speedX);
-    let speedY1 = speed*Math.sin(tempAngle + 0.2);
-    let speedX1 = speed*Math.cos(tempAngle + 0.2);
-    let speedY2 = speed*Math.sin(tempAngle - 0.2);
-    let speedX2 = speed*Math.cos(tempAngle - 0.2);
-
-    if(speedY < 0){
-        if(speedY1 > 0){
-            speedY1 *= -1;
-        }
-        if(speedY2 > 0){
-            speedY2 *= -1;
-        }
-    }
-    if(speedX < 0){
-        if(speedX1 > 0){
-            speedX1 *= -1;
-        }
-        if(speedX2 > 0){
-            speedX2 *= -1;
-        }
-    }
-    if(speedY > 0){
-        if(speedY1 < 0){
-            speedY1 *= -1;
-        }
-        if(speedY2 < 0){
-            speedY2 *= -1;
-        }
-    }
-    if(speedX > 0){
-        if(speedX1 < 0){
-            speedX1 *= -1;
-        }
-        if(speedX2 < 0){
-            speedX2 *= -1;
-        }
-    }
-
-
-
+function group6Bullet(bullet, element, socket, bulletAngle){
     
-    socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, 
+    socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed,
         damage: bullet.damage, atomicNumber: element.atomicNum });
-    
-    socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bullet.angle, speed_x: speedX1, speed_y: speedY1, 
+    socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bulletAngle + 0.2,  bulletSpeed: gameSettings.bulletSpeed,
         damage: bullet.damage, atomicNumber: element.atomicNum });
-    socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bullet.angle, speed_x: speedX2, speed_y: speedY2, 
+    socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bulletAngle - 0.2, bulletSpeed: gameSettings.bulletSpeed,
         damage: bullet.damage, atomicNumber: element.atomicNum });
     
 }
 
 
-
-
-
-function group4Bullet(bullet, element0, socket){
-    element = element0;
+function group4Bullet(bullet, element, socket, bulletAngle){
+ 
+   
     
-    let speedY = bullet.speed_y;
-    let speedX = bullet.speed_x;
-    let speed = Math.sqrt(speedX*speedX + speedY*speedY);
-
-    let tempAngle = Math.atan(speedY/speedX);
-    let speedY1 = speed*Math.sin(tempAngle + (3.1415/2));
-    let speedX1 = speed*Math.cos(tempAngle + (3.1415/2));
-    
-    let speedY2 = speed*Math.sin(tempAngle - (3.1415/2));
-    let speedX2 = speed*Math.cos(tempAngle - (3.1415/2));
-
-    let speedY3 = speed*Math.sin(tempAngle - 3.1415);
-    let speedX3 = speed*Math.cos(tempAngle - 3.1415);
-
-    
-    if (speedX <0){
-        speedY3 = -speedY3
-        speedX3 = -speedX3
-    }
-
-    
-    socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bullet.angle, speed_x: bullet.speed_x, speed_y: bullet.speed_y, 
+    socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed,
         damage: bullet.damage, atomicNumber: element.atomicNum });
-    
-    socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bullet.angle, speed_x: speedX1, speed_y: speedY1, 
+        
+    socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bulletAngle + 1.571,  bulletSpeed: gameSettings.bulletSpeed,
         damage: bullet.damage, atomicNumber: element.atomicNum });
 
-    socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bullet.angle, speed_x: speedX2, speed_y: speedY2, 
+    socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bulletAngle - 1.57, bulletSpeed: gameSettings.bulletSpeed,
         damage: bullet.damage, atomicNumber: element.atomicNum });
 
-    socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bullet.angle, speed_x: speedX3, speed_y: speedY3, 
-        damage: bullet.damage, atomicNumber: element.atomicNum });
+        socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bulletAngle + 3.14, bulletSpeed: gameSettings.bulletSpeed,
+            damage: bullet.damage, atomicNumber: element.atomicNum });
 
 
 
@@ -162,11 +93,4 @@ function group4Bullet(bullet, element0, socket){
 }
 
 
-        if (bullet.x > this.element.x && bullet.y > this.element.y) {
-        }
-        else if (bullet.x > this.element.x && this.element.y > bullet.y) {
-        }
-        else if (this.element.x > bullet.x && bullet.y > this.element.y) {
-            }
-        else if (this.element.x > bullet.x && this.element.y > bullet.y) {
-            }
+        
