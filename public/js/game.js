@@ -53,6 +53,19 @@ let config = {
     }
 };
 
+let scores;
+
+$.ajax({
+    type: 'GET',
+    url: '/scores',
+    success: function(data) {
+      scores = data;
+    },
+    error: function(xhr) {
+      console.log(xhr);
+    }
+  });
+
 //used in update to make sure healing does not occur when shot/shooting
 var lastShot = 0;
 var lastHealed = 0;
@@ -125,6 +138,16 @@ function preload() {
 
 // Built-in Phaser function that runs only once at the beginning of the game
 function create() {
+
+    this.add.bitmapText(100, 110, 'arcade', 'RANK  SCORE   NAME').setTint(0xffffff);
+
+    for (let i = 1; i < 6; i++) {
+      if (scores[i-1]) {
+        this.add.bitmapText(100, 160 + 50 * i, 'arcade', ` ${i}      ${scores[i-1].highScore}    ${scores[i-1].name}`).setTint(0xffffff);
+      } else {
+        this.add.bitmapText(100, 160 + 50 * i, 'arcade', ` ${i}      0    ---`).setTint(0xffffff);
+      }
+    }
 
     //  Set the camera and physics bounds to be the size of 4x4 bg images
     this.cameras.main.setBounds(0, 0, 1920 * 2, 1080 * 2);
