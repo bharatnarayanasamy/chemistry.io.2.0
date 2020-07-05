@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+</head>
+
+<body class="text-center">
+  <script type="text/javascript" src="js/usernameinfo.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <style>
+    body {
+      background-image: url('assets/images/chemBack.png');
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      background-size: cover;
+    }
+
+    .signin {
+      margin: 0;
+      position: absolute;
+      top: 30px;
+      right: -50px;
+      -ms-transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%);
+    }
+
+    .entergame {
+      margin: 0;
+      position: absolute;
+      top: 550px;
+      right: 600px;
+      -ms-transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%);
+    }
+
+    .button {
+      background-color: #4CAF50;
+      /* Green */
+      border: none;
+      color: white;
+      padding: 15px 32px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+    }
+  </style>
+  <div class="signin">
+    <button id="myButton" class="button">Sign In!</button>
+  </div>
+
+  <div class="entergame">
+    <form onsubmit="return getValue('commands')">
+      <label for="fname">Username:</label><br>
+      <input type="text" name="commands" size="20" id="commands" maxlength = "20">
+      <input type="submit" value="Enter Game" class="button">
+    </form>
+  </div>
+
+
+  <script type="text/javascript">
+    document.getElementById("myButton").onclick = function () {
+      location.href = "/index2.html";
+    };
+    localStorage.setItem("vTwoLocalStorage", null);
+  </script>
+</body>
+
+</html>

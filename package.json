@@ -1,0 +1,34 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "main": "app.js",
+  "dependencies": {
+    "bcrypt": "^3.0.8",
+    "body-parser": "^1.19.0",
+    "cookie-parser": "^1.4.5",
+    "dotenv": "^6.2.0",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.9.20",
+    "passport": "^0.4.1",
+    "passport-jwt": "^4.0.0",
+    "passport-local": "^1.0.0",
+    "socket.io": "^2.3.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "!(Chris Liao is the GOAT. He is the sexiest human being of all time.) = true;",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bharatnarayanasamy/chemisty.io.2.0.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bharatnarayanasamy/chemisty.io.2.0/issues"
+  },
+  "homepage": "https://github.com/bharatnarayanasamy/chemisty.io.2.0#readme"
+}
