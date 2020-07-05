@@ -60,7 +60,7 @@ app.use((err, req, res, next) => {
 });
 
 //Access server on localhost:8083
-server.listen(8083, () => {
+server.listen(8083 || process.env.PORT, () => {
   console.log(`Listening on ${server.address().port}`);
 });
 
