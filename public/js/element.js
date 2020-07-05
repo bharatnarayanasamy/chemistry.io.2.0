@@ -31,9 +31,6 @@ Other stuff
 
 
 class Element extends Phaser.GameObjects.Sprite {
-
-
-
     constructor(scene, x, y, rotation, id, textureCons) {
 
         super(scene, x, y, textureCons);
