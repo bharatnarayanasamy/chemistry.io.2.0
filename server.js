@@ -191,8 +191,6 @@ io.on('connection', (socket) => {
     if (typeof players[socket.id] != "undefined") {
       players[socket.id].x = movementData.x; //update player position
       players[socket.id].y = movementData.y;
-      players[socket.id].vy = movementData.vy; //update player velocity
-      players[socket.id].vx = movementData.vx;
       players[socket.id].rotation = movementData.rotation;
       // emit a message to all players about the player that moved
       socket.broadcast.emit('playerMoved', players[socket.id]);
@@ -280,6 +278,7 @@ io.on('connection', (socket) => {
     }
   });
 
+
   socket.on('usernameInfo', function (usernameInfo) {
 
     leaderboardArray[usernameInfo.id] = usernameInfo.username;
@@ -292,7 +291,7 @@ function ServerGameLoop() {
   for (let i = 0; i < bullet_array.length; i++) {
     let bullet = bullet_array[i];
     if (typeof bullet != "undefined") {
-      
+
       let speed = bullet.bulletSpeed;
 
       let speedY = speed * Math.sin(bullet.angle);
@@ -300,7 +299,7 @@ function ServerGameLoop() {
 
       bullet.x += speedX / 50; //update bullet position
       bullet.y += speedY / 50;
-
+      
       // Remove if it goes off screen
       if (bullet.x < -10 || bullet.x > gameWidth + 10 || bullet.y < -10 || bullet.y > gameHeight + 10) {
         bullet_array.splice(i, 1);
@@ -362,12 +361,12 @@ function ServerGameLoop() {
 function UpdateLeaderboard() {
   // Create items array
   var items = Object.keys(player_scores).map(function (key) {
-    return [leaderboardArray[key], player_scores[key]];
+    return [leaderboardArray[key], key, player_scores[key]];
   });
 
   // Sort the array based on the second element
   items.sort(function (first, second) {
-    return second[1] - first[1];
+    return second[2] - first[2];
   });
 
   // Tell everyone where all the bullets are by sending the whole array

@@ -59,7 +59,6 @@ var lastHealed = 0;
 //creates the game itself
 var game = new Phaser.Game(config);
 var element = null;
-console.log(localStorage.getItem("vTwoLocalStorage"));
 var username0 = localStorage.getItem("vOneLocalStorage");
 if (username0 == "") {
     username0 = "Anonymous Player";
@@ -74,7 +73,6 @@ $.ajax({
     url: '/users',
     success: function (data) {
         users = data;
-        console.log("booty!");
         if (typeof localStorage.getItem("vTwoLocalStorage") != null) {
             for (var i = 0; i < users.length; i++) {
                 if (users[i].email == localStorage.getItem("vTwoLocalStorage")) {
@@ -152,7 +150,6 @@ function create() {
             this.add.bitmapText(100, 160 + 50 * i, 'arcade', ` ${i}      0    ---`).setTint(0xffffff);
         }
     }**/
-    console.log(users);
 
 
     //  Set the camera and physics bounds to be the size of 4x4 bg images
@@ -189,6 +186,7 @@ function create() {
         bb3.setScale(0.03);
         neutron_array.push(bb3);
     }
+    console.log(users);
 
     //creates instance of socket.io
     let self = this;
@@ -225,7 +223,8 @@ function create() {
                 console.log("player destroyed")
             }
         });
-
+        //destroy leaderboard and reinitalize it
+        /** 
         for (let i = 0; i < self.leaderboard.length; i++) {
             console.log(self.leaderboard[i].text.substring(0, 20))
             console.log(playerId);
@@ -234,6 +233,8 @@ function create() {
                 self.leaderboard[i].text = '';
             }
         }
+        **/
+        //fix the update score glitch
         if (typeof email != "undefined") {
             const data = {
                 email: email,
@@ -268,11 +269,8 @@ function create() {
         self.otherElements.getChildren().forEach((otherElement) => {
             if (playerInfo.playerId === otherElement.playerId) {
                 //update other player's locations
-                otherElement.body.setVelocity(0);
-                otherElement.body.setVelocityX(playerInfo.vx);
-                otherElement.body.setVelocityY(playerInfo.vy);
-                otherElement.rotation = playerInfo.rotation;
-                otherElement.body.setCollideWorldBounds(true);
+                otherElement.setRotation(playerInfo.rotation);
+                otherElement.setPosition(playerInfo.x, playerInfo.y);
                 otherElement.hp.move(self, otherElement.x - 40, otherElement.y + 70);
             }
         });
@@ -319,12 +317,22 @@ function create() {
                 self.element.bullet_array[i] = new Bullet(self, server_bullet_array[i].angle, server_bullet_array[i].x, server_bullet_array[i].y, gameSettings.texture[server_bullet_array[i].atomicNumber - 1]);
             }
             else {
+
                 //Otherwise, just update bullet locations
                 self.element.bullet_array[i].enableBody(true, true);
                 self.element.bullet_array[i].setTexture(gameSettings.texture[server_bullet_array[i].atomicNumber - 1] + "bullet");
 
                 self.element.bullet_array[i].x = server_bullet_array[i].x;
                 self.element.bullet_array[i].y = server_bullet_array[i].y;
+
+                
+                let changex = self.element.x - server_bullet_array[i].x;
+                let changey = self.element.y - server_bullet_array[i].y;
+                let distance = Math.sqrt(changex * changex + changey * changey);
+                
+                
+
+
             }
         }
         // Otherwise if there's too many, delete the extra bullets
@@ -565,9 +573,6 @@ function create() {
         }
     });
 
-
-
-
     //Updates the kill count once this player kills someone  
     this.socket.on('updateKills', function (player) {
         if (self.socket.id == player.playerId) {
@@ -590,21 +595,30 @@ function create() {
         }
     });
 
-    this.leaderboard = [self.add.text(200, 20, ''), self.add.text(200, 40, ''), self.add.text(200, 60, ''), self.add.text(200, 80, ''), self.add.text(200, 100, '')];
+    this.leaderboard = [];
+    for (var i = 0; i < 5; i++) {
+        this.leaderboard.push(self.add.text(0, 20*i, ""));
+    }
     this.socket.on('update-leaderboard', function (items) {
         //self.killScoreText = self.add.text(16, 40, 'Kills: ' + (0), { fontSize: '25px', fill: '#00FF00' });
 
-        for (let i = 0; i < Math.min(5, items.length); i++) {
-            self.leaderboard[i].text = String(items[i][0]) + ': ' + String(items[i][1]);
-            //if (self.leaderboard[i].text[:20] )
+        for (let i = 0; i < 5; i++) {
+            if (i< items.length) {
+                self.leaderboard[i].text = String(items[i][0]) + ': ' + String(items[i][2]);
+            }
+            else {
+                self.leaderboard[i].text = "";
+            }
         }
     });
 
+    //RENAME TO SOMETHING LIKE SENDUSERNAMEINFO 
     this.socket.on('updateTheLeaderboard', function () {
         usernameInfo = {
             username: username0,
             id: self.socket.id
         }
+        console.log(usernameInfo)
         self.socket.emit('usernameInfo', usernameInfo);
     });
 
@@ -668,7 +682,7 @@ function create() {
 
 
 function update(time) {
-    
+
     if (typeof this.element != "undefined") {
 
         this.cameras.main.startFollow(this.element);
@@ -689,7 +703,7 @@ function update(time) {
         this.leaderboardBg.x = this.cameras.main.scrollX + 10;
         this.leaderboardBg.y = this.cameras.main.scrollY;
 
-        for (let i = 0; i < Math.min(5, this.otherElements.getChildren().length + 1); i++) {
+        for (let i = 0; i < 5; i++) {
             this.leaderboard[i].x = this.leaderboardBg.x + 925;
             this.leaderboard[i].y = this.leaderboardBg.y + 20 + 20 * i;
         }
@@ -714,8 +728,8 @@ function update(time) {
             let distance = Math.sqrt((bullet.x - this.element.x) * (bullet.x - this.element.x) + (bullet.y - this.element.y) * (bullet.y - this.element.y));
 
             if (this.element.atomicNum > 1) {
-                group2Bullet(bullet, distance, this.element, this.socket, bulletAngle);
-                //group4Bullet(bullet, this.element, this.socket, bulletAngle);
+                //actinideBullet(bullet, this.element, this.socket, bulletAngle);
+                group4Bullet(bullet, this.element, this.socket, bulletAngle);
                 //group6Bullet(bullet, distance, this.element, this.socket, bulletAngle);
             }
             else {
@@ -733,8 +747,7 @@ function update(time) {
 
             let r = this.element.rotation;
             if ((x !== this.element.oldPosition.x || y !== this.element.oldPosition.y || r !== this.element.oldPosition.rotation)) {
-                this.socket.emit('playerMovement', { x: this.element.x, y: this.element.y, vx: this.element.body.velocity.x, vy: this.element.body.velocity.y, rotation: this.element.rotation });
-                this.socket.emit('playerMovement', { x: this.element.x, y: this.element.y, vx: this.element.body.velocity.x, vy: this.element.body.velocity.y, rotation: this.element.rotation });
+                this.socket.emit('playerMovement', { x: this.element.x, y: this.element.y, rotation: this.element.rotation });
             }
         }
 
@@ -751,8 +764,6 @@ function update(time) {
             this.socket.emit('player-heal', { id: this.element.playerId, health: this.element.hp.value });
             lastHealed = time;
         }
-
-
     }
 }
 
