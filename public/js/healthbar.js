@@ -19,7 +19,6 @@ class HealthBar {
         this.y = y;
         this.draw();
         scene.add.existing(this.bar);
-
     }
 
     set (value)

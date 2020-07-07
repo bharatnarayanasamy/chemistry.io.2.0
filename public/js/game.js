@@ -1,3 +1,4 @@
+
 //This class is used for defining global letiables that can be accessed by any class
 
 //Dictionary of game settings
@@ -30,7 +31,6 @@ var gameSettings = {
 
 }
 
-//includes all the necessary phaser information
 let config = {
     type: Phaser.AUTO,
     parent: 'phaser-example',
@@ -43,7 +43,6 @@ let config = {
             debug: false,
             debugShowBody: true,
             debugShowStaticBody: true,
-            //gravity: { y: 0 }
         }
     },
     scene: {
@@ -52,22 +51,20 @@ let config = {
         update: update
     }
 };
-//used in update to make sure healing does not occur when shot/shooting
+
+var game = new Phaser.Game(config);
+
+//initializing some global vars
 var lastShot = 0;
 var lastHealed = 0;
-
-//creates the game itself
-var game = new Phaser.Game(config);
-var element = null;
 var username0 = localStorage.getItem("vOneLocalStorage");
 if (username0 == "") {
     username0 = "Anonymous Player";
 }
-
 let users;
-var emaill;
+var email;
 
-
+//accessing user information to get username
 $.ajax({
     type: 'GET',
     url: '/users',
@@ -86,39 +83,8 @@ $.ajax({
         console.log(xhr);
     }
 });
-var proton_array = [];
-
-for (let i = 0; i < 15; i++) {
-    proton_array.push({
-        x: -1,
-        y: -1,
-    });
-}
-
-var electron_array = [];
-
-for (let i = 0; i < 15; i++) {
-
-    electron_array.push({
-        x: -1,
-        y: -1,
-    });
-
-}
-
-var neutron_array = [];
-
-for (let i = 0; i < 15; i++) {
-
-    neutron_array.push({
-        x: -1,
-        y: -1,
-    });
-
-}
 
 function preload() {
-    //Loading the images for the bullet types, players, proton, electron and neutrons
     this.load.image("hydrogenbullet", "./assets/images/hydrogenbullet.png");
     this.load.image("heliumbullet", "./assets/images/heliumbullet.png");
     this.load.image("obstaclebullet", "./assets/images/obstacle.png");
@@ -138,20 +104,10 @@ function preload() {
     this.input.maxPointers = 1;
 }
 
-// Built-in Phaser function that runs only once at the beginning of the game
 function create() {
-
-    //this.add.bitmapText(100, 110, 'arcade', 'RANK  SCORE   NAME').setTint(0xffffff);
-
-    /**for (let i = 1; i < 6; i++) {
-        if (scores[i - 1]) {
-            this.add.bitmapText(100, 160 + 50 * i, 'arcade', ` ${i}      ${scores[i - 1].highScore}    ${scores[i - 1].name}`).setTint(0xffffff);
-        } else {
-            this.add.bitmapText(100, 160 + 50 * i, 'arcade', ` ${i}      0    ---`).setTint(0xffffff);
-        }
-    }**/
-
-
+    //var minimapCamera = this.cameras.add(512, 0, 512, 384);
+    //minimapCamera.zoom = 0.5;
+    
     //  Set the camera and physics bounds to be the size of 4x4 bg images
     this.cameras.main.setBounds(0, 0, 1920 * 2, 1080 * 2);
     this.physics.world.setBounds(0, 0, 1920 * 2, 1080 * 2);
@@ -165,28 +121,27 @@ function create() {
     //Enabling collisions when an object hits the boundary
     this.physics.world.setBoundsCollision();
 
-    //creating proton array
+    //creating PEN arrays
     this.proton_array = [];
     for (let i = 0; i < 15; i++) {
-        var bb = this.physics.add.image(-1000, -1000, 'proton');
+        var bb = this.physics.add.image(-1, -1, 'proton');
         bb.setScale(0.03);
-        proton_array.push(bb);
+        this.proton_array.push(bb);
     }
 
     this.electron_array = [];
     for (let i = 0; i < 15; i++) {
-        var bb2 = this.physics.add.image(-1000, -1000, 'electron');
+        var bb2 = this.physics.add.image(-1, -1, 'electron');
         bb2.setScale(0.03);
-        electron_array.push(bb2);
+        this.electron_array.push(bb2);
     }
 
     this.neutron_array = [];
     for (let i = 0; i < 15; i++) {
-        var bb3 = this.physics.add.image(-1000, -1000, 'neutron');
+        var bb3 = this.physics.add.image(-1, -1, 'neutron');
         bb3.setScale(0.03);
-        neutron_array.push(bb3);
+        this.neutron_array.push(bb3);
     }
-    console.log(users);
 
     //creates instance of socket.io
     let self = this;
@@ -205,16 +160,13 @@ function create() {
         });
     });
 
-    //adds new player to screen
     this.socket.on('newPlayer', function (playerInfo) {
         //add time delay
         addOtherPlayers(self, playerInfo);
     });
 
-    //disconnects from the game
     this.socket.on('disconnect', function (playerId) {
         //add time delay  
-        //destroying other elements
         self.otherElements.getChildren().forEach((otherElement) => {
             console.log("player disconnected")
             if (playerId === otherElement.playerId) {
@@ -223,32 +175,30 @@ function create() {
                 console.log("player destroyed")
             }
         });
-        //destroy leaderboard and reinitalize it
-        /** 
-        for (let i = 0; i < self.leaderboard.length; i++) {
-            console.log(self.leaderboard[i].text.substring(0, 20))
-            console.log(playerId);
-            if (self.leaderboard[i].text.substring(0, 20) == playerId) {
-                window.alert("you LOL")
-                self.leaderboard[i].text = '';
-            }
-        }
-        **/
-        //fix the update score glitch
+        
+        //improve this by creating special method to 
         if (typeof email != "undefined") {
-            const data = {
-                email: email,
-                score: self.score,
-            };
-            $.ajax({
-                type: 'POST',
-                url: '/submit-score',
-                data,
-                success: function (data) {
-                },
-                error: function (xhr) {
+            var currentHighScore;
+            for (var i = 0; i<users.length; i++) {
+                if (users[i].email == email) {
+                    currentHighScore = users[i].highScore;
                 }
-            });
+            }
+            if (currentHighScore < self.score) {
+                const data = {
+                    email: email,
+                    score: self.score,
+                };
+                $.ajax({
+                    type: 'POST',
+                    url: '/submit-score',
+                    data,
+                    success: function (data) {
+                    },
+                    error: function (xhr) {
+                    }
+                });
+            }
         }
     });
 
@@ -663,19 +613,15 @@ function create() {
 
 
     }
-    //Create group to hold all our projectiles, aka the bullets
     this.projectiles = this.add.group();
 
+    //create leaderboard background image
     this.rect = new Phaser.Geom.Rectangle(900, 0, 300, 250);
     this.graphics = this.add.graphics({ fillStyle: { color: 0x000000 } });
     this.graphics.fillRectShape(this.rect);
     this.graphics.alpha = .3;
     this.leaderboardBg = this.graphics.generateTexture("leaderboardBg");
 
-    //used too collect information on keys that were pressed - important for moving the player  
-    this.cursorKeys = this.input.keyboard.createCursorKeys();
-    this.cursors = this.input.keyboard.createCursorKeys();
-    //collecting information on space bar
     this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
 }
@@ -689,7 +635,6 @@ function update(time) {
         this.cameras.main.followOffset.set(10, 0);
         this.element.movePlayer(this);
 
-        //try to test this stuff with   
         this.protonBar.move(this, this.cameras.main.scrollX + config.width / 2 - 150, this.cameras.main.scrollY + config.height - 120);
         this.protonBarText.x = this.protonBar.x + 90;
         this.protonBarText.y = this.protonBar.y + 2;
@@ -721,11 +666,8 @@ function update(time) {
         if ((this.input.activePointer.isDown || Phaser.Input.Keyboard.JustDown(this.spacebar)) && lastShot + 500 < time) {
             let bullet = this.element.shootBullet(this);
             let bulletAngle = Phaser.Math.Angle.Between(this.element.x, this.element.y, this.input.activePointer.worldX, this.input.activePointer.worldY)
-            console.log("Bullet Shot!")
-            // Tell the server we shot a bullet 
 
-            //bullet.changePdroperty(this.element.atomicNum);
-            let distance = Math.sqrt((bullet.x - this.element.x) * (bullet.x - this.element.x) + (bullet.y - this.element.y) * (bullet.y - this.element.y));
+            //let distance = Math.sqrt((bullet.x - this.element.x) * (bullet.x - this.element.x) + (bullet.y - this.element.y) * (bullet.y - this.element.y));
 
             if (this.element.atomicNum > 1) {
                 //actinideBullet(bullet, this.element, this.socket, bulletAngle);
