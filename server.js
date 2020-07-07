@@ -11,6 +11,8 @@ var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io').listen(server);
 
+const PORT = process.env.PORT || 5000;
+
 const routes = require('./routes/main');
 const secureRoutes = require('./routes/secure');
 
@@ -59,8 +61,7 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).json({ error: err.message });
 });
 
-//Access server on localhost:8083
-server.listen(5000 || process.env.PORT, () => {
+server.listen(PORT, () => {
   console.log(`Listening on ${server.address().port}`);
 });
 
