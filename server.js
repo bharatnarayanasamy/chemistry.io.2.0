@@ -142,6 +142,7 @@ io.on('connection', (socket) => {
     kills: 0,
     atomicNumServer: 1 //player level
   };
+
   player_scores[socket.id] = 0;
   leaderboardArray[socket.id] = "";
 
@@ -152,10 +153,6 @@ io.on('connection', (socket) => {
     neutronScore: 0,
     id: socket.id
   }
-
-
-
-
 
   //Tell client which players are currently in the game so it can create them
   socket.emit('currentPlayers', players);

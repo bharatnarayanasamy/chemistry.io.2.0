@@ -17,25 +17,31 @@ router.post('/signup', passport.authenticate('signup', { session: false }), asyn
 
 
 router.get('/scores', async (req, res, next) => {
-  const users = await UserModel.find({}, 'name highScore -_id').sort({ highScore: -1}).limit(10);
+  const users = await UserModel.find({}, 'name highScore -_id').sort({ highScore: -1 }).limit(10);
   res.status(200).json(users);
 });
 
-router.get('/users', async (req, res) => {
-  UserModel.find({}, function (err, users) {
-    if (err) {
-      res.send('something went really wrong!!');
-      next();
-    }
-    res.json(users);
-  });
-});
+router.post('/loginnousername', async (req, res, next) => {
+  console.log(req.body.username);
 
+  const token = jwt.sign({ user: req.body.username }, 'top_secret', { expiresIn: 300 });
+  const refreshToken = jwt.sign({ user: req.body.username }, 'top_secret_refresh', { expiresIn: 86400 });
 
-router.post('/submit-score', async (req, res, next) => {
-  const { email, score } = req.body;
-  await UserModel.updateOne({ email }, { highScore: score });
-  res.status(200).json({ status: 'ok' });
+  // store tokens in cookie
+  res.cookie('jwt', token);
+  res.cookie('refreshJwt', refreshToken);
+
+  // store tokens in memory
+  tokenList[refreshToken] = {
+    token,
+    refreshToken,
+    email: "",
+    _id: ""
+  };
+
+  //Send back the token to the user
+  return res.status(200).json({ token, refreshToken });
+  res.status(200).json({ message: 'Login successful' });
 });
 
 router.post('/login', async (req, res, next) => {
@@ -90,6 +96,21 @@ router.post('/token', (req, res) => {
   } else {
     res.status(401).json({ message: 'Unauthorized' });
   }
+});
+router.get('/users', async (req, res) => {
+  UserModel.find({}, function (err, users) {
+    if (err) {
+      res.send('something went really wrong!!');
+      next();
+    }
+    res.json(users);
+  });
+});
+
+router.post('/submit-score', async (req, res, next) => {
+  const { email, score } = req.body;
+  await UserModel.updateOne({ email }, { highScore: score });
+  res.status(200).json({ status: 'ok' });
 });
 
 router.post('/logout', (req, res) => {

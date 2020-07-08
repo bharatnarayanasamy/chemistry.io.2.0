@@ -64,6 +64,9 @@ if (username0 == "") {
 let users;
 var email;
 
+var playerX;
+var playerY;
+
 //accessing user information to get username
 $.ajax({
     type: 'GET',
@@ -105,9 +108,6 @@ function preload() {
 }
 
 function create() {
-    //var minimapCamera = this.cameras.add(512, 0, 512, 384);
-    //minimapCamera.zoom = 0.5;
-    
     //  Set the camera and physics bounds to be the size of 4x4 bg images
     this.cameras.main.setBounds(0, 0, 1920 * 2, 1080 * 2);
     this.physics.world.setBounds(0, 0, 1920 * 2, 1080 * 2);
@@ -279,10 +279,6 @@ function create() {
                 let changex = self.element.x - server_bullet_array[i].x;
                 let changey = self.element.y - server_bullet_array[i].y;
                 let distance = Math.sqrt(changex * changex + changey * changey);
-                
-                
-
-
             }
         }
         // Otherwise if there's too many, delete the extra bullets
@@ -562,6 +558,7 @@ function create() {
         }
     });
 
+    
     //RENAME TO SOMETHING LIKE SENDUSERNAMEINFO 
     this.socket.on('updateTheLeaderboard', function () {
         usernameInfo = {
@@ -594,7 +591,6 @@ function create() {
 
         //create score text on top left
         self.scoreText = self.add.text(16, 70, 'Score: ' + (0), { fontSize: '25px', fill: '#00FF00' });
-
     }
 
     //add other players onto the screen
@@ -610,8 +606,6 @@ function create() {
             self.otherElements.add(otherElement);
             otherElement.body.enable = true;
         }
-
-
     }
     this.projectiles = this.add.group();
 
@@ -622,8 +616,19 @@ function create() {
     this.graphics.alpha = .3;
     this.leaderboardBg = this.graphics.generateTexture("leaderboardBg");
 
-    this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    this.rect2 = new Phaser.Geom.Rectangle(config.width - config.width/10 - 50, config.height - config.height/10 - 50, config.width / 10 + 10, config.height / 10 + 10);
+    this.graphics2 = this.add.graphics({ fillStyle: { color: 0x000000 } });
+    this.graphics2.fillRectShape(this.rect2);
+    this.graphics2.alpha = .5
+    this.minimapBg = this.graphics2.generateTexture("minimapBg");
 
+
+    this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    
+    this.whiteSquare = new Phaser.Geom.Rectangle(config.width - config.width/10 - 50, config.height - config.height/10 - 50, 10, 10 );
+                this.dot = this.add.graphics({ fillStyle: { color: 0xffffff } });
+                this.dot.fillRectShape(this.whiteSquare);
+    
 }
 
 
@@ -648,11 +653,26 @@ function update(time) {
         this.leaderboardBg.x = this.cameras.main.scrollX + 10;
         this.leaderboardBg.y = this.cameras.main.scrollY;
 
+        
         for (let i = 0; i < 5; i++) {
             this.leaderboard[i].x = this.leaderboardBg.x + 925;
             this.leaderboard[i].y = this.leaderboardBg.y + 20 + 20 * i;
         }
+        
+        //this.minimapBg.move(this, this.cameras.main.scrollX + config.width - 150, this.cameras.main.scrollY + config.height - 80);
+        this.minimapBg.x = this.cameras.main.scrollX;
+        this.minimapBg.y = this.cameras.main.scrollY;
 
+        this.dot.x = this.cameras.main.scrollX;
+        this.dot.y = this.cameras.main.scrollY;
+
+        //this.dot.x = config.width - config.width/10 - 50;
+        //this.dot.y = config.height - config.height/10 - 50;
+        //this.dot.x = (config.width - config.width/10 - 50) + this.element.x/( 3840/(config.width/10))
+        //this.dot.y = (config.height - config.height/10 - 50) + this.element.y/( 2080/(config.height/10))
+        this.dot.x += this.element.x/( 3840/(config.width/10));
+        this.dot.y += this.element.y/( 2080/(config.height/10));
+        
         this.healthLabel.text = "Health: " + this.element.hp.value;
         this.healthLabel.x = this.cameras.main.scrollX + 10;
         this.healthLabel.y = this.cameras.main.scrollY + 10;
