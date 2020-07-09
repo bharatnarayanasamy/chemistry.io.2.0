@@ -16,6 +16,19 @@
 
         }
     </style>
+    <script>
+        function deleteAllCookies() {
+            var cookies = document.cookie.split(";");
+
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i];
+                var eqPos = cookie.indexOf("=");
+                var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+                document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+            }
+        }
+    </script>
+    <script src="assets/js/refreshToken.js"></script>
 
     <script type="text/javascript" src="js/usernameinfo.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
@@ -34,11 +47,20 @@
     <script src="js/element.js"></script>
     <script>
         $(window).on("unload", function (e) {
+            $.ajax({
+                type: 'POST',
+                url: '/logout',
+                success: function () { window.alert("Hi") },
+                error: function (xhr) {
+                    window.alert('failed');
+                }
+            });
             window.location.href = "/index.html"
         });
     </script>
     <script type="text/javascript" src="js/game.js"></script>
-    
+
+
 
 </body>
 
