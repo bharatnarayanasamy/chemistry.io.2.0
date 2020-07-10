@@ -21,9 +21,7 @@ router.get('/scores', async (req, res, next) => {
   res.status(200).json(users);
 });
 
-router.post('/loginnousername', async (req, res, next) => {
-  console.log(req.cookies);
-  
+router.post('/loginnousername', async (req, res, next) => {  
   const token = jwt.sign({ user: req.body.username }, 'top_secret', { expiresIn: 300 });
   const refreshToken = jwt.sign({ user: req.body.username }, 'top_secret_refresh', { expiresIn: 10 });
 
@@ -93,7 +91,7 @@ router.post('/token', (req, res) => {
 
     res.status(200).json({ token });
   } else {
-    res.status(401).json({ message: 'Unauthorized' });
+    res.status(401).json({ message: 'Unauthorized, go to chemistry2-io.herokuapp.com to paly the game' });
   }
 });
 router.get('/users', async (req, res) => {
@@ -114,6 +112,7 @@ router.post('/submit-score', async (req, res, next) => {
 
 router.post('/logout', (req, res) => {
   //console.log(req);
+  console.log("AJSKLDJLK:FJSLDKJFLKSAJDKL:")
   if (req.cookies) {
     const refreshToken = req.cookies['refreshJwt'];
     if (refreshToken in tokenList) {

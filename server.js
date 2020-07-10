@@ -39,7 +39,7 @@ require('./auth/auth');
   res.sendFile(__dirname + '/public/game.html');
 });**/
 
-app.get('/game.html', passport.authenticate('jwt', { session : false }), function (req, res) {
+app.get('/game.html', passport.authenticate('jwt', { session: false }), function (req, res) {
   res.sendFile(__dirname + '/public/game.html');
 });
 
@@ -301,7 +301,43 @@ function ServerGameLoop() {
 
       bullet.x += speedX / 50; //update bullet position
       bullet.y += speedY / 50;
-      
+
+      //Split into three bullets for actinides
+
+      if (typeof players[bullet.owner_id] != "undefined" && players[bullet.owner_id].atomicNumServer > 1) {
+
+        let dx0 = players[bullet.owner_id].x - bullet.x;
+        let dy0 = players[bullet.owner_id].y - bullet.y;
+        let dist0 = Math.sqrt(dx0 * dx0 + dy0 * dy0);
+
+        if (dist0 > 300 && typeof bullet.firstBullet != "undefined" && bullet.firstBullet==true) {
+
+
+          let bullet0 = { x: bullet.x, y: bullet.y, angle: bullet.angle + 0.2, bulletSpeed: bullet.bulletSpeed, damage: bullet.damage, atomicNumber: bullet.atomicNumber }
+          let bullet1 = { x: bullet.x, y: bullet.y, angle: bullet.angle - 0.2, bulletSpeed: bullet.bulletSpeed, damage: bullet.damage, atomicNumber: bullet.atomicNumber };
+
+          //bullet0.angle += 0.2;
+          //bullet1.angle -= 0.2;
+
+         
+          bullet0.ix = bullet.ix;  //set initial positions of bullet to track distance travel;ed
+          bullet1.ix = bullet.ix;
+
+          bullet0.iy = bullet.iy;
+          bullet1.iy = bullet.iy;
+
+          bullet_array.push(bullet0);
+          bullet_array.push(bullet1);
+          bullet.firstBullet = false;
+        }
+
+
+      }
+
+
+
+
+
       // Remove if it goes off screen
       if (bullet.x < -10 || bullet.x > gameWidth + 10 || bullet.y < -10 || bullet.y > gameHeight + 10) {
         bullet_array.splice(i, 1);

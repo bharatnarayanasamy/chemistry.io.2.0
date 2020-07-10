@@ -28,7 +28,6 @@ var gameSettings = {
         104, 105, 106, 107, 108, 109, 110, 111, 112],
     lanthanides: [57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71],
     actinides: [89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103]
-
 }
 
 let config = {
@@ -89,7 +88,7 @@ $.ajax({
 
 function preload() {
     this.load.image("hydrogenbullet", "./assets/images/hydrogenbullet.png");
-    this.load.image("heliumbullet", "./assets/images/heliumbullet.png");
+    this.load.image("heliumbullet", "./assets/images/group8bullet.png");
     this.load.image("obstaclebullet", "./assets/images/obstacle.png");
 
     this.load.image("hydrogen", "./assets/images/hydrogen.png");
@@ -240,7 +239,7 @@ function create() {
         }
         if (self.element.hp.value <= 0) {
             if (confirm('Refresh to Play Again')) {
-                window.location.reload();
+                window.location.href = "/index.html";
             }
         }
     });
@@ -265,6 +264,7 @@ function create() {
             if (self.element.bullet_array[i] == undefined) {
                 //let angle = Phaser.Math.Angle.Between(self.element.x, self.element.y, self.input.activePointer.worldX, self.input.activePointer.worldY);
                 self.element.bullet_array[i] = new Bullet(self, server_bullet_array[i].angle, server_bullet_array[i].x, server_bullet_array[i].y, gameSettings.texture[server_bullet_array[i].atomicNumber - 1]);
+                console.log(server_bullet_array[i].angle);
             }
             else {
 
@@ -279,6 +279,7 @@ function create() {
                 let changex = self.element.x - server_bullet_array[i].x;
                 let changey = self.element.y - server_bullet_array[i].y;
                 let distance = Math.sqrt(changex * changex + changey * changey);
+                //console.log(self.element.bullet_array[i].angle)
             }
         }
         // Otherwise if there's too many, delete the extra bullets
@@ -637,7 +638,7 @@ function update(time) {
     if (typeof this.element != "undefined") {
 
         this.cameras.main.startFollow(this.element);
-        this.cameras.main.followOffset.set(10, 0);
+        this.cameras.main.followOffset.set(0, 0);
         this.element.movePlayer(this);
 
         this.protonBar.move(this, this.cameras.main.scrollX + config.width / 2 - 150, this.cameras.main.scrollY + config.height - 120);
@@ -683,15 +684,18 @@ function update(time) {
         this.scoreText.x = this.cameras.main.scrollX + 10;
         this.scoreText.y = this.cameras.main.scrollY + 90;
 
-        if ((this.input.activePointer.isDown || Phaser.Input.Keyboard.JustDown(this.spacebar)) && lastShot + 500 < time) {
+        if ( (this.input.activePointer.isDown || Phaser.Input.Keyboard.JustDown(this.spacebar)) && (lastShot + 500 < time || (lastShot + 250 < time && this.element.atomicNum == 2))) {
             let bullet = this.element.shootBullet(this);
+            
             let bulletAngle = Phaser.Math.Angle.Between(this.element.x, this.element.y, this.input.activePointer.worldX, this.input.activePointer.worldY)
-
+            //console.log(bullet.angle2)
+            //console.log(bulletAngle)
             //let distance = Math.sqrt((bullet.x - this.element.x) * (bullet.x - this.element.x) + (bullet.y - this.element.y) * (bullet.y - this.element.y));
 
-            if (this.element.atomicNum > 1) {
+            if (this.element.atomicNum == 2) {
                 //actinideBullet(bullet, this.element, this.socket, bulletAngle);
-                group4Bullet(bullet, this.element, this.socket, bulletAngle);
+                group8Bullet(bullet, this.element, this.socket, bulletAngle);
+                //group4Bullet(bullet, this.element, this.socket, bulletAngle);
                 //group6Bullet(bullet, distance, this.element, this.socket, bulletAngle);
             }
             else {
