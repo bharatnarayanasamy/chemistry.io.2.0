@@ -63,6 +63,8 @@ if (username0 == "") {
 let users;
 var email;
 
+var elementNumbers = JSON.parse("elements.json");
+
 var playerX;
 var playerY;
 
@@ -108,6 +110,8 @@ function preload() {
 }
 
 function create() {
+    console.log(elementNumbers);
+
     //  Set the camera and physics bounds to be the size of 4x4 bg images
     this.cameras.main.setBounds(0, 0, 1920 * 2, 1080 * 2);
     this.physics.world.setBounds(0, 0, 1920 * 2, 1080 * 2);
