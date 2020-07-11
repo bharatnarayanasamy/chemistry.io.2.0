@@ -1,7 +1,12 @@
+/*TO DO:
+FOR OFTEN USED VARIABLES REQUIRING INDEXING AND/OR PROCESSSING, CREATE A NEW VARIABLE TO STORE THAT VALUE
+*/
 
 //This class is used for defining global letiables that can be accessed by any class
 
 //Dictionary of game settings
+//fconst fs = require('fs');
+
 var gameSettings = {
     playerSpeed: 300,
     bulletSpeed: 350,
@@ -51,6 +56,7 @@ let config = {
     }
 };
 
+
 var game = new Phaser.Game(config);
 
 //initializing some global vars
@@ -68,6 +74,7 @@ var elementNumbers = JSON.parse(fs.readFileSync('elements.json', 'utf8'))
 var playerX;
 var playerY;
 
+var lastSccoreUpdate;
 //accessing user information to get username
 $.ajax({
     type: 'GET',
@@ -90,8 +97,11 @@ $.ajax({
 
 function preload() {
     this.load.image("hydrogenbullet", "./assets/images/hydrogenbullet.png");
-    this.load.image("heliumbullet", "./assets/images/group8Bullet.png");
+
+    //CHANGE LINE BELOW, CURRENTLY TESTING
+    //this.load.image("heliumbullet", "./assets/images/group8Bullet.png");
     this.load.image("obstaclebullet", "./assets/images/obstacle.png");
+    this.load.image("heliumbullet", "./assets/images/group7Bullet.png");
 
     this.load.image("hydrogen", "./assets/images/hydrogen.png");
     this.load.image("helium", "./assets/images/helium.png");
@@ -179,31 +189,6 @@ function create() {
                 console.log("player destroyed")
             }
         });
-
-        //improve this by creating special method to 
-        if (typeof email != "undefined") {
-            var currentHighScore;
-            for (var i = 0; i < users.length; i++) {
-                if (users[i].email == email) {
-                    currentHighScore = users[i].highScore;
-                }
-            }
-            if (currentHighScore < self.score) {
-                const data = {
-                    email: email,
-                    score: self.score,
-                };
-                $.ajax({
-                    type: 'POST',
-                    url: '/submit-score',
-                    data,
-                    success: function (data) {
-                    },
-                    error: function (xhr) {
-                    }
-                });
-            }
-        }
     });
 
     //removes dead players from the screen
@@ -243,8 +228,42 @@ function create() {
             });
         }
         if (self.element.hp.value <= 0) {
-            window.alert("You have died!")
-            window.location.href = "/index.html";
+            //improve this by creating special method to 
+            if (typeof email != "undefined") {
+                var currentHighScore;
+                for (var i = 0; i < users.length; i++) {
+                    if (users[i].email == email) {
+                        currentHighScore = users[i].highScore;
+                    }
+                }
+                if (currentHighScore < self.score) {
+                    const data = {
+                        email: email,
+                        score: self.score,
+                    };
+                    $.ajax({
+                        type: 'POST',
+                        url: '/submit-score',
+                        data,
+                        success: function (data) {
+                        },
+                        error: function (xhr) {
+                        }
+                    });
+                }
+            }
+            $.ajax({
+                type: 'POST',
+                url: '/logout',
+                success: function () {
+                    window.alert("You died!");
+                    window.location.href = "index.html";
+                },
+                error: function () {
+                    window.alert("System Error");
+                    window.location.href = "index.html";
+                }
+            });
         }
     });
 
@@ -272,12 +291,23 @@ function create() {
                 if (server_bullet_array[i].atomicNumber == 2) {
                     self.element.bullet_array[i].rotation = server_bullet_array[i].rotAngle;
                 }
-                //console.log(server_bullet_array[i].angle);
             }
             else {
                 //Otherwise, just update bullet locations
                 self.element.bullet_array[i].enableBody(true, true);
                 self.element.bullet_array[i].setTexture(gameSettings.texture[server_bullet_array[i].atomicNumber - 1] + "bullet");
+                
+                if (server_bullet_array[i].atomicNumber < 3 && gameSettings.texture[server_bullet_array[i].atomicNumber - 1] == "obstacle")
+                {
+                        console.log("BRUHHH WHY DID THIS PRINT")
+                }
+                if (server_bullet_array[i].atomicNumber > 2)
+                {
+                    //self.element.bullet_array[i].rotation += 1.5
+                    
+                    self.element.bullet_array[i].setScale(1.5);
+                    //change scale by 1.g
+                }
 
                 self.element.bullet_array[i].x = server_bullet_array[i].x;
                 self.element.bullet_array[i].y = server_bullet_array[i].y;
@@ -351,7 +381,6 @@ function create() {
             self.physics.add.overlap(self.element, self.proton_array[i], function () {
 
                 if (server_proton_array[i].x != this.oldProtonPosition[i].x || server_proton_array[i].y != this.oldProtonPosition[i].y) {
-                    console.log(this.killScore);
                     this.score += this.killScore / (gameSettings.upgradePEN * 3);
                     this.scoreText.text = 'Score: ' + this.score;
 

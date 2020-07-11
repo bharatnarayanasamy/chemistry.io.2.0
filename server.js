@@ -6,7 +6,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const passport = require('passport');
-const fs = require('fs');
+var fs = require('fs');
 
 // create an instance of an express app
 var app = express();
@@ -260,7 +260,9 @@ io.on('connection', (socket) => {
     data.owner_id = socket.id; // Attach id of the player to the bullet
     data.ix = data.x;  //set initial positions of bullet to track distance travel;ed
     data.iy = data.y;
-    if(data.atomicNumber > 1) {
+
+    //CHANGE BEFORE FINAL
+    if(data.atomicNumber == 5) {
       data.bulletSpeed /= 3;
     }
     let new_bullet = data;
@@ -270,6 +272,7 @@ io.on('connection', (socket) => {
   //gets called once a player is ready to upgrade
   socket.on('upgrade', (atomicNum) => {
     if (players[socket.id] != undefined) {
+      //CONSIDER JUST DOING ATOMICNUMSERVER++
       players[socket.id].atomicNumServer = atomicNum; //increases level
       score_array[socket.id].protonScore = 0; //resets proton collection numbers
       score_array[socket.id].neutronScore = 0;
@@ -312,9 +315,7 @@ function ServerGameLoop() {
         //group5Bullet
         
         bullet_array[i].bulletSpeed += 10;
-      }
-      console.log(bullet.bulletSpeed);
-    
+      }    
       
       
       /*
@@ -364,14 +365,20 @@ function ServerGameLoop() {
           let dy = players[id].y - bullet.y;
           let dist = Math.sqrt(dx * dx + dy * dy);
           let owner = bullet.owner_id;
-          if (dist < 70) {
-            healthInfo.i = i;
-            healthInfo.id = id;
-            io.emit('player-hit', healthInfo); // Tell everyone this player got hit
-            players[id].health -= bullet.damage;
-            if (typeof players[owner] != "undefined" && players[owner].atomicNumServer != 2 ) {
-              bullet_array.splice(i, 1);
-              i--;
+          thresh = 70
+          if(players[owner].atomicNumServer == 3) 
+          {
+              thresh = 500;            
+          }
+            if (dist < thresh) {
+              healthInfo.i = i;
+              healthInfo.id = id;
+              io.emit('player-hit', healthInfo); // Tell everyone this player got hit
+              players[id].health -= bullet.damage;
+              if (typeof players[owner] != "undefined" && players[owner].atomicNumServer != 2 ) {
+                bullet_array.splice(i, 1);
+                i--;
+              }
             }
           }
           io.emit("update-health", players[id]);
@@ -398,11 +405,12 @@ function ServerGameLoop() {
         }
       }
     }
+    // Tell everyone where all the bullets are by sending the whole array
+    io.emit("bullets-update", bullet_array);
   }
 
-  // Tell everyone where all the bullets are by sending the whole array
-  io.emit("bullets-update", bullet_array);
-}
+  
+
 
 // Update the bullets 60 times per frame and send updates
 function UpdateLeaderboard() {

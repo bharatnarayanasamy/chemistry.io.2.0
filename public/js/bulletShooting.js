@@ -71,9 +71,6 @@ function group6Bullet(bullet, element, socket, bulletAngle){
 }
 
 function group4Bullet(bullet, element, socket, bulletAngle){
- 
-   
-    
     socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed,
         damage: bullet.damage, atomicNumber: element.atomicNum, rotAngle: 0 });
         
@@ -85,13 +82,18 @@ function group4Bullet(bullet, element, socket, bulletAngle){
 
     socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bulletAngle + 3.14, bulletSpeed: gameSettings.bulletSpeed,
         damage: bullet.damage, atomicNumber: element.atomicNum, rotAngle: 0 });
-    
 }
 
-function actinideBullet(bullet, element, socket, bulletAngle)
+//group 5 kinda useless cuz everything is done in server
+function group5Bullet(bullet, element, socket, bulletAngle) {
+    socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed,
+        damage: bullet.damage, atomicNumber: element.atomicNum, rotAngle: 0});
+}
+
+function group7Bullet(bullet, element, socket, bulletAngle)
 {
     socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed,
-        damage: bullet.damage, atomicNumber: element.atomicNum, rotAngle: 0, firstBullet: true});
+        damage: bullet.damage, atomicNumber: element.atomicNum, rotAngle: 0});
 }
 
 function group8Bullet(bullet, element, socket, bulletAngle, rotationAngle)
@@ -100,9 +102,8 @@ function group8Bullet(bullet, element, socket, bulletAngle, rotationAngle)
         damage: bullet.damage/20, atomicNumber: element.atomicNum, rotAngle: rotationAngle});
 }
 
-function group5Bullet(bullet, element, socket, bulletAngle, rotationAngle)
+function actinideBullet(bullet, element, socket, bulletAngle)
 {
     socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed,
-        damage: bullet.damage, atomicNumber: element.atomicNum, rotAngle: rotationAngle});
+        damage: bullet.damage, atomicNumber: element.atomicNum, rotAngle: 0, firstBullet: true});
 }
-        

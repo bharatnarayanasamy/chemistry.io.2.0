@@ -112,7 +112,6 @@ router.post('/submit-score', async (req, res, next) => {
 
 router.post('/logout', (req, res) => {
   //console.log(req);
-  console.log("AJSKLDJLK:FJSLDKJFLKSAJDKL:")
   if (req.cookies) {
     const refreshToken = req.cookies['refreshJwt'];
     if (refreshToken in tokenList) {
@@ -120,6 +119,7 @@ router.post('/logout', (req, res) => {
     } 
     res.clearCookie('refreshJwt');
     res.clearCookie('jwt');
+    console.log("Logged Out!!")
   }
   res.status(200).json({ message: 'logged out' });
 });
