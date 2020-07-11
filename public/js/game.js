@@ -63,7 +63,7 @@ if (username0 == "") {
 let users;
 var email;
 
-var elementNumbers = JSON.parse("elements.json");
+var elementNumbers = JSON.parse(elements.json);
 
 var playerX;
 var playerY;
