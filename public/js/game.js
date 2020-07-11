@@ -90,7 +90,7 @@ $.ajax({
 
 function preload() {
     this.load.image("hydrogenbullet", "./assets/images/hydrogenbullet.png");
-    this.load.image("heliumbullet", "./assets/images/heliumbullet.png");
+    this.load.image("heliumbullet", "./assets/images/group8Bullet.png");
     this.load.image("obstaclebullet", "./assets/images/obstacle.png");
 
     this.load.image("hydrogen", "./assets/images/hydrogen.png");
