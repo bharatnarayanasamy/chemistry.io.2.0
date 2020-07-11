@@ -285,15 +285,12 @@ io.on('connection', (socket) => {
 
     leaderboardArray[usernameInfo.id] = usernameInfo.username;
   });
-
 });
-
 // Update the bullets 60 times per frame and send updates
 function ServerGameLoop() {
   for (let i = 0; i < bullet_array.length; i++) {
     let bullet = bullet_array[i];
     if (typeof bullet != "undefined") {
-
       let speed = bullet.bulletSpeed;
 
       let speedY = speed * Math.sin(bullet.angle);
@@ -301,9 +298,7 @@ function ServerGameLoop() {
 
       bullet.x += speedX / 50; //update bullet position
       bullet.y += speedY / 50;
-
-      //Split into three bullets for actinides
-
+      /*
       if (typeof players[bullet.owner_id] != "undefined" && players[bullet.owner_id].atomicNumServer > 1) {
 
         let dx0 = players[bullet.owner_id].x - bullet.x;
@@ -312,14 +307,12 @@ function ServerGameLoop() {
 
         if (dist0 > 300 && typeof bullet.firstBullet != "undefined" && bullet.firstBullet==true) {
 
-
           let bullet0 = { x: bullet.x, y: bullet.y, angle: bullet.angle + 0.2, bulletSpeed: bullet.bulletSpeed, damage: bullet.damage, atomicNumber: bullet.atomicNumber }
           let bullet1 = { x: bullet.x, y: bullet.y, angle: bullet.angle - 0.2, bulletSpeed: bullet.bulletSpeed, damage: bullet.damage, atomicNumber: bullet.atomicNumber };
 
           //bullet0.angle += 0.2;
           //bullet1.angle -= 0.2;
 
-         
           bullet0.ix = bullet.ix;  //set initial positions of bullet to track distance travel;ed
           bullet1.ix = bullet.ix;
 
@@ -330,13 +323,8 @@ function ServerGameLoop() {
           bullet_array.push(bullet1);
           bullet.firstBullet = false;
         }
-
-
       }
-
-
-
-
+      */
 
       // Remove if it goes off screen
       if (bullet.x < -10 || bullet.x > gameWidth + 10 || bullet.y < -10 || bullet.y > gameHeight + 10) {
@@ -362,8 +350,10 @@ function ServerGameLoop() {
             healthInfo.id = id;
             io.emit('player-hit', healthInfo); // Tell everyone this player got hit
             players[id].health -= bullet.damage;
-            bullet_array.splice(i, 1);
-            i--;
+            if (players[owner].atomicNumServer != 2) {
+              bullet_array.splice(i, 1);
+              i--;
+            }
           }
           io.emit("update-health", players[id]);
           if (typeof players[id] != "undefined") {

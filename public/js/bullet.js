@@ -33,8 +33,6 @@ class Bullet extends Phaser.Physics.Arcade.Sprite {
     this.body.velocity.x = Math.cos(angle) * gameSettings.bulletSpeed;
     this.body.velocity.y = Math.sin(angle) * gameSettings.bulletSpeed;
     
-
-    
     this.angle2 = angle;
 
     var angleInDegrees = (angle * (180 / 3.1415)) + 90;
