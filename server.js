@@ -6,6 +6,8 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const passport = require('passport');
+const fs = require('fs');
+
 // create an instance of an express app
 var app = express();
 var server = require('http').Server(app);
@@ -258,6 +260,9 @@ io.on('connection', (socket) => {
     data.owner_id = socket.id; // Attach id of the player to the bullet
     data.ix = data.x;  //set initial positions of bullet to track distance travel;ed
     data.iy = data.y;
+    if(data.atomicNumber > 1) {
+      data.bulletSpeed /= 3;
+    }
     let new_bullet = data;
     bullet_array.push(new_bullet);
   });
@@ -293,14 +298,28 @@ function ServerGameLoop() {
     if (typeof bullet != "undefined") {
       let speed = bullet.bulletSpeed;
 
+     
       let speedY = speed * Math.sin(bullet.angle);
       let speedX = speed * Math.cos(bullet.angle);
 
+      
+ 
       bullet.x += speedX / 50; //update bullet position
       bullet.y += speedY / 50;
+      
+
+      if (typeof players[bullet.owner_id] != "undefined" &&  players[bullet.owner_id].atomicNumServer > 1){
+        //group5Bullet
+        
+        bullet_array[i].bulletSpeed += 10;
+      }
+      console.log(bullet.bulletSpeed);
+    
+      
+      
       /*
       if (typeof players[bullet.owner_id] != "undefined" && players[bullet.owner_id].atomicNumServer > 1) {
-
+        //actinideBullet
         let dx0 = players[bullet.owner_id].x - bullet.x;
         let dy0 = players[bullet.owner_id].y - bullet.y;
         let dist0 = Math.sqrt(dx0 * dx0 + dy0 * dy0);
@@ -350,7 +369,7 @@ function ServerGameLoop() {
             healthInfo.id = id;
             io.emit('player-hit', healthInfo); // Tell everyone this player got hit
             players[id].health -= bullet.damage;
-            if (players[owner].atomicNumServer != 2) {
+            if (typeof players[owner] != "undefined" && players[owner].atomicNumServer != 2 ) {
               bullet_array.splice(i, 1);
               i--;
             }

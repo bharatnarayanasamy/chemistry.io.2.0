@@ -63,7 +63,7 @@ if (username0 == "") {
 let users;
 var email;
 
-var elementNumbers = JSON.parse(elements.json);
+var elementNumbers = JSON.parse(fs.readFileSync('elements.json', 'utf8'))
 
 var playerX;
 var playerY;
@@ -90,7 +90,7 @@ $.ajax({
 
 function preload() {
     this.load.image("hydrogenbullet", "./assets/images/hydrogenbullet.png");
-    this.load.image("heliumbullet", "./assets/images/group8bullet.png");
+    this.load.image("heliumbullet", "./assets/images/group8Bullet.png");
     this.load.image("obstaclebullet", "./assets/images/obstacle.png");
 
     this.load.image("hydrogen", "./assets/images/hydrogen.png");
@@ -179,11 +179,11 @@ function create() {
                 console.log("player destroyed")
             }
         });
-        
+
         //improve this by creating special method to 
         if (typeof email != "undefined") {
             var currentHighScore;
-            for (var i = 0; i<users.length; i++) {
+            for (var i = 0; i < users.length; i++) {
                 if (users[i].email == email) {
                     currentHighScore = users[i].highScore;
                 }
@@ -243,9 +243,8 @@ function create() {
             });
         }
         if (self.element.hp.value <= 0) {
-            if (confirm('Refresh to Play Again')) {
-                window.location.href = "/index.html";
-            }
+            window.alert("You have died!")
+            window.location.href = "/index.html";
         }
     });
 
@@ -331,7 +330,7 @@ function create() {
     this.killScore = 15;
     //creates scorebars at bottom of screen
     this.protonBar = new CollectionBar(this, config.width / 2 - 150, config.height - 120, "proton", 0);
-    this.protonBarText = this.add.text(config.width / 2 - 60, config.height - 118, 'Protons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' });
+    this.protonBarText = this.add.text(config.width / 2 - 60, config.height - 118, 'Protons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' }).setScrollFactor(1);
     this.electronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 80, "electron", 0);
     this.electronBarText = this.add.text(config.width / 2 - 60, config.height - 78, 'Electrons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' });
     this.neutronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 40, "neutron", 0);
@@ -531,13 +530,13 @@ function create() {
 
     this.leaderboard = [];
     for (var i = 0; i < 5; i++) {
-        this.leaderboard.push(self.add.text(0, 20*i, ""));
+        this.leaderboard.push(self.add.text(0, 20 * i, ""));
     }
     this.socket.on('update-leaderboard', function (items) {
         //self.killScoreText = self.add.text(16, 40, 'Kills: ' + (0), { fontSize: '25px', fill: '#00FF00' });
 
         for (let i = 0; i < 5; i++) {
-            if (i< items.length) {
+            if (i < items.length) {
                 self.leaderboard[i].text = String(items[i][0]) + ': ' + String(items[i][2]);
             }
             else {
@@ -546,7 +545,7 @@ function create() {
         }
     });
 
-    
+
     //RENAME TO SOMETHING LIKE SENDUSERNAMEINFO 
     this.socket.on('updateTheLeaderboard', function () {
         usernameInfo = {
@@ -603,7 +602,7 @@ function create() {
     this.graphics.alpha = .3;
     this.leaderboardBg = this.graphics.generateTexture("leaderboardBg");
 
-    this.rect2 = new Phaser.Geom.Rectangle(config.width - config.width/10 - 50, config.height - config.height/10 - 50, config.width / 10 + 10, config.height / 10 + 10);
+    this.rect2 = new Phaser.Geom.Rectangle(config.width - config.width / 10 - 50, config.height - config.height / 10 - 50, config.width / 10 + 10, config.height / 10 + 10);
     this.graphics2 = this.add.graphics({ fillStyle: { color: 0x000000 } });
     this.graphics2.fillRectShape(this.rect2);
     this.graphics2.alpha = .5
@@ -611,11 +610,11 @@ function create() {
 
 
     this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-    
-    this.whiteSquare = new Phaser.Geom.Rectangle(config.width - config.width/10 - 50, config.height - config.height/10 - 50, 10, 10 );
-                this.dot = this.add.graphics({ fillStyle: { color: 0xffffff } });
-                this.dot.fillRectShape(this.whiteSquare);
-    
+
+    this.whiteSquare = new Phaser.Geom.Rectangle(config.width - config.width / 10 - 50, config.height - config.height / 10 - 50, 10, 10);
+    this.dot = this.add.graphics({ fillStyle: { color: 0xffffff } });
+    this.dot.fillRectShape(this.whiteSquare);
+
 }
 
 
@@ -640,12 +639,12 @@ function update(time) {
         this.leaderboardBg.x = this.cameras.main.scrollX + 10;
         this.leaderboardBg.y = this.cameras.main.scrollY;
 
-        
+
         for (let i = 0; i < 5; i++) {
             this.leaderboard[i].x = this.leaderboardBg.x + 925;
             this.leaderboard[i].y = this.leaderboardBg.y + 20 + 20 * i;
         }
-        
+
         //this.minimapBg.move(this, this.cameras.main.scrollX + config.width - 150, this.cameras.main.scrollY + config.height - 80);
         this.minimapBg.x = this.cameras.main.scrollX;
         this.minimapBg.y = this.cameras.main.scrollY;
@@ -657,9 +656,9 @@ function update(time) {
         //this.dot.y = config.height - config.height/10 - 50;
         //this.dot.x = (config.width - config.width/10 - 50) + this.element.x/( 3840/(config.width/10))
         //this.dot.y = (config.height - config.height/10 - 50) + this.element.y/( 2080/(config.height/10))
-        this.dot.x += this.element.x/( 3840/(config.width/10));
-        this.dot.y += this.element.y/( 2080/(config.height/10));
-        
+        this.dot.x += this.element.x / (3840 / (config.width / 10));
+        this.dot.y += this.element.y / (2080 / (config.height / 10));
+
         this.healthLabel.text = "Health: " + this.element.hp.value;
         this.healthLabel.x = this.cameras.main.scrollX + 10;
         this.healthLabel.y = this.cameras.main.scrollY + 10;
@@ -670,9 +669,9 @@ function update(time) {
         this.scoreText.x = this.cameras.main.scrollX + 10;
         this.scoreText.y = this.cameras.main.scrollY + 90;
 
-        if ( (this.input.activePointer.isDown || Phaser.Input.Keyboard.JustDown(this.spacebar)) && (lastShot + 500 < time || (lastShot + 250 < time && this.element.atomicNum == 2))) {
+        if ((this.input.activePointer.isDown || Phaser.Input.Keyboard.JustDown(this.spacebar)) && (lastShot + 500 < time || (lastShot + 250 < time && this.element.atomicNum == 2))) {
             let bullet = this.element.shootBullet(this);
-            
+
             let bulletAngle = Phaser.Math.Angle.Between(this.element.x, this.element.y, this.input.activePointer.worldX, this.input.activePointer.worldY)
             //console.log(bullet.angle2)
             //console.log(bulletAngle)
