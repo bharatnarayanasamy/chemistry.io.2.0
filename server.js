@@ -312,8 +312,9 @@ function ServerGameLoop() {
         //group5Bullet
         bullet_array[i].bulletSpeed += 10;
       }   
-     
-      if (typeof players[bullet.owner_id] != "undefined" &&  players[bullet.owner_id].atomicNumServer == 2){
+      
+      //changed to 100 so it doesn't do anything
+      if (typeof players[bullet.owner_id] != "undefined" &&  players[bullet.owner_id].atomicNumServer == 100){
         //group5Bullet
         if (bullet_array[i].bulletSpeed > 20) {
           bullet_array[i].bulletSpeed -= 7;
@@ -332,9 +333,10 @@ function ServerGameLoop() {
 
       let longdist = 1000000;
 
-      if (typeof players[bullet.owner_id] != "undefined" && players[bullet.owner_id].atomicNumServer == 2)
+      if (typeof players[bullet.owner_id] != "undefined" && players[bullet.owner_id].atomicNumServer == 100)
       {
-        longdist = 38000;
+        //longdist = 38000; for halogens
+        longdist = 20000;
       }
       //Remove bullet once it has travelled 1000 units
       if ((Math.pow(bullet.x - bullet.ix, 2) + Math.pow(bullet.y - bullet.iy, 2)) > longdist) {
@@ -359,6 +361,7 @@ function ServerGameLoop() {
               io.emit('player-hit', healthInfo); // Tell everyone this player got hit
               players[id].health -= bullet.damage;
               io.emit("update-health", players[id]);
+              //changed to 100 so it doenst mess with code
               if (typeof players[owner] != "undefined" && players[owner].atomicNumServer !=2 ) {
                 bullet_array.splice(i, 1);
                 i--;

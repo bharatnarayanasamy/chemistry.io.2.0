@@ -409,8 +409,6 @@ function create() {
 
     //repeat of protonUpdate for electrons
     this.socket.on('electronUpdate', function (server_electron_array) {
-
-
         for (let i = 0; i < server_electron_array.length; i++) {
 
             if (self.electron_array[i]) self.electron_array[i].destroy();
@@ -695,7 +693,7 @@ function update(time) {
 
             if (this.element.atomicNum == 2) {
                 //actinideBullet(bullet, this.element, this.socket, bulletAngle);
-                group7Bullet(bullet, this.element, this.socket, bulletAngle, bulletAngle);
+                group3Bullet(bullet, this.element, this.socket, bulletAngle, bulletAngle);
                 //group4Bullet(bullet, this.element, this.socket, bulletAngle);
                 //group6Bullet(bullet, distance, this.element, this.socket, bulletAngle);
             }
