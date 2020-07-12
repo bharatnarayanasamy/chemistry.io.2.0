@@ -119,7 +119,7 @@ if (req.cookies) {
       delete tokenList[refreshToken];
     } 
     res.clearCookie('refreshJwt');
-    res.clearCookie('kwt');
+    res.clearCookie('jwt');
     console.log("Logged Out!!")
   }
   res.status(200).json({ message: 'logged out' });

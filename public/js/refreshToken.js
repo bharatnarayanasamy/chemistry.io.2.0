@@ -2,7 +2,7 @@ function getCookie(cname) {
   var name = cname + "=";
   var decodedCookie = decodeURIComponent(document.cookie);
   var ca = decodedCookie.split(';');
-  for(var i = 0; i <ca.length; i++) {
+  for (var i = 0; i < ca.length; i++) {
     var c = ca[i];
     while (c.charAt(0) == ' ') {
       c = c.substring(1);
@@ -13,18 +13,29 @@ function getCookie(cname) {
   }
   return "";
 }
-
-setInterval(function() {
+var limit = 0;
+setInterval(function () {
   $.ajax({
     type: 'POST',
     url: '/token',
     data: {
       refreshToken: getCookie('refreshJwt')
     },
-    success: function(data) {},
-    error: function(xhr) {
-      window.alert(JSON.stringify(xhr));
-      window.location.hrevf = '/index.html';
+    success: function (data) {
+    },
+    error: function (xhr) {
+      limit = limit + 1;
+      if (limit > 2) {
+        window.alert("ERROR ERROR ERROR");
+        window.location.href = '../index.html';
+      }
     }
   });
-}, 10000);
+}, 100);
+
+setInterval(function () {
+  limit = limit - 1;
+}, 500);
+
+
+

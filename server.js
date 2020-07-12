@@ -315,8 +315,12 @@ function ServerGameLoop() {
      
       if (typeof players[bullet.owner_id] != "undefined" &&  players[bullet.owner_id].atomicNumServer == 2){
         //group5Bullet
-        if (bullet_array[i].bulletSpeed > 10) {
-          bullet_array[i].bulletSpeed -= 10;
+        if (bullet_array[i].bulletSpeed > 20) {
+          bullet_array[i].bulletSpeed -= 7;
+        }
+        else
+        {
+          bullet_array[i].bulletSpeed = 10;
         }
       }   
       
@@ -326,8 +330,14 @@ function ServerGameLoop() {
         i--;
       }
 
+      let longdist = 1000000;
+
+      if (typeof players[bullet.owner_id] != "undefined" && players[bullet.owner_id].atomicNumServer == 2)
+      {
+        longdist = 38000;
+      }
       //Remove bullet once it has travelled 1000 units
-      if ((Math.pow(bullet.x - bullet.ix, 2) + Math.pow(bullet.y - bullet.iy, 2)) > 1000000) {
+      if ((Math.pow(bullet.x - bullet.ix, 2) + Math.pow(bullet.y - bullet.iy, 2)) > longdist) {
         bullet_array.splice(i, 1);
         i--;
       }
@@ -349,7 +359,7 @@ function ServerGameLoop() {
               io.emit('player-hit', healthInfo); // Tell everyone this player got hit
               players[id].health -= bullet.damage;
               io.emit("update-health", players[id]);
-              if (typeof players[owner] != "undefined" && players[owner].atomicNumServer != 2 ) {
+              if (typeof players[owner] != "undefined" && players[owner].atomicNumServer !=2 ) {
                 bullet_array.splice(i, 1);
                 i--;
               }

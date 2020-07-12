@@ -7,18 +7,6 @@
 <body class="text-center">
   <script type="text/javascript" src="js/usernameinfo.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  <script>
-    function deleteAllCookies() {
-      var cookies = document.cookie.split(";");
-
-      for (var i = 0; i < cookies.length; i++) {
-        var cookie = cookies[i];
-        var eqPos = cookie.indexOf("=");
-        var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
-      }
-    }
-  </script>
 
   <style>
     body {
@@ -58,20 +46,6 @@
       font-size: 16px;
     }
   </style>
-  <script>
-    function getOutput() {
-      $.ajax({
-        url: 'test.php',
-        complete: function (response) {
-          $('#output').html(response.responseText);
-        },
-        error: function () {
-          $('#output').html('Bummer: there was an error!');
-        }
-      });
-      return false;
-    }
-  </script>
 
   <div class="signin">
     <button id="myButton" class="button">Sign In!</button>
@@ -90,6 +64,10 @@
       location.href = "/index2.html";
     };
     localStorage.setItem("vTwoLocalStorage", null);
+  </script>
+
+  <script>
+    for (var it in $.cookie()) $.removeCookie(it);
   </script>
 </body>
 

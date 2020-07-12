@@ -40,14 +40,14 @@
                     type: 'POST',
                     url: '/logout',
                     success: function () {
-                        window.alert("Hi");
+                        window.location.href = 'index.html';
                     },
                     error: function () {
-                        window.alert("System Error");
+                        window.alert("System Error - failed to log you out");
+                        window.location.href = 'index.html';
+
                     }
                 });
-                window.alert("hi");
-                window.location = 'index.html';
             }, 0);
             window.onbeforeunload = null; // necessary to prevent infinite loop, that kills your browser 
         }
@@ -60,13 +60,10 @@
                 type: 'POST',
                 url: '/logout',
                 success: function () {
-                    window.alert("Hi");
-                    window.alert(Document.cookie);
                     window.location.href = 'index.html';
                 },
                 error: function () {
                     window.alert("System Error - failed to log you out");
-
                     window.location.href = 'index.html';
 
                 }

@@ -695,7 +695,7 @@ function update(time) {
 
             if (this.element.atomicNum == 2) {
                 //actinideBullet(bullet, this.element, this.socket, bulletAngle);
-                group6Bullet(bullet, this.element, this.socket, bulletAngle, bulletAngle);
+                group7Bullet(bullet, this.element, this.socket, bulletAngle, bulletAngle);
                 //group4Bullet(bullet, this.element, this.socket, bulletAngle);
                 //group6Bullet(bullet, distance, this.element, this.socket, bulletAngle);
             }
@@ -727,8 +727,8 @@ function update(time) {
                         error: function (xhr) {
                         }
                     });
+                    currentHighScore = this.score;
                 }
-                currentHighScore = this.score;
             }
             lastScoreUpdate = time;
         }
@@ -762,4 +762,4 @@ function update(time) {
 
 
     }
-} f
+} 
