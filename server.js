@@ -300,25 +300,98 @@ function ServerGameLoop() {
     let bullet = bullet_array[i];
     if (typeof bullet != "undefined") {
       let speed = bullet.bulletSpeed;
-
-     
       let speedY = speed * Math.sin(bullet.angle);
       let speedX = speed * Math.cos(bullet.angle);
 
-      
- 
       bullet.x += speedX / 50; //update bullet position
       bullet.y += speedY / 50;
       
-
       if (typeof players[bullet.owner_id] != "undefined" &&  players[bullet.owner_id].atomicNumServer > 1){
         //group5Bullet
-        
         bullet_array[i].bulletSpeed += 10;
       }    
       
-      
-      /*
+      // Remove if it goes off screen
+      if (bullet.x < -10 || bullet.x > gameWidth + 10 || bullet.y < -10 || bullet.y > gameHeight + 10) {
+        bullet_array.splice(i, 1);
+        i--;
+      }
+
+      //Remove bullet once it has travelled 1000 units
+      if ((Math.pow(bullet.x - bullet.ix, 2) + Math.pow(bullet.y - bullet.iy, 2)) > 1000000) {
+        bullet_array.splice(i, 1);
+        i--;
+      }
+
+      for (let id in players) {
+        if (bullet.owner_id != id && typeof players[id] != "undefined") {
+            //Your own bullet shouldn't kill you
+            let dx = players[id].x - bullet.x;
+            let dy = players[id].y - bullet.y;
+            let dist = Math.sqrt(dx * dx + dy * dy);
+            let owner = bullet.owner_id;
+            thresh = 70
+            if (dist < thresh) {
+              healthInfo.i = i;
+              healthInfo.id = id;
+              io.emit('player-hit', healthInfo); // Tell everyone this player got hit
+              players[id].health -= bullet.damage;
+              io.emit("update-health", players[id]);
+              if (/*typeof players[owner] != "undefined" && */players[owner].atomicNumServer != 2 ) {
+                bullet_array.splice(i, 1);
+                i--;
+              }
+            }
+            if (players[id].health <= 0) {
+              if (typeof players[owner] != "undefined") {
+                players[owner].kills++;
+                if (id == socketID) {
+                  delete players[id];
+                  delete score_array[id];
+                  io.emit('deleteDeadPlayers', id);
+                  io.emit('updateKills', players[owner]);
+                }
+                else {
+                  io.emit('deleteDeadPlayers', id);
+                  io.emit('updateKills', players[owner]);
+                  delete players[id];
+                  delete score_array[id];
+                }
+              }
+            }
+        }
+      }
+    }
+    // Tell everyone where all the bullets are by sending the whole array
+    io.emit("bullets-update", bullet_array);
+  }
+}
+
+  
+
+
+// Update the bullets 60 times per frame and send updates
+function UpdateLeaderboard() {
+  // Create items array
+  var items = Object.keys(player_scores).map(function (key) {
+    return [leaderboardArray[key], key, player_scores[key]];
+  });
+
+  // Sort the array based on the second element
+  items.sort(function (first, second) {
+    return second[2] - first[2];
+  });
+
+  // Tell everyone where all the bullets are by sending the whole array
+  io.emit("update-leaderboard", items);
+}
+
+setInterval(ServerGameLoop, 16);
+setInterval(UpdateLeaderboard, 100);
+
+
+
+/*
       if (typeof players[bullet.owner_id] != "undefined" && players[bullet.owner_id].atomicNumServer > 1) {
         //actinideBullet
         let dx0 = players[bullet.owner_id].x - bullet.x;
@@ -345,88 +418,3 @@ function ServerGameLoop() {
         }
       }
       */
-
-      // Remove if it goes off screen
-      if (bullet.x < -10 || bullet.x > gameWidth + 10 || bullet.y < -10 || bullet.y > gameHeight + 10) {
-        bullet_array.splice(i, 1);
-        i--;
-      }
-
-      //Remove bullet once it has travelled 1000 units
-      if ((Math.pow(bullet.x - bullet.ix, 2) + Math.pow(bullet.y - bullet.iy, 2)) > 1000000) {
-        bullet_array.splice(i, 1);
-        i--;
-      }
-
-      for (let id in players) {
-        if (bullet.owner_id != id && typeof players[id] != "undefined") {
-          //Your own bullet shouldn't kill you
-          let dx = players[id].x - bullet.x;
-          let dy = players[id].y - bullet.y;
-          let dist = Math.sqrt(dx * dx + dy * dy);
-          let owner = bullet.owner_id;
-          thresh = 70
-          if(players[owner].atomicNumServer == 3) 
-          {
-              thresh = 500;            
-          }
-            if (dist < thresh) {
-              healthInfo.i = i;
-              healthInfo.id = id;
-              io.emit('player-hit', healthInfo); // Tell everyone this player got hit
-              players[id].health -= bullet.damage;
-              if (typeof players[owner] != "undefined" && players[owner].atomicNumServer != 2 ) {
-                bullet_array.splice(i, 1);
-                i--;
-              }
-            }
-          }
-          io.emit("update-health", players[id]);
-          if (typeof players[id] != "undefined") {
-
-            if (players[id].health <= 0) {
-              if (typeof players[owner] != "undefined") {
-                players[owner].kills++;
-                if (id == socketID) {
-                  delete players[id];
-                  delete score_array[id];
-                  io.emit('deleteDeadPlayers', id);
-                  io.emit('updateKills', players[owner]);
-                }
-                else {
-                  io.emit('deleteDeadPlayers', id);
-                  io.emit('updateKills', players[owner]);
-                  delete players[id];
-                  delete score_array[id];
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    // Tell everyone where all the bullets are by sending the whole array
-    io.emit("bullets-update", bullet_array);
-  }
-
-  
-
-
-// Update the bullets 60 times per frame and send updates
-function UpdateLeaderboard() {
-  // Create items array
-  var items = Object.keys(player_scores).map(function (key) {
-    return [leaderboardArray[key], key, player_scores[key]];
-  });
-
-  // Sort the array based on the second element
-  items.sort(function (first, second) {
-    return second[2] - first[2];
-  });
-
-  // Tell everyone where all the bullets are by sending the whole array
-  io.emit("update-leaderboard", items);
-}
-
-setInterval(ServerGameLoop, 16);
-setInterval(UpdateLeaderboard, 100);
