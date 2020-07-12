@@ -46,7 +46,7 @@ class Bullet extends Phaser.Physics.Arcade.Sprite {
     this.speed_x = this.body.velocity.x;
     this.speed_y = this.body.velocity.y;
 
-    //this.texture = texture;
+    this.bulletTexture = btexture;
     //console.log(this.texture);
   }
 

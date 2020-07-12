@@ -91,9 +91,10 @@ router.post('/token', (req, res) => {
 
     res.status(200).json({ token });
   } else {
-    res.status(401).json({ message: 'Unauthorized, go to chemistry2-io.herokuapp.com to paly the game' });
+    res.status(401).json({ message: 'Unauthorized' });
   }
 });
+
 router.get('/users', async (req, res) => {
   UserModel.find({}, function (err, users) {
     if (err) {
@@ -110,15 +111,15 @@ router.post('/submit-score', async (req, res, next) => {
   res.status(200).json({ status: 'ok' });
 });
 
-router.post('/logout', (req, res) => {
-  //console.log(req);
-  if (req.cookies) {
+router.post('/logout', (req, res, next) => {
+if (req.cookies) {
+    console.log(req.cookies);
     const refreshToken = req.cookies['refreshJwt'];
     if (refreshToken in tokenList) {
       delete tokenList[refreshToken];
     } 
     res.clearCookie('refreshJwt');
-    res.clearCookie('jwt');
+    res.clearCookie('kwt');
     console.log("Logged Out!!")
   }
   res.status(200).json({ message: 'logged out' });

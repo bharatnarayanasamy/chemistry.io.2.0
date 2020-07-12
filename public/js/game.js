@@ -62,12 +62,18 @@ var game = new Phaser.Game(config);
 //initializing some global vars
 var lastShot = 0;
 var lastHealed = 0;
-var username0 = localStorage.getItem("vOneLocalStorage");
-if (username0 == "") {
-    username0 = "Anonymous Player";
+var lastScoreUpdate = 0;
+
+if (typeof localStorage.getItem("vOneLocalStorage") != undefined) {
+    var username0 = localStorage.getItem("vOneLocalStorage");
 }
-let users;
+else {
+    var username0;
+}
 var email;
+var currentHighScore;
+
+let users;
 
 var elementNumbers = JSON.parse(fs.readFileSync('elements.json', 'utf8'))
 
@@ -75,25 +81,7 @@ var playerX;
 var playerY;
 
 var lastSccoreUpdate;
-//accessing user information to get username
-$.ajax({
-    type: 'GET',
-    url: '/users',
-    success: function (data) {
-        users = data;
-        if (typeof localStorage.getItem("vTwoLocalStorage") != null) {
-            for (var i = 0; i < users.length; i++) {
-                if (users[i].email == localStorage.getItem("vTwoLocalStorage")) {
-                    username0 = users[i].name;
-                    email = users[i].email;
-                }
-            }
-        }
-    },
-    error: function (xhr) {
-        console.log(xhr);
-    }
-});
+
 
 function preload() {
     this.load.image("hydrogenbullet", "./assets/images/hydrogenbullet.png");
@@ -120,7 +108,30 @@ function preload() {
 }
 
 function create() {
-    console.log(elementNumbers);
+    //console.log(elementNumbers);
+    
+    //accessing user information to get username
+    $.ajax({
+        type: 'GET',
+        url: '/users',
+        success: function (data) {
+            users = data;
+            if (typeof localStorage.getItem("vTwoLocalStorage") != null) {
+                for (var i = 0; i < users.length; i++) {
+                    if (users[i].email == localStorage.getItem("vTwoLocalStorage")) {
+                        username0 = users[i].name;
+                        email = users[i].email;
+                        currentHighScore = users[i].highScore;
+
+                    }
+                }
+            }
+        },
+        error: function (xhr) {
+            console.log(xhr);
+            console.log("BOB JOE");
+        }
+    });
 
     //  Set the camera and physics bounds to be the size of 4x4 bg images
     this.cameras.main.setBounds(0, 0, 1920 * 2, 1080 * 2);
@@ -228,30 +239,6 @@ function create() {
             });
         }
         if (self.element.hp.value <= 0) {
-            //improve this by creating special method to 
-            if (typeof email != "undefined") {
-                var currentHighScore;
-                for (var i = 0; i < users.length; i++) {
-                    if (users[i].email == email) {
-                        currentHighScore = users[i].highScore;
-                    }
-                }
-                if (currentHighScore < self.score) {
-                    const data = {
-                        email: email,
-                        score: self.score,
-                    };
-                    $.ajax({
-                        type: 'POST',
-                        url: '/submit-score',
-                        data,
-                        success: function (data) {
-                        },
-                        error: function (xhr) {
-                        }
-                    });
-                }
-            }
             $.ajax({
                 type: 'POST',
                 url: '/logout',
@@ -296,16 +283,13 @@ function create() {
                 //Otherwise, just update bullet locations
                 self.element.bullet_array[i].enableBody(true, true);
                 self.element.bullet_array[i].setTexture(gameSettings.texture[server_bullet_array[i].atomicNumber - 1] + "bullet");
+
                 
-                if (server_bullet_array[i].atomicNumber < 3 && gameSettings.texture[server_bullet_array[i].atomicNumber - 1] == "obstacle")
-                {
-                        console.log("BRUHHH WHY DID THIS PRINT")
-                }
-                if (server_bullet_array[i].atomicNumber > 2)
-                {
+                if (server_bullet_array[i].atomicNumber > 2) {
                     //self.element.bullet_array[i].rotation += 1.5
-                    
-                    self.element.bullet_array[i].setScale(1.5);
+                    //console.log("atomic num:" + server_bullet_array[i].atomicNumber)
+                    //self.element.bullet_array[i].setScale(1.5);
+                    //self.element.bullet_array[i].displayWidth = 10;
                     //change scale by 1.g
                 }
 
@@ -650,7 +634,6 @@ function create() {
 function update(time) {
 
     if (typeof this.element != "undefined") {
-
         this.cameras.main.startFollow(this.element);
         this.cameras.main.followOffset.set(0, 0);
         this.element.movePlayer(this);
@@ -698,6 +681,10 @@ function update(time) {
         this.scoreText.x = this.cameras.main.scrollX + 10;
         this.scoreText.y = this.cameras.main.scrollY + 90;
 
+
+        
+
+
         if ((this.input.activePointer.isDown || Phaser.Input.Keyboard.JustDown(this.spacebar)) && (lastShot + 500 < time || (lastShot + 250 < time && this.element.atomicNum == 2))) {
             let bullet = this.element.shootBullet(this);
 
@@ -708,14 +695,42 @@ function update(time) {
 
             if (this.element.atomicNum == 2) {
                 //actinideBullet(bullet, this.element, this.socket, bulletAngle);
-                group8Bullet(bullet, this.element, this.socket, bulletAngle, bulletAngle);
+                group6Bullet(bullet, this.element, this.socket, bulletAngle, bulletAngle);
                 //group4Bullet(bullet, this.element, this.socket, bulletAngle);
                 //group6Bullet(bullet, distance, this.element, this.socket, bulletAngle);
             }
             else {
                 this.socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed, damage: bullet.damage, atomicNumber: this.element.atomicNum, rotAngle: 0 });
             }
+            
             lastShot = time;
+
+        }
+
+        if (lastScoreUpdate + 5000 < time) {
+
+            if (typeof email != "undefined") {
+                if (currentHighScore < this.score) {
+                    console.log(username0);
+                    console.log(email);
+                    console.log(currentHighScore);
+                    const data = {
+                        email: email,
+                        score: this.score,
+                    };
+                    $.ajax({
+                        type: 'POST',
+                        url: '/submit-score',
+                        data,
+                        success: function (data) {
+                        },
+                        error: function (xhr) {
+                        }
+                    });
+                }
+                currentHighScore = this.score;
+            }
+            lastScoreUpdate = time;
         }
 
         if (Math.random() < 0.5) this.element.x += 0.000000001;
@@ -744,8 +759,7 @@ function update(time) {
             this.socket.emit('player-heal', { id: this.element.playerId, health: this.element.hp.value });
             lastHealed = time;
         }
+
+
     }
-}
-
-
-
+} f

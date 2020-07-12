@@ -90,10 +90,15 @@ function group5Bullet(bullet, element, socket, bulletAngle) {
         damage: bullet.damage, atomicNumber: element.atomicNum, rotAngle: 0});
 }
 
-function group7Bullet(bullet, element, socket, bulletAngle)
-{
+function group7Bullet(bullet, element, socket, bulletAngle){
+    
     socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed,
-        damage: bullet.damage, atomicNumber: element.atomicNum, rotAngle: 0});
+        damage: bullet.damage, atomicNumber: element.atomicNum, rotAngle: 0 });
+    socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bulletAngle + 0.2,  bulletSpeed: gameSettings.bulletSpeed,
+        damage: bullet.damage, atomicNumber: element.atomicNum, rotAngle: 0 });
+    socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bulletAngle - 0.2, bulletSpeed: gameSettings.bulletSpeed,
+        damage: bullet.damage, atomicNumber: element.atomicNum, rotAngle: 0 });
+    
 }
 
 function group8Bullet(bullet, element, socket, bulletAngle, rotationAngle)

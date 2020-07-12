@@ -41,14 +41,15 @@ require('./auth/auth');
   res.sendFile(__dirname + '/public/game.html');
 });**/
 
-app.get('/game.html', passport.authenticate('jwt', { session: false }), function (req, res) {
-  res.sendFile(__dirname + '/public/game.html');
-});
+
 
 app.use(express.static(__dirname + '/public'));
 
 app.get('/', function (req, res) {
   res.sendFile(__dirname + '/index.html');
+});
+app.get('/game.html', passport.authenticate('jwt', { session : false }), function (req, res) {
+  res.sendFile(__dirname + '/public/game.html');
 });
 
 // main routes
@@ -306,10 +307,18 @@ function ServerGameLoop() {
       bullet.x += speedX / 50; //update bullet position
       bullet.y += speedY / 50;
       
-      if (typeof players[bullet.owner_id] != "undefined" &&  players[bullet.owner_id].atomicNumServer > 1){
+      //changed to >5 for now so it doesnt do jack
+      if (typeof players[bullet.owner_id] != "undefined" &&  players[bullet.owner_id].atomicNumServer > 5){
         //group5Bullet
         bullet_array[i].bulletSpeed += 10;
-      }    
+      }   
+     
+      if (typeof players[bullet.owner_id] != "undefined" &&  players[bullet.owner_id].atomicNumServer == 2){
+        //group5Bullet
+        if (bullet_array[i].bulletSpeed > 10) {
+          bullet_array[i].bulletSpeed -= 10;
+        }
+      }   
       
       // Remove if it goes off screen
       if (bullet.x < -10 || bullet.x > gameWidth + 10 || bullet.y < -10 || bullet.y > gameHeight + 10) {
@@ -331,13 +340,16 @@ function ServerGameLoop() {
             let dist = Math.sqrt(dx * dx + dy * dy);
             let owner = bullet.owner_id;
             thresh = 70
+            //if(players[owner].atomicNumServer == 3) {
+                //thresh = 500;            
+            //}
             if (dist < thresh) {
               healthInfo.i = i;
               healthInfo.id = id;
               io.emit('player-hit', healthInfo); // Tell everyone this player got hit
               players[id].health -= bullet.damage;
               io.emit("update-health", players[id]);
-              if (/*typeof players[owner] != "undefined" && */players[owner].atomicNumServer != 2 ) {
+              if (typeof players[owner] != "undefined" && players[owner].atomicNumServer != 2 ) {
                 bullet_array.splice(i, 1);
                 i--;
               }
@@ -417,4 +429,4 @@ setInterval(UpdateLeaderboard, 100);
           bullet.firstBullet = false;
         }
       }
-      */
+*/
