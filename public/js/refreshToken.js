@@ -14,6 +14,7 @@ function getCookie(cname) {
   return "";
 }
 var limit = 0;
+var consecutive = 0;
 setInterval(function () {
   $.ajax({
     type: 'POST',
@@ -22,11 +23,11 @@ setInterval(function () {
       refreshToken: getCookie('refreshJwt')
     },
     success: function (data) {
+      consecutive = 0
     },
     error: function (xhr) {
       limit = limit + 1;
       if (limit > 2) {
-        window.alert("ERROR ERROR ERROR");
         window.location.href = '../index.html';
       }
     }

@@ -83,22 +83,22 @@ class Element extends Phaser.GameObjects.Sprite {
     }
     
     */
-    movePlayer(scene) {
+    movePlayer(scene, speed) {
         //reset player velocity
 
         this.body.setVelocity(0);
         //this.hp.body.setVelocity(0);
         //move right or left
         if (scene.input.keyboard.addKey('A').isDown) {
-            this.body.setVelocityX(-gameSettings.playerSpeed);
+            this.body.setVelocityX(-speed);
         } else if (scene.input.keyboard.addKey('D').isDown) {
-            this.body.setVelocityX(gameSettings.playerSpeed);
+            this.body.setVelocityX(speed);
         }
         //move up or down
         if (scene.input.keyboard.addKey('W').isDown) {
-            this.body.setVelocityY(-gameSettings.playerSpeed);
+            this.body.setVelocityY(-speed);
         } else if (scene.input.keyboard.addKey('S').isDown) {
-            this.body.setVelocityY(gameSettings.playerSpeed);
+            this.body.setVelocityY(speed);
         }
         this.hp.move(scene, this.body.x+40, this.body.y+120);
 

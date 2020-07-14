@@ -138,3 +138,10 @@ function actinideBullet(bullet, element, socket, bulletAngle)
     socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed,
         damage: bullet.damage, atomicNumber: element.atomicNum, rotAngle: 0, firstBullet: true});
 }
+
+function transitionMetalBullet(bullet, element, socket, bulletAngle)
+{
+    //increase damage, decrease velocity
+    socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed,
+        damage: bullet.damage / 10, atomicNumber: element.atomicNum, rotAngle: 0});
+}

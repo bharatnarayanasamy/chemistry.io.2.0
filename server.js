@@ -361,8 +361,16 @@ function ServerGameLoop() {
               io.emit('player-hit', healthInfo); // Tell everyone this player got hit
               players[id].health -= bullet.damage;
               io.emit("update-health", players[id]);
+              if (players[owner].atomicNumServer == 2){
+                players[id].x -=100;
+                players[id].y -=100;
+                console.log("gei");
+                io.emit('playerMoved', players[id]);
+
+              }
+
               //changed to 100 so it doenst mess with code
-              if (typeof players[owner] != "undefined" && players[owner].atomicNumServer !=2 ) {
+              if (typeof players[owner] != "undefined" && players[owner].atomicNumServer !=100 ) {
                 bullet_array.splice(i, 1);
                 i--;
               }

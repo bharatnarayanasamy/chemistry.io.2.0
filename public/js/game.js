@@ -75,10 +75,10 @@ var currentHighScore;
 
 let users;
 
-var elementNumbers = JSON.parse(fs.readFileSync('elements.json', 'utf8'))
-
 var playerX;
-var playerY;
+var playerY
+
+var elementNumbers = JSON.parse(fs.readFileSync('elements.json', 'utf8'))
 
 var lastSccoreUpdate;
 
@@ -109,7 +109,7 @@ function preload() {
 
 function create() {
     //console.log(elementNumbers);
-    
+
     //accessing user information to get username
     $.ajax({
         type: 'GET',
@@ -171,13 +171,11 @@ function create() {
     //creates instance of socket.io
     let self = this;
     this.socket = io();
-    this.otherPlayers = this.physics.add.group();
     this.otherElements = this.physics.add.group();
-    this.otherPlayersHP = [];
     this.socket.on('currentPlayers', function (players) {
         //add time delay
         Object.keys(players).forEach((id) => {
-            if (players[id].playerId === self.socket.id) {
+            if (players[id].playerId == self.socket.id) {
                 addPlayer(self, players[id]);
             } else {
                 addOtherPlayers(self, players[id]);
@@ -194,7 +192,7 @@ function create() {
         //add time delay  
         self.otherElements.getChildren().forEach((otherElement) => {
             console.log("player disconnected")
-            if (playerId === otherElement.playerId) {
+            if (playerId == otherElement.playerId) {
                 otherElement.hp.destroy()
                 otherElement.destroy();
                 console.log("player destroyed")
@@ -206,7 +204,7 @@ function create() {
     this.socket.on('deleteDeadPlayers', function (playerId) {
         self.otherElements.getChildren().forEach((otherElement) => {
             console.log("player disconnected")
-            if (playerId === otherElement.playerId) {
+            if (playerId == otherElement.playerId) {
                 otherElement.hp.destroy();
                 otherElement.destroy();
                 console.log("player destroyed");
@@ -216,11 +214,21 @@ function create() {
 
     //displays other players' movement on screen
     this.socket.on('playerMoved', function (playerInfo) {
+        if (playerInfo.playerId == self.socket.id) {
+            //goal --> get to playerInfo.x, y
+            
+            
+            self.element.setPosition(playerInfo.x, playerInfo.y);
+            
+            self.element.hp.move(self, otherElement.x - 40, otherElement.y + 70);
+        }
         self.otherElements.getChildren().forEach((otherElement) => {
-            if (playerInfo.playerId === otherElement.playerId) {
+            if (playerInfo.playerId == otherElement.playerId) {
                 //update other player's locations
                 otherElement.setRotation(playerInfo.rotation);
                 otherElement.setPosition(playerInfo.x, playerInfo.y);
+
+                //otherElement.setPosition(playerInfo.x, playerInfo.y);
                 otherElement.hp.move(self, otherElement.x - 40, otherElement.y + 70);
             }
         });
@@ -233,7 +241,7 @@ function create() {
         }
         else {
             self.otherElements.getChildren().forEach((otherElement) => {
-                if (player.playerId === otherElement.playerId) {
+                if (player.playerId == otherElement.playerId) {
                     otherElement.hp.set(player.health);
                 }
             });
@@ -284,7 +292,7 @@ function create() {
                 self.element.bullet_array[i].enableBody(true, true);
                 self.element.bullet_array[i].setTexture(gameSettings.texture[server_bullet_array[i].atomicNumber - 1] + "bullet");
 
-                
+
                 if (server_bullet_array[i].atomicNumber > 2) {
                     //self.element.bullet_array[i].rotation += 1.5
                     //console.log("atomic num:" + server_bullet_array[i].atomicNumber)
@@ -340,15 +348,19 @@ function create() {
         });
     }
 
-    this.score = 0;
-    this.killScore = 15;
     //creates scorebars at bottom of screen
     this.protonBar = new CollectionBar(this, config.width / 2 - 150, config.height - 120, "proton", 0);
-    this.protonBarText = this.add.text(config.width / 2 - 60, config.height - 118, 'Protons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' }).setScrollFactor(1);
+    this.protonBarText = this.add.text(config.width / 2 - 60, config.height - 118, 'Protons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' })
     this.electronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 80, "electron", 0);
     this.electronBarText = this.add.text(config.width / 2 - 60, config.height - 78, 'Electrons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' });
     this.neutronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 40, "neutron", 0);
     this.neutronBarText = this.add.text(config.width / 2 - 60, config.height - 38, 'Neutrons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' });
+    this.atoms = this.add.container(playerX, playerY);
+    this.atoms.add(this.protonBarText);
+    this.atoms.add(this.electronBarText);
+    this.atoms.add(this.neutronBarText);
+    this.atoms.setScrollFactorX(1);
+    this.atoms.setScrollFactorY(1);
 
     //find way to destroy protons that were collected from the array
     //change overlap from self.proton to proton group
@@ -586,6 +598,8 @@ function create() {
         self.killScoreText = self.add.text(16, 40, 'Kills: ' + (0), { fontSize: '25px', fill: '#00FF00' });
         self.healthLabel = self.add.text(16, 10, "Health: 100", { fontSize: '25px', fill: '#00FF00' });
 
+        playerX = self.element.x;
+        playerY = self.element.y;
         //create score text on top left
         self.scoreText = self.add.text(16, 70, 'Score: ' + (0), { fontSize: '25px', fill: '#00FF00' });
     }
@@ -626,6 +640,9 @@ function create() {
     this.dot = this.add.graphics({ fillStyle: { color: 0xffffff } });
     this.dot.fillRectShape(this.whiteSquare);
 
+    this.score = 0;
+    this.killScore = 15;
+
 }
 
 
@@ -634,17 +651,18 @@ function update(time) {
     if (typeof this.element != "undefined") {
         this.cameras.main.startFollow(this.element);
         this.cameras.main.followOffset.set(0, 0);
-        this.element.movePlayer(this);
+        this.element.movePlayer(this, gameSettings.playerSpeed);
 
         this.protonBar.move(this, this.cameras.main.scrollX + config.width / 2 - 150, this.cameras.main.scrollY + config.height - 120);
-        this.protonBarText.x = this.protonBar.x + 90;
-        this.protonBarText.y = this.protonBar.y + 2;
+        //this.protonBarText.x = this.protonBar.x + 90;
+        //this.protonBarText.y = this.protonBar.y + 2;
         this.electronBar.move(this, this.cameras.main.scrollX + config.width / 2 - 150, this.cameras.main.scrollY + config.height - 80);
-        this.electronBarText.x = this.electronBar.x + 85;
-        this.electronBarText.y = this.electronBar.y + 2;
+        //this.electronBarText.x = this.electronBar.x + 85;
+        //this.electronBarText.y = this.electronBar.y + 2;
         this.neutronBar.move(this, this.cameras.main.scrollX + config.width / 2 - 150, this.cameras.main.scrollY + config.height - 40);
-        this.neutronBarText.x = this.neutronBar.x + 90;
-        this.neutronBarText.y = this.neutronBar.y + 2;
+        //this.neutronBarText.x = this.neutronBar.x + 90;
+        //this.neutronBarText.y = this.neutronBar.y + 2;
+
 
         this.leaderboardBg.x = this.cameras.main.scrollX + 10;
         this.leaderboardBg.y = this.cameras.main.scrollY;
@@ -680,7 +698,7 @@ function update(time) {
         this.scoreText.y = this.cameras.main.scrollY + 90;
 
 
-        
+
 
 
         if ((this.input.activePointer.isDown || Phaser.Input.Keyboard.JustDown(this.spacebar)) && (lastShot + 500 < time || (lastShot + 250 < time && this.element.atomicNum == 2))) {
@@ -693,14 +711,15 @@ function update(time) {
 
             if (this.element.atomicNum == 2) {
                 //actinideBullet(bullet, this.element, this.socket, bulletAngle);
-                group3Bullet(bullet, this.element, this.socket, bulletAngle, bulletAngle);
+                //group3Bullet(bullet, this.element, this.socket, bulletAngle, bulletAngle);
                 //group4Bullet(bullet, this.element, this.socket, bulletAngle);
                 //group6Bullet(bullet, distance, this.element, this.socket, bulletAngle);
+                transitionMetalBullet(bullet, this.element, this.socket, bulletAngle);
             }
             else {
                 this.socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed, damage: bullet.damage, atomicNumber: this.element.atomicNum, rotAngle: 0 });
             }
-            
+
             lastShot = time;
 
         }
