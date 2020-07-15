@@ -76,11 +76,11 @@ var currentHighScore;
 let users;
 
 var playerX;
-var playerY
+var playerY;
 
 var elementNumbers = JSON.parse(fs.readFileSync('elements.json', 'utf8'))
 
-var lastSccoreUpdate;
+var lastScoreUpdate;
 
 
 function preload() {
@@ -356,11 +356,11 @@ function create() {
     this.neutronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 40, "neutron", 0);
     this.neutronBarText = this.add.text(config.width / 2 - 60, config.height - 38, 'Neutrons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' });
     this.atoms = this.add.container(playerX, playerY);
-    this.atoms.add(this.protonBarText);
-    this.atoms.add(this.electronBarText);
-    this.atoms.add(this.neutronBarText);
-    this.atoms.setScrollFactorX(1);
-    this.atoms.setScrollFactorY(1);
+    // this.atoms.add(this.protonBarText);
+    // this.atoms.add(this.electronBarText);
+    // this.atoms.add(this.neutronBarText);
+    // this.atoms.setScrollFactorX(1);
+    // this.atoms.setScrollFactorY(1);
 
     //find way to destroy protons that were collected from the array
     //change overlap from self.proton to proton group
