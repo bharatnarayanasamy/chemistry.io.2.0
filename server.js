@@ -81,7 +81,8 @@ let score_array = {};
 let player_scores = {};
 let healthInfo = {
   id: 0,
-  i: 0
+  i: 0,
+  atomicNumber: 0
 }
 let socketID;
 let proton_array = [];
@@ -304,8 +305,8 @@ function ServerGameLoop() {
       let speedY = speed * Math.sin(bullet.angle);
       let speedX = speed * Math.cos(bullet.angle);
 
-      bullet.x += speedX / 50; //update bullet position
-      bullet.y += speedY / 50;
+      bullet.x += speedX / 60; //update bullet position
+      bullet.y += speedY / 60;
       
       //changed to >5 for now so it doesnt do jack
       if (typeof players[bullet.owner_id] != "undefined" &&  players[bullet.owner_id].atomicNumServer > 5){
@@ -358,12 +359,16 @@ function ServerGameLoop() {
             if (dist < thresh) {
               healthInfo.i = i;
               healthInfo.id = id;
+              if(typeof players[bullet.owner_id] != "undefined") healthInfo.atomicNumber = players[bullet.owner_id].atomicNumServer;
+              healthInfo.speedX = speedX;
+              healthInfo.speedY = speedY;
+              healthInfo.bulletAngle = bullet.angle;
               io.emit('player-hit', healthInfo); // Tell everyone this player got hit
               players[id].health -= bullet.damage;
               io.emit("update-health", players[id]);
               if (players[owner].atomicNumServer == 2){
-                players[id].x -=100;
-                players[id].y -=100;
+                //players[id].x -=100;
+                //players[id].y -=100;
                 console.log("gei");
                 io.emit('playerMoved', players[id]);
 

@@ -44,7 +44,7 @@ class Element extends Phaser.GameObjects.Sprite {
         this.bullet_array = [];
 
         this.atomicNum = 1;
-        
+
         this.texture1 = gameSettings.texture;
 
         this.kills = 0;
@@ -55,8 +55,8 @@ class Element extends Phaser.GameObjects.Sprite {
         scene.physics.world.enableBody(this);
 
         this.body.setCollideWorldBounds(true);
-        
-        this.hp = new HealthBar(scene, x-50, y+70);
+
+        this.hp = new HealthBar(scene, x - 50, y + 70);
 
         this.lastHurt = 0;
     }
@@ -83,26 +83,37 @@ class Element extends Phaser.GameObjects.Sprite {
     }
     
     */
-    movePlayer(scene, speed) {
+    movePlayer(scene, speed, isHitByTransitionBullet, speedX, speedY, bulletAngle) {
         //reset player velocity
 
         this.body.setVelocity(0);
         //this.hp.body.setVelocity(0);
         //move right or left
-        if (scene.input.keyboard.addKey('A').isDown) {
-            this.body.setVelocityX(-speed);
-        } else if (scene.input.keyboard.addKey('D').isDown) {
-            this.body.setVelocityX(speed);
-        }
-        //move up or down
-        if (scene.input.keyboard.addKey('W').isDown) {
-            this.body.setVelocityY(-speed);
-        } else if (scene.input.keyboard.addKey('S').isDown) {
-            this.body.setVelocityY(speed);
-        }
-        this.hp.move(scene, this.body.x+40, this.body.y+120);
 
-        
+        if (!isHitByTransitionBullet) {
+            //no knockback
+            if (scene.input.keyboard.addKey('A').isDown) {
+                this.body.setVelocityX(-speed);
+            } else if (scene.input.keyboard.addKey('D').isDown) {
+                this.body.setVelocityX(speed);
+            }
+
+            //move up or down
+            if (scene.input.keyboard.addKey('W').isDown) {
+                this.body.setVelocityY(-speed);
+            } else if (scene.input.keyboard.addKey('S').isDown) {
+                this.body.setVelocityY(speed);
+            }
+            this.hp.move(scene, this.body.x + 40, this.body.y + 120);
+        }
+        else {
+            //knockback
+            this.body.setVelocityX(speedX*2);
+            this.body.setVelocityY(speedY*2);
+            this.hp.move(scene, this.body.x + 40, this.body.y + 120);
+
+        }
+
         let angleToPointer = Phaser.Math.Angle.Between(this.x, this.y, scene.input.activePointer.worldX, scene.input.activePointer.worldY);
         let angleDelta = Phaser.Math.Angle.Wrap(angleToPointer - this.rotation);
         //some fancy math stuff I got from online
@@ -113,7 +124,7 @@ class Element extends Phaser.GameObjects.Sprite {
             this.body.setAngularVelocity(Math.sign(angleDelta) * gameSettings.ROTATION_SPEED_DEGREES);
         }
     }
-    shootBullet(scene) {    
+    shootBullet(scene) {
 
         let angle = Phaser.Math.Angle.Between(this.x, this.y, scene.input.activePointer.worldX, scene.input.activePointer.worldY);
         //let angleInDegrees = (angle * (180 / 3.1415)) + 90;
@@ -125,15 +136,15 @@ class Element extends Phaser.GameObjects.Sprite {
         this.bullet_array.push(this.bullet);
 
         this.bullet.disableBody(true, true);
-        
+
         return this.bullet;
     }
 
-    upgrade(){
+    upgrade() {
 
         let text = gameSettings.texture;
-        if (this.atomicNum < 5){
-            this.setTexture(text[this.atomicNum-1]);
+        if (this.atomicNum < 5) {
+            this.setTexture(text[this.atomicNum - 1]);
         }
     }
 

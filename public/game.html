@@ -16,10 +16,10 @@
 
         }
     </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="js/refreshToken.js"></script>
 
     <script type="text/javascript" src="js/usernameinfo.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <style>
         body {
             background-image: none;
@@ -33,6 +33,7 @@
     <script src="js/bulletShooting.js"></script>
     <script src="js/collectionbar.js"></script>
     <script src="js/element.js"></script>
+
     <script>
         window.onbeforeunload = function () {
             window.setTimeout(function () {
@@ -40,12 +41,12 @@
                     type: 'POST',
                     url: '/logout',
                     success: function () {
+                        window.alert("Refreshed!")
                         window.location.href = 'index.html';
                     },
                     error: function () {
                         window.alert("System Error - failed to log you out");
                         window.location.href = 'index.html';
-
                     }
                 });
             }, 0);
@@ -56,6 +57,9 @@
     <button id="logout" type="button">Logout</button>
     <script>
         $("#logout").on("click", function () {
+            window.location.href = 'index.html';
+        });
+        /*$("#logout").on("click", function () {
             $.ajax({
                 type: 'POST',
                 url: '/logout',
@@ -68,7 +72,7 @@
 
                 }
             });
-        });
+        });*/
     </script>
 </body>
 

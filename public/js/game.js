@@ -82,6 +82,8 @@ var elementNumbers = JSON.parse(fs.readFileSync('elements.json', 'utf8'))
 
 var lastScoreUpdate;
 
+var isHit = false;
+
 
 function preload() {
     this.load.image("hydrogenbullet", "./assets/images/hydrogenbullet.png");
@@ -283,18 +285,20 @@ function create() {
             if (self.element.bullet_array[i] == undefined) {
                 //let angle = Phaser.Math.Angle.Between(self.element.x, self.element.y, self.input.activePointer.worldX, self.input.activePointer.worldY);
                 self.element.bullet_array[i] = new Bullet(self, server_bullet_array[i].angle, server_bullet_array[i].x, server_bullet_array[i].y, gameSettings.texture[server_bullet_array[i].atomicNumber - 1]);
+                //specific to group8 laser bullets
                 if (server_bullet_array[i].atomicNumber == 2) {
                     self.element.bullet_array[i].rotation = server_bullet_array[i].rotAngle;
                 }
             }
             else {
+
                 //Otherwise, just update bullet locations
                 self.element.bullet_array[i].enableBody(true, true);
                 self.element.bullet_array[i].setTexture(gameSettings.texture[server_bullet_array[i].atomicNumber - 1] + "bullet");
+                
 
-
-                if (server_bullet_array[i].atomicNumber > 2) {
-                    //self.element.bullet_array[i].rotation += 1.5
+                if (server_bullet_array[i].atomicNumber == 2) {
+                    self.element.bullet_array[i].rotation += 0.015;
                     //console.log("atomic num:" + server_bullet_array[i].atomicNumber)
                     //self.element.bullet_array[i].setScale(1.5);
                     //self.element.bullet_array[i].displayWidth = 10;
@@ -356,10 +360,10 @@ function create() {
     this.neutronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 40, "neutron", 0);
     this.neutronBarText = this.add.text(config.width / 2 - 60, config.height - 38, 'Neutrons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' });
     this.atoms = this.add.container(playerX, playerY);
-    // this.atoms.add(this.protonBarText);
-    // this.atoms.add(this.electronBarText);
-    // this.atoms.add(this.neutronBarText);
-    // this.atoms.setScrollFactorX(1);
+    this.atoms.add(this.protonBarText);
+    this.atoms.add(this.electronBarText);
+    this.atoms.add(this.neutronBarText);
+    this.atoms.setScrollFactor(1);
     // this.atoms.setScrollFactorY(1);
 
     //find way to destroy protons that were collected from the array
@@ -579,10 +583,21 @@ function create() {
     });
 
     //used for managing the lastHurt variable, player can only heal after not being damaged for some time
-    this.socket.on('player-hit', function (player) {
-        if (self.socket.id == player.id) {
+    this.socket.on('player-hit', function (healthInfo) {
+        if (self.socket.id == healthInfo.id) {
             date_obj = new Date();
-            self.element.lastHurt = date_obj.getTime()
+            self.element.lastHurt = date_obj.getTime();
+            if(healthInfo.atomicNumber == 2 /* NEEDS TO BE CHANGED*/){
+                isHit = true;
+                self.element.lastHurtByTransition = date_obj.getTime();
+                self.knockbackSpeedX = healthInfo.speedX;
+                self.knockbackSpeedY = healthInfo.speedY;
+                self.transitionBulletAngle = healthInfo.bulletAngle;
+                console.log(self.knockbackSpeedX);
+                console.log(self.knockbackSpeedY);
+                console.log(self.transitionBulletAngle);
+
+            }
         }
     });
 
@@ -651,7 +666,10 @@ function update(time) {
     if (typeof this.element != "undefined") {
         this.cameras.main.startFollow(this.element);
         this.cameras.main.followOffset.set(0, 0);
-        this.element.movePlayer(this, gameSettings.playerSpeed);
+        this.element.movePlayer(this, gameSettings.playerSpeed, isHit, this.knockbackSpeedX, this.knockbackSpeedY, this.transitionBulletAngle);
+        if(isHit==true && time - this.element.lastHurtByTransition > 150){
+            isHit = false;
+        }
 
         this.protonBar.move(this, this.cameras.main.scrollX + config.width / 2 - 150, this.cameras.main.scrollY + config.height - 120);
         //this.protonBarText.x = this.protonBar.x + 90;
@@ -776,7 +794,10 @@ function update(time) {
             this.socket.emit('player-heal', { id: this.element.playerId, health: this.element.hp.value });
             lastHealed = time;
         }
-
+        
+        if(upDate.getTime() > this.element.lastHurtByTransition + 300 && isHit){
+            isHit = false;
+        }
 
     }
 } 
