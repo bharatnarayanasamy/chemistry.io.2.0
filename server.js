@@ -41,8 +41,6 @@ require('./auth/auth');
   res.sendFile(__dirname + '/public/game.html');
 });**/
 
-
-
 app.use(express.static(__dirname + '/public'));
 
 app.get('/', function (req, res) {
@@ -308,15 +306,15 @@ function ServerGameLoop() {
       bullet.x += speedX / 60; //update bullet position
       bullet.y += speedY / 60;
       
-      //changed to >5 for now so it doesnt do jack
-      if (typeof players[bullet.owner_id] != "undefined" &&  players[bullet.owner_id].atomicNumServer > 5){
+      let longdist = 1000000;
+
+      if (typeof players[bullet.owner_id] != "undefined" &&  players[bullet.owner_id].atomicNumServer == 7){
         //group5Bullet
         bullet_array[i].bulletSpeed += 10;
       }   
       
-      //changed to 100 so it doesn't do anything
-      if (typeof players[bullet.owner_id] != "undefined" &&  players[bullet.owner_id].atomicNumServer == 100){
-        //group5Bullet
+      if (typeof players[bullet.owner_id] != "undefined" &&  players[bullet.owner_id].atomicNumServer == 9){
+        //group 7 bullet
         if (bullet_array[i].bulletSpeed > 20) {
           bullet_array[i].bulletSpeed -= 7;
         }
@@ -324,21 +322,22 @@ function ServerGameLoop() {
         {
           bullet_array[i].bulletSpeed = 10;
         }
+
+        longdist = 38000;
       }   
       
+      if (typeof players[bullet.owner_id] != "undefined" && players[bullet.owner_id].atomicNumServer == 57)
+      {
+        //lanthanides
+        longdist = 1500*1500;
+      }
+
       // Remove if it goes off screen
       if (bullet.x < -10 || bullet.x > gameWidth + 10 || bullet.y < -10 || bullet.y > gameHeight + 10) {
         bullet_array.splice(i, 1);
         i--;
       }
-
-      let longdist = 1000000;
-
-      if (typeof players[bullet.owner_id] != "undefined" && players[bullet.owner_id].atomicNumServer == 2)
-      {
-        //longdist = 38000; for halogens
-        longdist = 1500*1500;
-      }
+      
       //Remove bullet once it has travelled 1000 units
       if ((Math.pow(bullet.x - bullet.ix, 2) + Math.pow(bullet.y - bullet.iy, 2)) > longdist) {
         bullet_array.splice(i, 1);
@@ -366,16 +365,12 @@ function ServerGameLoop() {
               io.emit('player-hit', healthInfo); // Tell everyone this player got hit
               players[id].health -= bullet.damage;
               io.emit("update-health", players[id]);
-              if (players[owner].atomicNumServer == 2){
-                //players[id].x -=100;
-                //players[id].y -=100;
-                console.log("gei");
+              if (players[owner].atomicNumServer == 21){
+                //transition metals
                 io.emit('playerMoved', players[id]);
-
               }
 
-              //changed to 100 so it doenst mess with code
-              if (typeof players[owner] != "undefined" && players[owner].atomicNumServer !=100 ) {
+              if (typeof players[owner] != "undefined" && ![2,9].includes(players[owner].atomicNumServer)) {
                 bullet_array.splice(i, 1);
                 i--;
               }
@@ -404,8 +399,6 @@ function ServerGameLoop() {
     io.emit("bullets-update", bullet_array);
   }
 }
-
-  
 
 
 // Update the bullets 60 times per frame and send updates

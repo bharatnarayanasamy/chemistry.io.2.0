@@ -56,7 +56,6 @@ let config = {
     }
 };
 
-
 var game = new Phaser.Game(config);
 
 //initializing some global vars
@@ -89,9 +88,9 @@ function preload() {
     this.load.image("hydrogenbullet", "./assets/images/hydrogenbullet.png");
 
     //CHANGE LINE BELOW, CURRENTLY TESTING
-    //this.load.image("heliumbullet", "./assets/images/group8Bullet.png");
+    this.load.image("heliumbullet", "./assets/images/group8Bullet.png");
     this.load.image("obstaclebullet", "./assets/images/obstacle.png");
-    this.load.image("heliumbullet", "./assets/images/group7Bullet.png");
+    //this.load.image("heliumbullet", "./assets/images/group7Bullet.png");
 
     this.load.image("hydrogen", "./assets/images/hydrogen.png");
     this.load.image("helium", "./assets/images/helium.png");
@@ -214,27 +213,7 @@ function create() {
         });
     });
 
-    //displays other players' movement on screen
-    this.socket.on('playerMoved', function (playerInfo) {
-        if (playerInfo.playerId == self.socket.id) {
-            //goal --> get to playerInfo.x, y
-
-
-            self.element.setPosition(playerInfo.x, playerInfo.y);
-
-            self.element.hp.move(self, otherElement.x - 40, otherElement.y + 70);
-        }
-        self.otherElements.getChildren().forEach((otherElement) => {
-            if (playerInfo.playerId == otherElement.playerId) {
-                //update other player's locations
-                otherElement.setRotation(playerInfo.rotation);
-                otherElement.setPosition(playerInfo.x, playerInfo.y);
-
-                //otherElement.setPosition(playerInfo.x, playerInfo.y);
-                otherElement.hp.move(self, otherElement.x - 40, otherElement.y + 70);
-            }
-        });
-    });
+    
 
     //updates a player's health 
     this.socket.on('update-health', function (player) {
@@ -286,7 +265,7 @@ function create() {
                 //let angle = Phaser.Math.Angle.Between(self.element.x, self.element.y, self.input.activePointer.worldX, self.input.activePointer.worldY);
                 self.element.bullet_array[i] = new Bullet(self, server_bullet_array[i].angle, server_bullet_array[i].x, server_bullet_array[i].y, gameSettings.texture[server_bullet_array[i].atomicNumber - 1]);
                 //specific to group8 laser bullets
-                if (server_bullet_array[i].atomicNumber == 2) {
+                if (gameSettings.group8.includes(server_bullet_array[i].atomicNumber)) {
                     self.element.bullet_array[i].rotation = server_bullet_array[i].rotAngle;
                 }
             }
@@ -297,12 +276,8 @@ function create() {
                 self.element.bullet_array[i].setTexture(gameSettings.texture[server_bullet_array[i].atomicNumber - 1] + "bullet");
 
 
-                if (server_bullet_array[i].atomicNumber == 2) {
+                if (gameSettings.transitionmetals.includes(server_bullet_array[i].atomicNumber)) {
                     self.element.bullet_array[i].rotation += 0.015;
-                    //console.log("atomic num:" + server_bullet_array[i].atomicNumber)
-                    //self.element.bullet_array[i].setScale(1.5);
-                    //self.element.bullet_array[i].displayWidth = 10;
-                    //change scale by 1.g
                 }
 
                 self.element.bullet_array[i].x = server_bullet_array[i].x;
@@ -408,7 +383,6 @@ function create() {
             }, null, self);
         }
     });
-
 
     //repeat of protonUpdate for electrons
     this.socket.on('electronUpdate', function (server_electron_array) {
@@ -571,16 +545,12 @@ function create() {
         if (self.socket.id == healthInfo.id) {
             date_obj = new Date();
             self.element.lastHurt = date_obj.getTime();
-            if (healthInfo.atomicNumber == 2 /* NEEDS TO BE CHANGED*/) {
+            if (gameSettings.transitionmetals.includes(healthInfo.atomicNumber)) {
                 isHit = true;
                 self.element.lastHurtByTransition = date_obj.getTime();
                 self.knockbackSpeedX = healthInfo.speedX;
                 self.knockbackSpeedY = healthInfo.speedY;
                 self.transitionBulletAngle = healthInfo.bulletAngle;
-                console.log(self.knockbackSpeedX);
-                console.log(self.knockbackSpeedY);
-                console.log(self.transitionBulletAngle);
-
             }
         }
     });
@@ -664,14 +634,11 @@ function create() {
 
 
 function update(time) {
-
-
-
     if (typeof this.element != "undefined") {
         this.cameras.main.startFollow(this.element);
         this.cameras.main.followOffset.set(0, 0);
 
-        if (this.element.atomicNum == 2) {
+        if (gameSettings.lanthanides.includes(this.element.atomicNum)) {
             this.cameras.main.setZoom(0.7);
         }
         else {
@@ -679,14 +646,10 @@ function update(time) {
         }
         //Phaser.Math.Clamp
 
-
         this.element.movePlayer(this, gameSettings.playerSpeed, isHit, this.knockbackSpeedX, this.knockbackSpeedY, this.transitionBulletAngle);
         if (isHit == true && time - this.element.lastHurtByTransition > 150) {
             isHit = false;
         }
-
-
-
 
         this.protonBar.move(this, this.cameras.main.scrollX + config.width / 2 - 150, this.cameras.main.scrollY + config.height - 80);
         this.electronBar.move(this, this.cameras.main.scrollX + config.width / 2 - 150, this.cameras.main.scrollY + config.height - 80);
@@ -719,7 +682,8 @@ function update(time) {
         this.scoreText.x = this.cameras.main.scrollX + 10;
         this.scoreText.y = this.cameras.main.scrollY + 90;
 
-        if (this.element.atomicNum == 2) {
+        //change to only lanthanide group
+        if (gameSettings.lanthanides.includes(this.element.atomicNum)) {
             this.minimapBg.x += 220;
             this.minimapBg.y += 150;
             this.dot.x += 220;
@@ -743,43 +707,29 @@ function update(time) {
             }
         }
 
-
-
-        //this.dot.x = config.width - config.width/10 - 50;
-        //this.dot.y = config.height - config.height/10 - 50;
-        //this.dot.x = (config.width - config.width/10 - 50) + this.element.x/( 3840/(config.width/10))
-        //this.dot.y = (config.height - config.height/10 - 50) + this.element.y/( 2080/(config.height/10))
         this.dot.x += this.element.x / (3840 / (config.width / 10));
         this.dot.y += this.element.y / (2080 / (config.height / 10));
-
-
-
-
-
-
 
         if ((this.input.activePointer.isDown || Phaser.Input.Keyboard.JustDown(this.spacebar)) && (lastShot + 500 < time || (lastShot + 250 < time && this.element.atomicNum == 2))) {
             let bullet = this.element.shootBullet(this);
 
             let bulletAngle = Phaser.Math.Angle.Between(this.element.x, this.element.y, this.input.activePointer.worldX, this.input.activePointer.worldY)
-            //console.log(bullet.angle2)
-            //console.log(bulletAngle)
             //let distance = Math.sqrt((bullet.x - this.element.x) * (bullet.x - this.element.x) + (bullet.y - this.element.y) * (bullet.y - this.element.y));
 
-            if (this.element.atomicNum == 2) {
+            if (gameSettings.group8.includes(this.element.atomicNum)) {
                 //actinideBullet(bullet, this.element, this.socket, bulletAngle);
                 //group3Bullet(bullet, this.element, this.socket, bulletAngle, bulletAngle);
                 //group4Bullet(bullet, this.element, this.socket, bulletAngle);
                 //group6Bullet(bullet, distance, this.element, this.socket, bulletAngle);
-                lanthanideBullet(bullet, this.element, this.socket, bulletAngle);
+                //lanthanideBullet(bullet, this.element, this.socket, bulletAngle);
                 //transitionMetalBullet(bullet, this.element, this.socket, bulletAngle);
+                group8Bullet(bullet, this.element, this.socket, bulletAngle, bulletAngle);
             }
             else {
                 this.socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed, damage: bullet.damage, atomicNumber: this.element.atomicNum, rotAngle: 0 });
             }
 
             lastShot = time;
-
         }
 
         if (lastScoreUpdate + 5000 < time) {
@@ -838,6 +788,28 @@ function update(time) {
         if (upDate.getTime() > this.element.lastHurtByTransition + 300 && isHit) {
             isHit = false;
         }
-
     }
 } 
+
+
+/*
+    //displays other players' movement on screen
+    this.socket.on('playerMoved', function (playerInfo) {
+        if (playerInfo.playerId == self.socket.id) {
+            //goal --> get to playerInfo.x, y
+            self.element.setPosition(playerInfo.x, playerInfo.y);
+
+            self.element.hp.move(self, otherElement.x - 40, otherElement.y + 70);
+        }
+        self.otherElements.getChildren().forEach((otherElement) => {
+            if (playerInfo.playerId == otherElement.playerId) {
+                //update other player's locations
+                otherElement.setRotation(playerInfo.rotation);
+                otherElement.setPosition(playerInfo.x, playerInfo.y);
+
+                //otherElement.setPosition(playerInfo.x, playerInfo.y);
+                otherElement.hp.move(self, otherElement.x - 40, otherElement.y + 70);
+            }
+        });
+    });
+    */
