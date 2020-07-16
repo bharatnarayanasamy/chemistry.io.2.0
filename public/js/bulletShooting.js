@@ -146,3 +146,10 @@ function transitionMetalBullet(bullet, element, socket, bulletAngle)
     socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed,
         damage: bullet.damage / 10, atomicNumber: element.atomicNum, rotAngle: 0});
 }
+
+function lanthanideBullet(bullet, element, socket, bulletAngle)
+{
+    //increase damage, decrease velocity
+    socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed*2,
+        damage: bullet.damage * 2.5, atomicNumber: element.atomicNum, rotAngle: 0});
+}

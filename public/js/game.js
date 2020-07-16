@@ -218,10 +218,10 @@ function create() {
     this.socket.on('playerMoved', function (playerInfo) {
         if (playerInfo.playerId == self.socket.id) {
             //goal --> get to playerInfo.x, y
-            
-            
+
+
             self.element.setPosition(playerInfo.x, playerInfo.y);
-            
+
             self.element.hp.move(self, otherElement.x - 40, otherElement.y + 70);
         }
         self.otherElements.getChildren().forEach((otherElement) => {
@@ -295,7 +295,7 @@ function create() {
                 //Otherwise, just update bullet locations
                 self.element.bullet_array[i].enableBody(true, true);
                 self.element.bullet_array[i].setTexture(gameSettings.texture[server_bullet_array[i].atomicNumber - 1] + "bullet");
-                
+
 
                 if (server_bullet_array[i].atomicNumber == 2) {
                     self.element.bullet_array[i].rotation += 0.015;
@@ -352,19 +352,6 @@ function create() {
         });
     }
 
-    //creates scorebars at bottom of screen
-    this.protonBar = new CollectionBar(this, config.width / 2 - 150, config.height - 120, "proton", 0);
-    this.protonBarText = this.add.text(config.width / 2 - 60, config.height - 118, 'Protons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' })
-    this.electronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 80, "electron", 0);
-    this.electronBarText = this.add.text(config.width / 2 - 60, config.height - 78, 'Electrons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' });
-    this.neutronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 40, "neutron", 0);
-    this.neutronBarText = this.add.text(config.width / 2 - 60, config.height - 38, 'Neutrons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' });
-    this.atoms = this.add.container(playerX, playerY);
-    this.atoms.add(this.protonBarText);
-    this.atoms.add(this.electronBarText);
-    this.atoms.add(this.neutronBarText);
-    this.atoms.setScrollFactor(1);
-    // this.atoms.setScrollFactorY(1);
 
     //find way to destroy protons that were collected from the array
     //change overlap from self.proton to proton group
@@ -473,9 +460,6 @@ function create() {
                 }
             }, null, self);
         }
-
-
-
     });
 
     //repeat of protonUpdate for neutrons
@@ -587,7 +571,7 @@ function create() {
         if (self.socket.id == healthInfo.id) {
             date_obj = new Date();
             self.element.lastHurt = date_obj.getTime();
-            if(healthInfo.atomicNumber == 2 /* NEEDS TO BE CHANGED*/){
+            if (healthInfo.atomicNumber == 2 /* NEEDS TO BE CHANGED*/) {
                 isHit = true;
                 self.element.lastHurtByTransition = date_obj.getTime();
                 self.knockbackSpeedX = healthInfo.speedX;
@@ -658,20 +642,51 @@ function create() {
     this.score = 0;
     this.killScore = 15;
 
+    //creates scorebars at bottom of screen
+    this.protonBar = new CollectionBar(this, config.width / 2 - 150, config.height - 120, "proton", 0);
+    this.protonBarText = this.add.text(config.width / 2 - 60, config.height - 118, 'Protons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' })
+    this.electronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 80, "electron", 0);
+    this.electronBarText = this.add.text(config.width / 2 - 60, config.height - 78, 'Electrons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' });
+    this.neutronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 40, "neutron", 0);
+    this.neutronBarText = this.add.text(config.width / 2 - 60, config.height - 38, 'Neutrons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' });
+    this.atoms = this.add.container(playerX, playerY);
+    this.atoms.add(this.protonBarText);
+    this.atoms.add(this.electronBarText);
+    this.atoms.add(this.neutronBarText);
+    this.atoms.add
+    //this.atoms.add(this.healthLabel);
+    //this.atoms.add(this.scoreText);
+    //this.atoms.add(this.protonBar);
+    this.atoms.setScrollFactor(0);
+    //this.atomBars = this.add.container(playerX, playerY);
+    //this.atomBars.add(this.protonBar);
+
 }
 
 
 function update(time) {
 
+
+
     if (typeof this.element != "undefined") {
         this.cameras.main.startFollow(this.element);
         this.cameras.main.followOffset.set(0, 0);
+
+        if (this.element.atomicNum == 2) {
+            this.cameras.main.setZoom(0.7);
+        }
+        else {
+            this.cameras.main.setZoom(1);
+        }
+        //Phaser.Math.Clamp
+
+
         this.element.movePlayer(this, gameSettings.playerSpeed, isHit, this.knockbackSpeedX, this.knockbackSpeedY, this.transitionBulletAngle);
-        if(isHit==true && time - this.element.lastHurtByTransition > 150){
+        if (isHit == true && time - this.element.lastHurtByTransition > 150) {
             isHit = false;
         }
 
-        this.protonBar.move(this, this.cameras.main.scrollX + config.width / 2 - 150, this.cameras.main.scrollY + config.height - 120);
+        this.protonBar.move(this, this.element.body.position.x - 50, this.element.body.position.y);
         //this.protonBarText.x = this.protonBar.x + 90;
         //this.protonBarText.y = this.protonBar.y + 2;
         this.electronBar.move(this, this.cameras.main.scrollX + config.width / 2 - 150, this.cameras.main.scrollY + config.height - 80);
@@ -698,13 +713,6 @@ function update(time) {
         this.dot.x = this.cameras.main.scrollX;
         this.dot.y = this.cameras.main.scrollY;
 
-        //this.dot.x = config.width - config.width/10 - 50;
-        //this.dot.y = config.height - config.height/10 - 50;
-        //this.dot.x = (config.width - config.width/10 - 50) + this.element.x/( 3840/(config.width/10))
-        //this.dot.y = (config.height - config.height/10 - 50) + this.element.y/( 2080/(config.height/10))
-        this.dot.x += this.element.x / (3840 / (config.width / 10));
-        this.dot.y += this.element.y / (2080 / (config.height / 10));
-
         this.healthLabel.text = "Health: " + this.element.hp.value;
         this.healthLabel.x = this.cameras.main.scrollX + 10;
         this.healthLabel.y = this.cameras.main.scrollY + 10;
@@ -714,6 +722,41 @@ function update(time) {
 
         this.scoreText.x = this.cameras.main.scrollX + 10;
         this.scoreText.y = this.cameras.main.scrollY + 90;
+
+        if (this.element.atomicNum == 2) {
+            this.minimapBg.x += 220;
+            this.minimapBg.y += 150;
+            this.dot.x += 220;
+            this.dot.y += 150;
+            this.leaderboardBg.x += 250;
+            this.leaderboardBg.y -= 180;
+
+            this.healthLabel.text = "Health: " + this.element.hp.value;
+            this.healthLabel.x -= 260;
+            this.healthLabel.y -= 180;
+
+            this.killScoreText.x -= 260;
+            this.killScoreText.y -= 180;
+
+            this.scoreText.x -= 260;
+            this.scoreText.y -= 180;
+
+            for (let i = 0; i < 5; i++) {
+                this.leaderboard[i].x += 250;
+                this.leaderboard[i].y -= 180;
+            }
+        }
+
+
+
+        //this.dot.x = config.width - config.width/10 - 50;
+        //this.dot.y = config.height - config.height/10 - 50;
+        //this.dot.x = (config.width - config.width/10 - 50) + this.element.x/( 3840/(config.width/10))
+        //this.dot.y = (config.height - config.height/10 - 50) + this.element.y/( 2080/(config.height/10))
+        this.dot.x += this.element.x / (3840 / (config.width / 10));
+        this.dot.y += this.element.y / (2080 / (config.height / 10));
+
+
 
 
 
@@ -732,7 +775,8 @@ function update(time) {
                 //group3Bullet(bullet, this.element, this.socket, bulletAngle, bulletAngle);
                 //group4Bullet(bullet, this.element, this.socket, bulletAngle);
                 //group6Bullet(bullet, distance, this.element, this.socket, bulletAngle);
-                transitionMetalBullet(bullet, this.element, this.socket, bulletAngle);
+                lanthanideBullet(bullet, this.element, this.socket, bulletAngle);
+                //transitionMetalBullet(bullet, this.element, this.socket, bulletAngle);
             }
             else {
                 this.socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed, damage: bullet.damage, atomicNumber: this.element.atomicNum, rotAngle: 0 });
@@ -787,15 +831,15 @@ function update(time) {
             rotation: this.element.rotation,
         };
 
-        upDate = new Date()
+        upDate = new Date();
 
         if (time > lastHealed + 1000 && time > lastShot + 3000 && upDate.getTime() > this.element.lastHurt + 3000) {
             this.element.hp.increment(3);
             this.socket.emit('player-heal', { id: this.element.playerId, health: this.element.hp.value });
             lastHealed = time;
         }
-        
-        if(upDate.getTime() > this.element.lastHurtByTransition + 300 && isHit){
+
+        if (upDate.getTime() > this.element.lastHurtByTransition + 300 && isHit) {
             isHit = false;
         }
 

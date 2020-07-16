@@ -334,10 +334,10 @@ function ServerGameLoop() {
 
       let longdist = 1000000;
 
-      if (typeof players[bullet.owner_id] != "undefined" && players[bullet.owner_id].atomicNumServer == 100)
+      if (typeof players[bullet.owner_id] != "undefined" && players[bullet.owner_id].atomicNumServer == 2)
       {
         //longdist = 38000; for halogens
-        longdist = 20000;
+        longdist = 1500*1500;
       }
       //Remove bullet once it has travelled 1000 units
       if ((Math.pow(bullet.x - bullet.ix, 2) + Math.pow(bullet.y - bullet.iy, 2)) > longdist) {
