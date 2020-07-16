@@ -27,28 +27,30 @@ class CollectionBar {
             this.value = 0;
         }
         this.draw();
-
     }
 
-    increment (value)
+    increment (scene, value, type)
     {
+        this.type = type;
         this.value+=value;
+        this.x = 448;
 
+        if (this.type == "proton") {
+            this.y = 680;
+        }
+        else if (this.type == "electron") {
+            this.y = 720;
+        }
+        else {
+            this.y = 760;
+        }
         if (this.value > 100)
         {
             this.value = 100;
         }
 
-        this.draw();
-
-    }
-    
-    move(scene, x, y) {
-        this.x = x;
-        this.y = y;
-        this.draw();
+        this.draw()
         scene.add.existing(this.bar);
-
     }
 
     draw ()

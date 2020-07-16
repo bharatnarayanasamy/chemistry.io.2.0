@@ -62,6 +62,7 @@ var game = new Phaser.Game(config);
 var lastShot = 0;
 var lastHealed = 0;
 var lastScoreUpdate = 0;
+var groupCreated = true;
 
 if (typeof localStorage.getItem("vOneLocalStorage") != undefined) {
     var username0 = localStorage.getItem("vOneLocalStorage");
@@ -213,7 +214,7 @@ function create() {
         });
     });
 
-    
+
 
     //updates a player's health 
     this.socket.on('update-health', function (player) {
@@ -348,8 +349,9 @@ function create() {
 
                     if (this.numProtons < gameSettings.upgradePEN) {
                         this.numProtons++;
-                        this.protonBar.increment(100 / gameSettings.upgradePEN);
+                        this.protonBar.increment(this, 100 / gameSettings.upgradePEN, "proton");
                         this.protonBarText.text = 'Protons: ' + this.numProtons + '/' + gameSettings.upgradePEN;
+
                     }
                     //level up if player has collected sufficient number of protons, neutrons, and electrons (PENs)
                     if (this.numNeutrons == gameSettings.upgradePEN && this.numProtons == gameSettings.upgradePEN && this.numElectrons == gameSettings.upgradePEN) {
@@ -358,11 +360,12 @@ function create() {
                         this.numProtons = 0;
                         this.numElectrons = 0;
 
-                        this.protonBar.increment(-100);
+
+                        this.protonBar.increment(this, -100, "proton");
                         this.protonBarText.text = "Protons: 0/" + gameSettings.upgradePEN;
-                        this.electronBar.increment(-100);
+                        this.electronBar.increment(this, -100, "electron");
                         this.electronBarText.text = "Electrons: 0/" + gameSettings.upgradePEN;
-                        this.neutronBar.increment(-100);
+                        this.neutronBar.increment(this, -100, "neutron");
                         this.neutronBarText.text = "Neutrons: 0/" + gameSettings.upgradePEN;
 
                         self.element.upgrade();
@@ -400,7 +403,7 @@ function create() {
                     this.scoreText.text = 'Score: ' + this.score;
                     if (this.numElectrons < gameSettings.upgradePEN) {
                         this.numElectrons++;
-                        this.electronBar.increment(100 / gameSettings.upgradePEN);
+                        this.electronBar.increment(this, 100 / gameSettings.upgradePEN, "electron");
                         this.electronBarText.text = 'Electrons: ' + this.numElectrons + '/' + gameSettings.upgradePEN;
                     }
                     //level up if player has collected sufficient number of protons, neutrons, and electrons (PENs)
@@ -410,11 +413,11 @@ function create() {
                         this.numProtons = 0;
                         this.numElectrons = 0;
 
-                        this.protonBar.increment(-100);
+                        this.protonBar.increment(this, -100, "proton");
                         this.protonBarText.text = "Protons: 0/" + gameSettings.upgradePEN;
-                        this.electronBar.increment(-100);
+                        this.electronBar.increment(this, -100, "electron");
                         this.electronBarText.text = "Electrons: 0/" + gameSettings.upgradePEN;
-                        this.neutronBar.increment(-100);
+                        this.neutronBar.increment(this, -100, "neutron");
                         this.neutronBarText.text = "Neutrons: 0/" + gameSettings.upgradePEN;
 
                         self.element.upgrade();
@@ -454,7 +457,7 @@ function create() {
 
                     if (this.numNeutrons < gameSettings.upgradePEN) {
                         this.numNeutrons++;
-                        this.neutronBar.increment(100 / gameSettings.upgradePEN);
+                        this.neutronBar.increment(this, 100 / gameSettings.upgradePEN, "neutron");
                         this.neutronBarText.text = 'Neutrons: ' + this.numNeutrons + '/' + gameSettings.upgradePEN;
                     }
                     //level up if player has collected sufficient number of protons, neutrons, and electrons (PENs)
@@ -464,11 +467,11 @@ function create() {
                         this.numProtons = 0;
                         this.numElectrons = 0;
 
-                        this.protonBar.increment(-100);
+                        this.protonBar.increment(this, -100, "proton");
                         this.protonBarText.text = "Protons: 0/" + gameSettings.upgradePEN;
-                        this.electronBar.increment(-100);
+                        this.electronBar.increment(this, -100, "electron");
                         this.electronBarText.text = "Electrons: 0/" + gameSettings.upgradePEN;
-                        this.neutronBar.increment(-100);
+                        this.neutronBar.increment(this, -100, "neutron");
                         this.neutronBarText.text = "Neutrons: 0/" + gameSettings.upgradePEN;
 
                         self.element.upgrade();
@@ -515,7 +518,7 @@ function create() {
 
     this.leaderboard = [];
     for (var i = 0; i < 5; i++) {
-        this.leaderboard.push(self.add.text(0, 20 * i, ""));
+        this.leaderboard.push(self.add.text(920, 20+20 * i, ""));
     }
     this.socket.on('update-leaderboard', function (items) {
         //self.killScoreText = self.add.text(16, 40, 'Kills: ' + (0), { fontSize: '25px', fill: '#00FF00' });
@@ -527,6 +530,7 @@ function create() {
             else {
                 self.leaderboard[i].text = "";
             }
+            self.leaderboard[i].setScrollFactor(0);
         }
     });
 
@@ -571,6 +575,9 @@ function create() {
         playerY = self.element.y;
         //create score text on top left
         self.scoreText = self.add.text(16, 70, 'Score: ' + (0), { fontSize: '25px', fill: '#00FF00' });
+        self.healthLabel.setScrollFactor(0);
+        self.killScoreText.setScrollFactor(0);
+        self.scoreText.setScrollFactor(0);
     }
 
     //add other players onto the screen
@@ -592,12 +599,14 @@ function create() {
     //create leaderboard background image
     this.rect = new Phaser.Geom.Rectangle(900, 0, 300, 250);
     this.graphics = this.add.graphics({ fillStyle: { color: 0x000000 } });
+    this.graphics.setScrollFactor(0);
     this.graphics.fillRectShape(this.rect);
     this.graphics.alpha = .3;
     this.leaderboardBg = this.graphics.generateTexture("leaderboardBg");
 
-    this.rect2 = new Phaser.Geom.Rectangle(config.width - config.width / 10 - 50, config.height - config.height / 10 - 50, config.width / 10 + 10, config.height / 10 + 10);
+    this.rect2 = new Phaser.Geom.Rectangle(config.width - config.width / 10 - 50, config.height - config.height / 10 - 50, config.width / 10 + 16, config.height / 10 + 10);
     this.graphics2 = this.add.graphics({ fillStyle: { color: 0x000000 } });
+    this.graphics2.setScrollFactor(0);
     this.graphics2.fillRectShape(this.rect2);
     this.graphics2.alpha = .5
     this.minimapBg = this.graphics2.generateTexture("minimapBg");
@@ -607,6 +616,7 @@ function create() {
 
     this.whiteSquare = new Phaser.Geom.Rectangle(config.width - config.width / 10 - 50, config.height - config.height / 10 - 50, 10, 10);
     this.dot = this.add.graphics({ fillStyle: { color: 0xffffff } });
+    this.dot.setScrollFactor(0);
     this.dot.fillRectShape(this.whiteSquare);
 
     this.score = 0;
@@ -623,20 +633,19 @@ function create() {
     this.atoms.add(this.protonBarText);
     this.atoms.add(this.electronBarText);
     this.atoms.add(this.neutronBarText);
-    //this.atoms.add(this.healthLabel);
-    //this.atoms.add(this.scoreText);
-    //this.atoms.add(this.protonBar);
     this.atoms.setScrollFactor(0);
-    //this.atomBars = this.add.container(playerX, playerY);
-    //this.atomBars.add(this.protonBar);
-
+    this.protonBar.bar.setScrollFactor(0);
+    this.electronBar.bar.setScrollFactor(0);
+    this.neutronBar.bar.setScrollFactor(0);
 }
 
 
 function update(time) {
     if (typeof this.element != "undefined") {
+
+
         this.cameras.main.startFollow(this.element);
-        this.cameras.main.followOffset.set(0, 0);
+        this.cameras.main.followOffset.set(5, 5);
 
         if (gameSettings.lanthanides.includes(this.element.atomicNum)) {
             this.cameras.main.setZoom(0.7);
@@ -651,36 +660,7 @@ function update(time) {
             isHit = false;
         }
 
-        this.protonBar.move(this, this.cameras.main.scrollX + config.width / 2 - 150, this.cameras.main.scrollY + config.height - 80);
-        this.electronBar.move(this, this.cameras.main.scrollX + config.width / 2 - 150, this.cameras.main.scrollY + config.height - 80);
-        this.neutronBar.move(this, this.cameras.main.scrollX + config.width / 2 - 150, this.cameras.main.scrollY + config.height - 40);
-
-
-        this.leaderboardBg.x = this.cameras.main.scrollX + 10;
-        this.leaderboardBg.y = this.cameras.main.scrollY;
-
-
-        for (let i = 0; i < 5; i++) {
-            this.leaderboard[i].x = this.leaderboardBg.x + 925;
-            this.leaderboard[i].y = this.leaderboardBg.y + 20 + 20 * i;
-        }
-
-        //this.minimapBg.move(this, this.cameras.main.scrollX + config.width - 150, this.cameras.main.scrollY + config.height - 80);
-        this.minimapBg.x = this.cameras.main.scrollX;
-        this.minimapBg.y = this.cameras.main.scrollY;
-
-        this.dot.x = this.cameras.main.scrollX;
-        this.dot.y = this.cameras.main.scrollY;
-
         this.healthLabel.text = "Health: " + this.element.hp.value;
-        this.healthLabel.x = this.cameras.main.scrollX + 10;
-        this.healthLabel.y = this.cameras.main.scrollY + 10;
-
-        this.killScoreText.x = this.cameras.main.scrollX + 10;
-        this.killScoreText.y = this.cameras.main.scrollY + 50;
-
-        this.scoreText.x = this.cameras.main.scrollX + 10;
-        this.scoreText.y = this.cameras.main.scrollY + 90;
 
         //change to only lanthanide group
         if (gameSettings.lanthanides.includes(this.element.atomicNum)) {
@@ -707,8 +687,11 @@ function update(time) {
             }
         }
 
-        this.dot.x += this.element.x / (3840 / (config.width / 10));
-        this.dot.y += this.element.y / (2080 / (config.height / 10));
+        console.log(this.dot.x);
+        this.dot.x = this.element.x / 30;
+        this.dot.y = this.element.y / 26.5;
+        
+        console.log(this.dot.y);
 
         if ((this.input.activePointer.isDown || Phaser.Input.Keyboard.JustDown(this.spacebar)) && (lastShot + 500 < time || (lastShot + 250 < time && this.element.atomicNum == 2))) {
             let bullet = this.element.shootBullet(this);
@@ -789,7 +772,7 @@ function update(time) {
             isHit = false;
         }
     }
-} 
+}
 
 
 /*
