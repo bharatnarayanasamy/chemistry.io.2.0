@@ -653,7 +653,6 @@ function create() {
     this.atoms.add(this.protonBarText);
     this.atoms.add(this.electronBarText);
     this.atoms.add(this.neutronBarText);
-    this.atoms.add
     //this.atoms.add(this.healthLabel);
     //this.atoms.add(this.scoreText);
     //this.atoms.add(this.protonBar);
@@ -686,15 +685,12 @@ function update(time) {
             isHit = false;
         }
 
-        this.protonBar.move(this, this.element.body.position.x - 50, this.element.body.position.y);
-        //this.protonBarText.x = this.protonBar.x + 90;
-        //this.protonBarText.y = this.protonBar.y + 2;
+
+
+
+        this.protonBar.move(this, this.cameras.main.scrollX + config.width / 2 - 150, this.cameras.main.scrollY + config.height - 80);
         this.electronBar.move(this, this.cameras.main.scrollX + config.width / 2 - 150, this.cameras.main.scrollY + config.height - 80);
-        //this.electronBarText.x = this.electronBar.x + 85;
-        //this.electronBarText.y = this.electronBar.y + 2;
         this.neutronBar.move(this, this.cameras.main.scrollX + config.width / 2 - 150, this.cameras.main.scrollY + config.height - 40);
-        //this.neutronBarText.x = this.neutronBar.x + 90;
-        //this.neutronBarText.y = this.neutronBar.y + 2;
 
 
         this.leaderboardBg.x = this.cameras.main.scrollX + 10;
