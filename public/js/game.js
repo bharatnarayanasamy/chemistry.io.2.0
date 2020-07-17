@@ -5,7 +5,6 @@ FOR OFTEN USED VARIABLES REQUIRING INDEXING AND/OR PROCESSSING, CREATE A NEW VAR
 //This class is used for defining global letiables that can be accessed by any class
 
 //Dictionary of game settings
-//fconst fs = require('fs');
 
 var gameSettings = {
     playerSpeed: 300,
@@ -17,7 +16,7 @@ var gameSettings = {
     ROTATION_SPEED_DEGREES: Phaser.Math.RadToDeg(2 * Math.PI), // 0.5 arc per sec, 2 sec per arc
     TOLERANCE: 0.04 * 1 * Math.PI,
     playerHealth: 100,
-    texture: ["hydrogen", "helium", "obstacle", "vrishabkrishna"],
+    texture: ["hydrogen", "helium", "lithium", "vrishabkrishna"],
     upgradePEN: 1,
     group1: [1, 3, 11, 19, 37, 55, 87],
     group2: [4, 12, 20, 38, 56, 88],
@@ -78,40 +77,42 @@ let users;
 var playerX;
 var playerY;
 
-var elementNumbers = JSON.parse(fs.readFileSync('elements.json', 'utf8'))
-
 var lastScoreUpdate;
 
 var isHit = false;
 
+var elements =  JSON.parse(localStorage.getItem("elements"));
 
 function preload() {
-    this.load.image("hydrogenbullet", "./assets/images/hydrogenbullet.png");
 
-    //CHANGE LINE BELOW, CURRENTLY TESTING
-    this.load.image("heliumbullet", "./assets/images/group8Bullet.png");
-    this.load.image("obstaclebullet", "./assets/images/obstacle.png");
-    //this.load.image("heliumbullet", "./assets/images/group7Bullet.png");
+    //loading in element images and their bullet images
+    /*for (i in elements) {
+        var imageName = elements[i].toLowerCase()
+        this.load.image(imageName, "./assets/images/" + imageName + ".png")
+        this.load.image(imageName, "./assets/images/" + imageName + "bullet" + ".png")
+    }*/
 
-    this.load.image("hydrogen", "./assets/images/hydrogen.png");
-    this.load.image("helium", "./assets/images/helium.png");
-    //need to change to lithium
-    this.load.image("obstacle", "./assets/images/lithium.png");
-    this.load.image("vrishabkrishna", "./assets/images/vrishabkrishna.png");
+    this.load.image("hydrogenbullet", "./assets/images/old_images/hydrogenbullet.png");
+    this.load.image("heliumbullet", "./assets/images/old_images/group8Bullet.png");
+    this.load.image("lithiumbullet", "./assets/images/old_images/obstacle.png");
+    this.load.image("halogenbullet", "./assets/images/old_images/group7Bullet.png");
+
+    this.load.image("hydrogen", "./assets/images/old_images/hydrogen.png");
+    this.load.image("helium", "./assets/images/old_images/helium.png");
+    this.load.image("lithium", "./assets/images/old_images/lithium.png");
+    this.load.image("vrishabkrishna", "./assets/images/old_images/vrishabkrishna.png");
 
 
     this.load.image("proton", "./assets/images/proton.svg");
     this.load.image("electron", "./assets/images/electron.svg");
     this.load.image("neutron", "./assets/images/neutron.svg");
-    this.load.image("bg", "./assets/images/dope.png");
+    this.load.image("bg", "./assets/images/background.png");
 
     //Setting the maximum number of mouse pointers that can be used on the screen to one
     this.input.maxPointers = 1;
 }
 
 function create() {
-    //console.log(elementNumbers);
-
     //accessing user information to get username
     $.ajax({
         type: 'GET',
@@ -134,6 +135,8 @@ function create() {
             console.log("BOB JOE");
         }
     });
+
+    console.log(elements);
 
     //  Set the camera and physics bounds to be the size of 4x4 bg images
     this.cameras.main.setBounds(0, 0, 1920 * 2, 1080 * 2);
@@ -318,7 +321,6 @@ function create() {
             y: -1000
         });
     }
-
 
     this.oldNeutronPosition = [];
     for (let i = 0; i < 15; i++) {
@@ -518,7 +520,7 @@ function create() {
 
     this.leaderboard = [];
     for (var i = 0; i < 5; i++) {
-        this.leaderboard.push(self.add.text(920, 20+20 * i, ""));
+        this.leaderboard.push(self.add.text(920, 20 + 20 * i, ""));
     }
     this.socket.on('update-leaderboard', function (items) {
         //self.killScoreText = self.add.text(16, 40, 'Kills: ' + (0), { fontSize: '25px', fill: '#00FF00' });
@@ -557,6 +559,26 @@ function create() {
                 self.transitionBulletAngle = healthInfo.bulletAngle;
             }
         }
+    });
+
+    //displays other players' movement on screen
+    this.socket.on('playerMoved', function (playerInfo) {
+        if (playerInfo.playerId == self.socket.id) {
+            //goal --> get to playerInfo.x, y
+            self.element.setPosition(playerInfo.x, playerInfo.y);
+
+            self.element.hp.move(self, otherElement.x - 40, otherElement.y + 70);
+        }
+        self.otherElements.getChildren().forEach((otherElement) => {
+            if (playerInfo.playerId == otherElement.playerId) {
+                //update other player's locations
+                otherElement.setRotation(playerInfo.rotation);
+                otherElement.setPosition(playerInfo.x, playerInfo.y);
+
+                //otherElement.setPosition(playerInfo.x, playerInfo.y);
+                otherElement.hp.move(self, otherElement.x - 40, otherElement.y + 70);
+            }
+        });
     });
 
     //add this player onto the screen
@@ -642,8 +664,6 @@ function create() {
 
 function update(time) {
     if (typeof this.element != "undefined") {
-
-
         this.cameras.main.startFollow(this.element);
         this.cameras.main.followOffset.set(5, 5);
 
@@ -687,31 +707,48 @@ function update(time) {
             }
         }
 
-        console.log(this.dot.x);
+        //console.log(this.dot.x);
         this.dot.x = this.element.x / 30;
         this.dot.y = this.element.y / 26.5;
-        
-        console.log(this.dot.y);
+
+        //console.log(this.dot.y);
 
         if ((this.input.activePointer.isDown || Phaser.Input.Keyboard.JustDown(this.spacebar)) && (lastShot + 500 < time || (lastShot + 250 < time && this.element.atomicNum == 2))) {
             let bullet = this.element.shootBullet(this);
 
             let bulletAngle = Phaser.Math.Angle.Between(this.element.x, this.element.y, this.input.activePointer.worldX, this.input.activePointer.worldY)
-            //let distance = Math.sqrt((bullet.x - this.element.x) * (bullet.x - this.element.x) + (bullet.y - this.element.y) * (bullet.y - this.element.y));
 
             if (gameSettings.group8.includes(this.element.atomicNum)) {
-                //actinideBullet(bullet, this.element, this.socket, bulletAngle);
-                //group3Bullet(bullet, this.element, this.socket, bulletAngle, bulletAngle);
-                //group4Bullet(bullet, this.element, this.socket, bulletAngle);
-                //group6Bullet(bullet, distance, this.element, this.socket, bulletAngle);
-                //lanthanideBullet(bullet, this.element, this.socket, bulletAngle);
-                //transitionMetalBullet(bullet, this.element, this.socket, bulletAngle);
                 group8Bullet(bullet, this.element, this.socket, bulletAngle, bulletAngle);
+            }
+            else if (gameSettings.group2.includes(this.element.atomicNum)) {
+                let distance = Math.sqrt((bullet.x - this.element.x) * (bullet.x - this.element.x) + (bullet.y - this.element.y) * (bullet.y - this.element.y));
+                group2Bullet(bullet, distance, this.element, this.socket, bulletAngle);
+            }
+            else if (gameSettings.group3.includes(this.element.atomicNum)) {
+                group3Bullet(bullet, this.element, this.socket, bulletAngle);
+            }
+            else if (gameSettings.group4.includes(this.element.atomicNum)) {
+                group4Bullet(bullet, this.element, this.socket, bulletAngle);
+            }
+            else if (gameSettings.group5.includes(this.element.atomicNum)) {
+                group5Bullet(bullet, this.element, this.socket, bulletAngle);
+            }
+            else if (gameSettings.group6.includes(this.element.atomicNum)) {
+                group6Bullet(bullet, this.element, this.socket, bulletAngle);
+            }
+            else if (gameSettings.group7.includes(this.element.atomicNum)) {
+                group7Bullet(bullet, this.element, this.socket, bulletAngle);
+            }
+            else if (gameSettings.transitionmetals.includes(this.element.atomicNum)) {
+                transitionMetalBullet(bullet, this.element, this.socket, bulletAngle);
+            }
+            else if (gameSettings.lanthanides.includes(this.element.atomicNum)) {
+                lanthanideBullet(bullet, this.element, this.socket, bulletAngle);
             }
             else {
                 this.socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed, damage: bullet.damage, atomicNumber: this.element.atomicNum, rotAngle: 0 });
             }
-
             lastShot = time;
         }
 
@@ -775,24 +812,3 @@ function update(time) {
 }
 
 
-/*
-    //displays other players' movement on screen
-    this.socket.on('playerMoved', function (playerInfo) {
-        if (playerInfo.playerId == self.socket.id) {
-            //goal --> get to playerInfo.x, y
-            self.element.setPosition(playerInfo.x, playerInfo.y);
-
-            self.element.hp.move(self, otherElement.x - 40, otherElement.y + 70);
-        }
-        self.otherElements.getChildren().forEach((otherElement) => {
-            if (playerInfo.playerId == otherElement.playerId) {
-                //update other player's locations
-                otherElement.setRotation(playerInfo.rotation);
-                otherElement.setPosition(playerInfo.x, playerInfo.y);
-
-                //otherElement.setPosition(playerInfo.x, playerInfo.y);
-                otherElement.hp.move(self, otherElement.x - 40, otherElement.y + 70);
-            }
-        });
-    });
-    */

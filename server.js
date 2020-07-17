@@ -131,6 +131,22 @@ for (let i = 0; i < 15; i++) {
   });
 
 }
+var serverSettings = {
+  group1: [1, 3, 11, 19, 37, 55, 87],
+  group2: [4, 12, 20, 38, 56, 88],
+  group3: [5, 13, 31, 49, 81, 113],
+  group4: [6, 14, 32, 50, 82, 114],
+  group5: [7, 15, 33, 51, 83, 115],
+  group6: [8, 16, 34, 52, 84, 116],
+  group7: [9, 17, 35, 53, 85, 117],
+  group8: [2, 10, 18, 36, 54, 86, 118],
+  transitionmetals: [21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
+      39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
+      72, 73, 74, 75, 76, 77, 78, 79, 80,
+      104, 105, 106, 107, 108, 109, 110, 111, 112],
+  lanthanides: [57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71],
+  actinides: [89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103]
+}
 
 //Initialize function for what happens when connection occurs
 io.on('connection', (socket) => {
@@ -308,28 +324,28 @@ function ServerGameLoop() {
       
       let longdist = 1000000;
 
-      if (typeof players[bullet.owner_id] != "undefined" &&  players[bullet.owner_id].atomicNumServer == 7){
-        //group5Bullet
-        bullet_array[i].bulletSpeed += 10;
+      if (typeof players[bullet.owner_id] != "undefined" && serverSettings.group3.includes(players[bullet.owner_id].atomicNumServer))
+      {
+        longdist = 20000;
+      }
+
+      if (typeof players[bullet.owner_id] != "undefined" && serverSettings.group5.includes(players[bullet.owner_id].atomicNumServer)){
+        bullet_array[i].bulletSpeed += 20;
       }   
       
-      if (typeof players[bullet.owner_id] != "undefined" &&  players[bullet.owner_id].atomicNumServer == 9){
-        //group 7 bullet
+      if (typeof players[bullet.owner_id] != "undefined" && serverSettings.group7.includes(players[bullet.owner_id].atomicNumServer)){
         if (bullet_array[i].bulletSpeed > 20) {
           bullet_array[i].bulletSpeed -= 7;
         }
-        else
-        {
+        else {
           bullet_array[i].bulletSpeed = 10;
         }
 
-        longdist = 38000;
+        longdist = 30000;
       }   
       
-      if (typeof players[bullet.owner_id] != "undefined" && players[bullet.owner_id].atomicNumServer == 57)
-      {
-        //lanthanides
-        longdist = 1500*1500;
+      if (typeof players[bullet.owner_id] != "undefined" && serverSettings.lanthanides.includes(players[bullet.owner_id].atomicNumServer)) {
+        longdist = 2250000;
       }
 
       // Remove if it goes off screen
@@ -365,10 +381,6 @@ function ServerGameLoop() {
               io.emit('player-hit', healthInfo); // Tell everyone this player got hit
               players[id].health -= bullet.damage;
               io.emit("update-health", players[id]);
-              if (players[owner].atomicNumServer == 21){
-                //transition metals
-                io.emit('playerMoved', players[id]);
-              }
 
               if (typeof players[owner] != "undefined" && ![2,9].includes(players[owner].atomicNumServer)) {
                 bullet_array.splice(i, 1);
