@@ -746,6 +746,9 @@ function update(time) {
             else if (gameSettings.lanthanides.includes(this.element.atomicNum)) {
                 lanthanideBullet(bullet, this.element, this.socket, bulletAngle);
             }
+            else if (gameSettings.actinides.includes(this.element.atomicNum)) {
+                actinideBullet(bullet, this.element, this.socket, bulletAngle);
+            }
             else {
                 this.socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed, damage: bullet.damage, atomicNumber: this.element.atomicNum, rotAngle: 0 });
             }

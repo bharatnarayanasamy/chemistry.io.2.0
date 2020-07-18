@@ -322,6 +322,31 @@ function ServerGameLoop() {
       bullet.x += speedX / 60; //update bullet position
       bullet.y += speedY / 60;
       
+      if (typeof players[bullet.owner_id] != "undefined" && serverSettings.actinides.includes(players[bullet.owner_id].atomicNumServer)) {
+        let dx0 = players[bullet.owner_id].x - bullet.x;
+        let dy0 = players[bullet.owner_id].y - bullet.y;
+        let dist0 = Math.sqrt(dx0 * dx0 + dy0 * dy0);
+
+        if (dist0 > 300 && typeof bullet.firstBullet != "undefined" && bullet.firstBullet==true) {
+
+          let bullet0 = { x: bullet.x, y: bullet.y, angle: bullet.angle + 0.2, bulletSpeed: bullet.bulletSpeed, damage: bullet.damage, atomicNumber: bullet.atomicNumber }
+          let bullet1 = { x: bullet.x, y: bullet.y, angle: bullet.angle - 0.2, bulletSpeed: bullet.bulletSpeed, damage: bullet.damage, atomicNumber: bullet.atomicNumber };
+
+          //bullet0.angle += 0.2;
+          //bullet1.angle -= 0.2;
+
+          bullet0.ix = bullet.ix;  //set initial positions of bullet to track distance traveled
+          bullet1.ix = bullet.ix;
+
+          bullet0.iy = bullet.iy;
+          bullet1.iy = bullet.iy;
+
+          bullet_array.push(bullet0);
+          bullet_array.push(bullet1);
+          bullet.firstBullet = false;
+        }
+      }
+
       let longdist = 1000000;
 
       if (typeof players[bullet.owner_id] != "undefined" && serverSettings.group3.includes(players[bullet.owner_id].atomicNumServer))
@@ -434,30 +459,5 @@ setInterval(UpdateLeaderboard, 100);
 
 
 
-/*
-      if (typeof players[bullet.owner_id] != "undefined" && players[bullet.owner_id].atomicNumServer > 1) {
-        //actinideBullet
-        let dx0 = players[bullet.owner_id].x - bullet.x;
-        let dy0 = players[bullet.owner_id].y - bullet.y;
-        let dist0 = Math.sqrt(dx0 * dx0 + dy0 * dy0);
 
-        if (dist0 > 300 && typeof bullet.firstBullet != "undefined" && bullet.firstBullet==true) {
-
-          let bullet0 = { x: bullet.x, y: bullet.y, angle: bullet.angle + 0.2, bulletSpeed: bullet.bulletSpeed, damage: bullet.damage, atomicNumber: bullet.atomicNumber }
-          let bullet1 = { x: bullet.x, y: bullet.y, angle: bullet.angle - 0.2, bulletSpeed: bullet.bulletSpeed, damage: bullet.damage, atomicNumber: bullet.atomicNumber };
-
-          //bullet0.angle += 0.2;
-          //bullet1.angle -= 0.2;
-
-          bullet0.ix = bullet.ix;  //set initial positions of bullet to track distance travel;ed
-          bullet1.ix = bullet.ix;
-
-          bullet0.iy = bullet.iy;
-          bullet1.iy = bullet.iy;
-
-          bullet_array.push(bullet0);
-          bullet_array.push(bullet1);
-          bullet.firstBullet = false;
-        }
-      }
-*/
+      
