@@ -16,7 +16,6 @@ var io = require('socket.io').listen(server);
 const PORT = process.env.PORT || 5000;
 
 const routes = require('./routes/main');
-const secureRoutes = require('./routes/secure');
 
 // setup mongo connection
 const uri = process.env.MONGO_CONNECTION_URL;
@@ -52,7 +51,6 @@ app.get('/game.html', passport.authenticate('jwt', { session : false }), functio
 
 // main routes
 app.use('/', routes);
-app.use('/', passport.authenticate('jwt', { session: false }), secureRoutes);
 
 // catch all other routes
 app.use((req, res, next) => {
@@ -393,9 +391,6 @@ function ServerGameLoop() {
             let dist = Math.sqrt(dx * dx + dy * dy);
             let owner = bullet.owner_id;
             thresh = 70
-            //if(players[owner].atomicNumServer == 3) {
-                //thresh = 500;            
-            //}
             if (dist < thresh) {
               healthInfo.i = i;
               healthInfo.id = id;
@@ -406,8 +401,19 @@ function ServerGameLoop() {
               io.emit('player-hit', healthInfo); // Tell everyone this player got hit
               players[id].health -= bullet.damage;
               io.emit("update-health", players[id]);
+              /*
+              group 5 rocket stuff
+              for (let id in players) {
+                if ((Math.pow(players[id].x - bullet.x, 2) + Math.pow(players[id].y - bullet.y;,2)) < Math.pow(2000,2)){
+                  healthInfo.id = id;
+                  io.emit('player-hit', healthInfo);
+                  players[id].health -= bullet.damage;
+                  io.emit("update-health", players[id]);
+                }
+              }
+              */
 
-              if (typeof players[owner] != "undefined" && ![2,9].includes(players[owner].atomicNumServer)) {
+              if (typeof players[owner] != "undefined" && !(serverSettings.group8.includes(players[owner].atomicNumServer) || serverSettings.group7.includes(players[owner].atomicNumServer))) {
                 bullet_array.splice(i, 1);
                 i--;
               }

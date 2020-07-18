@@ -60,8 +60,10 @@
 
 
   <script type="text/javascript">
+    localStorage.setItem("loginState", false);
+
     document.getElementById("myButton").onclick = function () {
-      location.href = "/index2.html";
+      location.href = "/login.html";
     };
     localStorage.setItem("vTwoLocalStorage", null);
   </script>

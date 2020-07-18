@@ -1,14 +1,15 @@
+//handles getting the value of the username that a player who isn't logged in stored in local storage
 function getValue(id) {
-    a = document.getElementById(id).value.trim(); //value of the text input
-    if (a == '') {
+    username = document.getElementById(id).value.trim(); //value of the text input
+    if (username == "") {
         window.alert("Please enter a username")
     }
     else {
-        localStorage.setItem("vOneLocalStorage", a);
+        localStorage.setItem("username", username);
         $.ajax({
             type: 'POST',
-            url: '/loginnousername',
-            data: {username: a},
+            url: '/login-without-account', //name for the express route that is sent when you dont login but enter the game
+            data: {username: username},
             success: function (data) {
                 window.location.replace('/game.html');
             },

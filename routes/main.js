@@ -21,7 +21,7 @@ router.get('/scores', async (req, res, next) => {
   res.status(200).json(users);
 });
 
-router.post('/loginnousername', async (req, res, next) => {  
+router.post('/login-without-account', async (req, res, next) => {  
   const token = jwt.sign({ user: req.body.username }, 'top_secret', { expiresIn: 300 });
   const refreshToken = jwt.sign({ user: req.body.username }, 'top_secret_refresh', { expiresIn: 86400 });
 

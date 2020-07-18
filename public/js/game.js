@@ -15,7 +15,6 @@ var gameSettings = {
     obstacleVel: 0,
     ROTATION_SPEED_DEGREES: Phaser.Math.RadToDeg(2 * Math.PI), // 0.5 arc per sec, 2 sec per arc
     TOLERANCE: 0.04 * 1 * Math.PI,
-    playerHealth: 100,
     texture: ["hydrogen", "helium", "lithium", "vrishabkrishna"],
     upgradePEN: 1,
     group1: [1, 3, 11, 19, 37, 55, 87],
@@ -63,8 +62,8 @@ var lastHealed = 0;
 var lastScoreUpdate = 0;
 var groupCreated = true;
 
-if (typeof localStorage.getItem("vOneLocalStorage") != undefined) {
-    var username0 = localStorage.getItem("vOneLocalStorage");
+if (typeof localStorage.getItem("username") != undefined) {
+    var username0 = localStorage.getItem("username");
 }
 else {
     var username0;
@@ -77,19 +76,21 @@ let users;
 var playerX;
 var playerY;
 
+var hasDied = false;
+
 var lastScoreUpdate;
 
 var isHit = false;
 
-var elements =  JSON.parse(localStorage.getItem("elements"));
+var elements = JSON.parse(localStorage.getItem("elements"));
 
 function preload() {
 
     //loading in element images and their bullet images
     /*for (i in elements) {
         var imageName = elements[i].toLowerCase()
-        this.load.image(imageName, "./assets/images/" + imageName + ".png")
-        this.load.image(imageName, "./assets/images/" + imageName + "bullet" + ".png")
+        this.load.image(imageName, "./assets/images/elements/" + imageName + ".png")
+        this.load.image(imageName, "./assets/images/bullets/" + imageName + "bullet" +".png")
     }*/
 
     this.load.image("hydrogenbullet", "./assets/images/old_images/hydrogenbullet.png");
@@ -97,15 +98,20 @@ function preload() {
     this.load.image("lithiumbullet", "./assets/images/old_images/obstacle.png");
     this.load.image("halogenbullet", "./assets/images/old_images/group7Bullet.png");
 
-    this.load.image("hydrogen", "./assets/images/old_images/hydrogen.png");
+    this.load.image("hydrogen", "./assets/images/elements/hydrogen.png");
     this.load.image("helium", "./assets/images/old_images/helium.png");
+    //this.load.image("hydrogen", "./assets/images/old_images/hydrogen.png");
     this.load.image("lithium", "./assets/images/old_images/lithium.png");
+    //this.load.image("potassium", "./assets/images/elements/potassium.png");
+    //this.load.image("sodium", "./assets/images/elements/sodium.png");
+    //this.load.image("rubidium", "./assets/images/elements/rubidium.png");
+
     this.load.image("vrishabkrishna", "./assets/images/old_images/vrishabkrishna.png");
 
 
     this.load.image("proton", "./assets/images/proton.svg");
     this.load.image("electron", "./assets/images/electron.svg");
-    this.load.image("neutron", "./assets/images/neutron.svg");
+    this.load.image("neutron", "./assets/images/neutron.png");
     this.load.image("bg", "./assets/images/background.png");
 
     //Setting the maximum number of mouse pointers that can be used on the screen to one
@@ -232,18 +238,21 @@ function create() {
             });
         }
         if (self.element.hp.value <= 0) {
-            $.ajax({
-                type: 'POST',
-                url: '/logout',
-                success: function () {
-                    window.alert("You died!");
-                    window.location.href = "index.html";
-                },
-                error: function () {
-                    window.alert("System Error");
-                    window.location.href = "index.html";
-                }
-            });
+            if (!hasDied) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/logout',
+                    success: function () {
+                        window.alert("You died!");
+                        hasDied = true;
+                        window.location.href = "index.html";
+                    },
+                    error: function () {
+                        window.alert("System Error");
+                        window.location.href = "index.html";
+                    }
+                });
+            }
         }
     });
 
@@ -584,6 +593,7 @@ function create() {
     //add this player onto the screen
     function addPlayer(self, playerInfo) {
         self.element = new Element(self, playerInfo.x, playerInfo.y, 45, playerInfo.playerId, "hydrogen");
+        self.element.setScale(0.4);
         self.element.oldPosition = {
             x: self.element.x,
             y: self.element.y,
@@ -604,6 +614,7 @@ function create() {
 
     //add other players onto the screen
     function addOtherPlayers(self, playerInfo) {
+
         if (playerInfo.atomicNumServer < 5) {
             const otherElement = new Element(self, playerInfo.x, playerInfo.y, 45, playerInfo.playerId, this.gameSettings.texture[playerInfo.atomicNumServer - 1]);
             self.otherElements.add(otherElement);

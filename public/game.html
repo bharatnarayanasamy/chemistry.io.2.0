@@ -18,14 +18,12 @@
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="js/refreshToken.js"></script>
-
-    <script type="text/javascript" src="js/usernameinfo.js"></script>
+    <script src="js/usernameinfo.js"></script>
     <style>
         body {
             background-image: none;
         }
     </style>
-
     <script src="/socket.io/socket.io.js"></script>
     <script src="//cdn.jsdelivr.net/npm/phaser@3.23.0/dist/phaser.min.js"></script>
     <script src="js/bullet.js"></script>
@@ -33,48 +31,9 @@
     <script src="js/bulletShooting.js"></script>
     <script src="js/collectionbar.js"></script>
     <script src="js/element.js"></script>
-
-    <script>
-        window.onbeforeunload = function () {
-            window.setTimeout(function () {
-                $.ajax({
-                    type: 'POST',
-                    url: '/logout',
-                    success: function () {
-                        window.alert("Refreshed!")
-                        window.location.href = 'index.html';
-                    },
-                    error: function () {
-                        window.alert("System Error - failed to log you out");
-                        window.location.href = 'index.html';
-                    }
-                });
-            }, 0);
-            window.onbeforeunload = null; // necessary to prevent infinite loop, that kills your browser 
-        }
-    </script>
-    <script>
-        function loadJSON(callback) {
-            var xobj = new XMLHttpRequest();
-            xobj.overrideMimeType("application/json");
-            xobj.open('GET', 'js/elements.json', true); // Replace 'my_data' with the path to your file
-            xobj.onreadystatechange = function () {
-                if (xobj.readyState == 4 && xobj.status == "200") {
-                    // Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode
-                    callback(xobj.responseText);
-                }
-                else {
-                }
-            };
-            xobj.send(null);
-        }
-        loadJSON(function (response) {
-            // Parse JSON string into object
-            var elementJSON = JSON.parse(response);
-            localStorage.setItem("elements", JSON.stringify(elementJSON));
-        });
-    </script>
-    <script type="text/javascript" src="js/game.js"></script>
+    <script src="js/logout.js"></script>
+    <script src="js/loadJSON.js"></script>
+    <script src="js/game.js"></script>
 </body>
 
 </html>
