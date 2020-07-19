@@ -111,15 +111,25 @@ router.post('/submit-score', async (req, res, next) => {
   res.status(200).json({ status: 'ok' });
 });
 
+router.post('/submit-element', async (req, res, next) => {
+  const { email, element } = req.body;
+  await UserModel.updateOne({ email }, { bestElement: element });
+  res.status(200).json({ status: 'ok' });
+});
+
+router.post('/submit-kills', async (req, res, next) => {
+  const { email, kills } = req.body;
+  await UserModel.updateOne({ email }, { kills: kills });
+  res.status(200).json({ status: 'ok' });
+});
+
 router.get('/get-user', async (req, res, next) => {
-  const email = req.body;
-  console.log(email);
-  await UserModel.find({email: "billybob@gmail.com" }, function (err, users) {
-    console.log(err);
-    console.log(users);
+  const email = req.query["email"];
+  await UserModel.find({email: email}, function (err, users) {
     if (err) return handleError(err);
     res.send(users)
-  })
+  });
+
 });
 
 router.post('/logout', (req, res, next) => {

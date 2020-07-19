@@ -17,7 +17,7 @@ var gameSettings = {
     TOLERANCE: 0.04 * 1 * Math.PI,
     //texture: ["hydrogen", "helium", "lithium", "vrishabkrishna"],
     texture: ["hydrogen", "helium", "lithium", "beryllium", "boron", "carbon", "nitrogen", "oxygen", "fluorine"],
-    texLen: 9, 
+    texLen: 9,
     upgradePEN: 1,
     group1: [1, 3, 11, 19, 37, 55, 87],
     group2: [4, 12, 20, 38, 56, 88],
@@ -70,8 +70,10 @@ if (typeof localStorage.getItem("username") != undefined) {
 else {
     var username0;
 }
-var email;
+var email = localStorage.getItem("email");
 var currentHighScore;
+var bestKills;
+var bestElement;
 
 let users;
 
@@ -85,18 +87,19 @@ var hasDied = false;
 var lastScoreUpdate;
 
 var isHit = false;
+var isMoving = false;
 
 var elements = JSON.parse(localStorage.getItem("elements"));
 
 function preload() {
 
     //loading in element images and their bullet images
-    for (let i = 1; i<11; i++) { //temporary
+    for (let i = 1; i < 11; i++) { //temporary
         var imageName = elements[i].toLowerCase()
         this.load.image(imageName, "./assets/images/elements/" + imageName + ".png")
-        this.load.image(imageName + "bullet", "./assets/images/bullets/" + imageName + "bullet" +".png")
+        this.load.image(imageName + "bullet", "./assets/images/bullets/" + imageName + "bullet" + ".png")
     }
-    
+
     //this.load.image("vrishabkrishna", "./assets/images/old_images/vrishabkrishna.png");
 
     this.load.image("proton", "./assets/images/proton.png");
@@ -110,26 +113,29 @@ function preload() {
 
 function create() {
     //accessing user information to get username
-    console.log(localStorage.getItem("email"));
-    if (typeof localStorage.getItem("email") != undefined) {
-        const data = {
-            'email': localStorage.getItem("email"),
-        }
+    console.log(typeof email);
+
+    if (typeof email != "object") {
+        const data = { "email": localStorage.getItem("email") };
+        console.log(data);
         $.ajax({
             type: 'GET',
             url: '/get-user',
-            data, 
+            data,
             success: function (data) {
-                window.alert(data)
+                username0 = data.name;
+                currentHighScore = data.highScore;
+                email = data.email;
+                bestKills = data.kills;
+                bestElement = data.bestElement;
                 console.log(data)
             },
             error: function (xhr) {
-                window.alert(xhr);
             }
         });
     }
-    
- 
+
+
 
 
     //  Set the camera and physics bounds to be the size of 4x4 bg images
@@ -138,11 +144,11 @@ function create() {
 
     //  Mash 4 images together to create our background
     this.add.image(0, 0, 'bg').setOrigin(0);
-    this.add.image(gameWidth/2, 0, 'bg').setOrigin(0).setFlipX(true);
-    this.add.image(0, gameHeight/2, 'bg').setOrigin(0).setFlipY(true);
-    this.add.image(gameWidth/2, gameHeight/2, 'bg').setOrigin(0).setFlipX(true).setFlipY(true);
+    this.add.image(gameWidth / 2, 0, 'bg').setOrigin(0).setFlipX(true);
+    this.add.image(0, gameHeight / 2, 'bg').setOrigin(0).setFlipY(true);
+    this.add.image(gameWidth / 2, gameHeight / 2, 'bg').setOrigin(0).setFlipX(true).setFlipY(true);
 
-    var g2 = this.add.grid(0, 0, 2*gameWidth, 2*gameHeight, 20, 20, 0xffffff, 1, 0xf8f8f8);
+    var g2 = this.add.grid(0, 0, 2 * gameWidth, 2 * gameHeight, 20, 20, 0xffffff, 1, 0xf8f8f8);
 
     //Enabling collisions when an object hits the boundary
     this.physics.world.setBoundsCollision();
@@ -610,7 +616,7 @@ function create() {
             self.otherElements.add(otherElement);
             otherElement.setScale(0.4);
             otherElement.body.enable = true;
-            
+
         }
         else {
             const otherElement = new Element(self, playerInfo.x, playerInfo.y, 45, playerInfo.playerId, this.gameSettings.texture[this.gameSettings.texture.length - 1]);
@@ -678,10 +684,13 @@ function update(time) {
         }
         //Phaser.Math.Clamp
 
-        this.element.movePlayer(this, gameSettings.playerSpeed, isHit, this.knockbackSpeedX, this.knockbackSpeedY, this.transitionBulletAngle);
+        var currentSpeed = this.element.movePlayer(this, gameSettings.playerSpeed, isHit, this.knockbackSpeedX, this.knockbackSpeedY, this.transitionBulletAngle);
         if (isHit == true && time - this.element.lastHurtByTransition > 150) {
             isHit = false;
         }
+
+
+
 
         this.healthLabel.text = "Health: " + this.element.hp.value;
 
@@ -735,7 +744,7 @@ function update(time) {
                 group4Bullet(bullet, this.element, this.socket, bulletAngle);
             }
             else if (gameSettings.group5.includes(this.element.atomicNum)) {
-                group5Bullet(bullet, this.element, this.socket, bulletAngle);
+                group5Bullet(bullet, this.element, this.socket, bulletAngle, currentSpeed);
             }
             else if (gameSettings.group6.includes(this.element.atomicNum)) {
                 group6Bullet(bullet, this.element, this.socket, bulletAngle);
@@ -754,18 +763,17 @@ function update(time) {
             }
             else {
                 //damage /= 10, NEED TO CHANGE, ONLY FOR TESTING
-                this.socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed, damage: bullet.damage, atomicNumber: this.element.atomicNum, rotAngle: 0 });
+                
+                this.socket.emit('shoot-bullet', { x: bullet.x + (currentSpeed/60)*Math.cos(bulletAngle), y: bullet.y + (currentSpeed/60)*Math.sin(bulletAngle), angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed, damage: bullet.damage, atomicNumber: this.element.atomicNum, rotAngle: 0 });
+                
             }
             lastShot = time;
         }
 
         if (lastScoreUpdate + 5000 < time) {
 
-            if (typeof email != "undefined") {
+            if (typeof email != "object") {
                 if (currentHighScore < this.score) {
-                    console.log(username0);
-                    console.log(email);
-                    console.log(currentHighScore);
                     const data = {
                         email: email,
                         score: this.score,
@@ -781,6 +789,39 @@ function update(time) {
                     });
                     currentHighScore = this.score;
                 }
+                /*
+                if (currentHighScore < this.score) {
+                    const data = {
+                        email: email,
+                        score: this.killScore,
+                    };
+                    $.ajax({
+                        type: 'POST',
+                        url: '/submit-kills',
+                        data,
+                        success: function (data) {
+                        },
+                        error: function (xhr) {
+                        }
+                    });
+                    currentHighScore = this.score;
+                }
+                if (currentHighScore < this.score) {
+                    const data = {
+                        email: email,
+                        score: this.score,
+                    };
+                    $.ajax({
+                        type: 'POST',
+                        url: '/submit-score',
+                        data,
+                        success: function (data) {
+                        },
+                        error: function (xhr) {
+                        }
+                    });
+                    currentHighScore = this.score;
+                }*/
             }
             lastScoreUpdate = time;
         }
