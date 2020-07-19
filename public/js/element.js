@@ -143,7 +143,7 @@ class Element extends Phaser.GameObjects.Sprite {
     upgrade() {
 
         let text = gameSettings.texture;
-        if (this.atomicNum < 5) {
+        if (this.atomicNum < 10) {
             this.setTexture(text[this.atomicNum - 1]);
         }
     }

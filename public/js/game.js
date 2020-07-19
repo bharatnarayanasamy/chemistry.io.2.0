@@ -15,7 +15,8 @@ var gameSettings = {
     obstacleVel: 0,
     ROTATION_SPEED_DEGREES: Phaser.Math.RadToDeg(2 * Math.PI), // 0.5 arc per sec, 2 sec per arc
     TOLERANCE: 0.04 * 1 * Math.PI,
-    texture: ["hydrogen", "helium", "lithium", "vrishabkrishna"],
+    //texture: ["hydrogen", "helium", "lithium", "vrishabkrishna"],
+    texture: ["hydrogen", "helium", "lithium", "beryllium", "boron", "carbon", "nitrogen", "oxygen", "fluorine"],
     upgradePEN: 1,
     group1: [1, 3, 11, 19, 37, 55, 87],
     group2: [4, 12, 20, 38, 56, 88],
@@ -87,27 +88,14 @@ var elements = JSON.parse(localStorage.getItem("elements"));
 function preload() {
 
     //loading in element images and their bullet images
-    /*for (i in elements) {
+    
+    for (i in elements) {
         var imageName = elements[i].toLowerCase()
         this.load.image(imageName, "./assets/images/elements/" + imageName + ".png")
-        this.load.image(imageName, "./assets/images/bullets/" + imageName + "bullet" +".png")
-    }*/
-
-    this.load.image("hydrogenbullet", "./assets/images/old_images/hydrogenbullet.png");
-    this.load.image("heliumbullet", "./assets/images/old_images/group8Bullet.png");
-    this.load.image("lithiumbullet", "./assets/images/old_images/obstacle.png");
-    this.load.image("halogenbullet", "./assets/images/old_images/group7Bullet.png");
-
-    this.load.image("hydrogen", "./assets/images/elements/hydrogen.png");
-    this.load.image("helium", "./assets/images/old_images/helium.png");
-    //this.load.image("hydrogen", "./assets/images/old_images/hydrogen.png");
-    this.load.image("lithium", "./assets/images/old_images/lithium.png");
-    //this.load.image("potassium", "./assets/images/elements/potassium.png");
-    //this.load.image("sodium", "./assets/images/elements/sodium.png");
-    //this.load.image("rubidium", "./assets/images/elements/rubidium.png");
-
-    this.load.image("vrishabkrishna", "./assets/images/old_images/vrishabkrishna.png");
-
+        this.load.image(imageName + "bullet", "./assets/images/bullets/" + imageName + "bullet" +".png")
+    }
+    
+    //this.load.image("vrishabkrishna", "./assets/images/old_images/vrishabkrishna.png");
 
     this.load.image("proton", "./assets/images/proton.svg");
     this.load.image("electron", "./assets/images/electron.svg");
@@ -262,7 +250,7 @@ function create() {
             if (playerInfo.playerId == otherElement.playerId) {
                 otherElement.atomicNum = playerInfo.atomicNumServer;
                 //NEED TO CHANGE AS WE GO ALONG
-                if (playerInfo.atomicNumServer < 5) {
+                if (playerInfo.atomicNumServer < 10) {
                     otherElement.setTexture(gameSettings.texture[otherElement.atomicNum - 1]);
                 }
             }
@@ -615,7 +603,7 @@ function create() {
     //add other players onto the screen
     function addOtherPlayers(self, playerInfo) {
 
-        if (playerInfo.atomicNumServer < 5) {
+        if (playerInfo.atomicNumServer < 10) {
             const otherElement = new Element(self, playerInfo.x, playerInfo.y, 45, playerInfo.playerId, this.gameSettings.texture[playerInfo.atomicNumServer - 1]);
             self.otherElements.add(otherElement);
             otherElement.body.enable = true;
