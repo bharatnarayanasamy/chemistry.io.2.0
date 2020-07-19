@@ -17,6 +17,7 @@ var gameSettings = {
     TOLERANCE: 0.04 * 1 * Math.PI,
     //texture: ["hydrogen", "helium", "lithium", "vrishabkrishna"],
     texture: ["hydrogen", "helium", "lithium", "beryllium", "boron", "carbon", "nitrogen", "oxygen", "fluorine"],
+    texLen: texture.length, 
     upgradePEN: 1,
     group1: [1, 3, 11, 19, 37, 55, 87],
     group2: [4, 12, 20, 38, 56, 88],
@@ -250,7 +251,7 @@ function create() {
             if (playerInfo.playerId == otherElement.playerId) {
                 otherElement.atomicNum = playerInfo.atomicNumServer;
                 //NEED TO CHANGE AS WE GO ALONG
-                if (playerInfo.atomicNumServer < 10) {
+                if (playerInfo.atomicNumServer < gameSettings.texLen + 1) {
                     otherElement.setTexture(gameSettings.texture[otherElement.atomicNum - 1]);
                 }
             }
@@ -603,7 +604,7 @@ function create() {
     //add other players onto the screen
     function addOtherPlayers(self, playerInfo) {
 
-        if (playerInfo.atomicNumServer < 10) {
+        if (playerInfo.atomicNumServer < gameSettings.texLen + 1) {
             const otherElement = new Element(self, playerInfo.x, playerInfo.y, 45, playerInfo.playerId, this.gameSettings.texture[playerInfo.atomicNumServer - 1]);
             self.otherElements.add(otherElement);
             otherElement.body.enable = true;
