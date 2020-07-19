@@ -390,7 +390,7 @@ function ServerGameLoop() {
             let dy = players[id].y - bullet.y;
             let dist = Math.sqrt(dx * dx + dy * dy);
             let owner = bullet.owner_id;
-            thresh = 70
+            thresh = 70;
             if (dist < thresh) {
               healthInfo.i = i;
               healthInfo.id = id;
@@ -401,10 +401,10 @@ function ServerGameLoop() {
               io.emit('player-hit', healthInfo); // Tell everyone this player got hit
               players[id].health -= bullet.damage;
               io.emit("update-health", players[id]);
+              //group 5 rocket stuff
               /*
-              group 5 rocket stuff
               for (let id in players) {
-                if ((Math.pow(players[id].x - bullet.x, 2) + Math.pow(players[id].y - bullet.y;,2)) < Math.pow(2000,2)){
+                if ((Math.pow(players[id].x - bullet.x, 2) + Math.pow(players[id].y - bullet.y,2)) < 20000){
                   healthInfo.id = id;
                   io.emit('player-hit', healthInfo);
                   players[id].health -= bullet.damage;

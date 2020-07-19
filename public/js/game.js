@@ -8,7 +8,7 @@ FOR OFTEN USED VARIABLES REQUIRING INDEXING AND/OR PROCESSSING, CREATE A NEW VAR
 
 var gameSettings = {
     playerSpeed: 300,
-    bulletSpeed: 350,
+    bulletSpeed: 500,
     maxPowerups: 14,
     maxObstacles: 2,
     powerUpVel: 50,
@@ -17,7 +17,7 @@ var gameSettings = {
     TOLERANCE: 0.04 * 1 * Math.PI,
     //texture: ["hydrogen", "helium", "lithium", "vrishabkrishna"],
     texture: ["hydrogen", "helium", "lithium", "beryllium", "boron", "carbon", "nitrogen", "oxygen", "fluorine"],
-    texLen: texture.length, 
+    texLen: 9, 
     upgradePEN: 1,
     group1: [1, 3, 11, 19, 37, 55, 87],
     group2: [4, 12, 20, 38, 56, 88],
@@ -77,6 +77,8 @@ let users;
 
 var playerX;
 var playerY;
+var gameWidth = 3840;
+var gameHeight = 2160
 
 var hasDied = false;
 
@@ -89,8 +91,7 @@ var elements = JSON.parse(localStorage.getItem("elements"));
 function preload() {
 
     //loading in element images and their bullet images
-    
-    for (i in elements) {
+    for (let i = 1; i<11; i++) { //temporary
         var imageName = elements[i].toLowerCase()
         this.load.image(imageName, "./assets/images/elements/" + imageName + ".png")
         this.load.image(imageName + "bullet", "./assets/images/bullets/" + imageName + "bullet" +".png")
@@ -98,8 +99,8 @@ function preload() {
     
     //this.load.image("vrishabkrishna", "./assets/images/old_images/vrishabkrishna.png");
 
-    this.load.image("proton", "./assets/images/proton.svg");
-    this.load.image("electron", "./assets/images/electron.svg");
+    this.load.image("proton", "./assets/images/proton.png");
+    this.load.image("electron", "./assets/images/electron.png");
     this.load.image("neutron", "./assets/images/neutron.png");
     this.load.image("bg", "./assets/images/background.png");
 
@@ -109,29 +110,27 @@ function preload() {
 
 function create() {
     //accessing user information to get username
-    $.ajax({
-        type: 'GET',
-        url: '/users',
-        success: function (data) {
-            users = data;
-            if (typeof localStorage.getItem("vTwoLocalStorage") != null) {
-                for (var i = 0; i < users.length; i++) {
-                    if (users[i].email == localStorage.getItem("vTwoLocalStorage")) {
-                        username0 = users[i].name;
-                        email = users[i].email;
-                        currentHighScore = users[i].highScore;
-
-                    }
-                }
-            }
-        },
-        error: function (xhr) {
-            console.log(xhr);
-            console.log("BOB JOE");
+    console.log(localStorage.getItem("email"));
+    if (typeof localStorage.getItem("email") != undefined) {
+        const data = {
+            'email': localStorage.getItem("email"),
         }
-    });
+        $.ajax({
+            type: 'GET',
+            url: '/get-user',
+            data, 
+            success: function (data) {
+                window.alert(data)
+                console.log(data)
+            },
+            error: function (xhr) {
+                window.alert(xhr);
+            }
+        });
+    }
+    
+ 
 
-    console.log(elements);
 
     //  Set the camera and physics bounds to be the size of 4x4 bg images
     this.cameras.main.setBounds(0, 0, 1920 * 2, 1080 * 2);
@@ -139,9 +138,11 @@ function create() {
 
     //  Mash 4 images together to create our background
     this.add.image(0, 0, 'bg').setOrigin(0);
-    this.add.image(1920, 0, 'bg').setOrigin(0).setFlipX(true);
-    this.add.image(0, 1080, 'bg').setOrigin(0).setFlipY(true);
-    this.add.image(1920, 1080, 'bg').setOrigin(0).setFlipX(true).setFlipY(true);
+    this.add.image(gameWidth/2, 0, 'bg').setOrigin(0).setFlipX(true);
+    this.add.image(0, gameHeight/2, 'bg').setOrigin(0).setFlipY(true);
+    this.add.image(gameWidth/2, gameHeight/2, 'bg').setOrigin(0).setFlipX(true).setFlipY(true);
+
+    var g2 = this.add.grid(0, 0, 2*gameWidth, 2*gameHeight, 20, 20, 0xffffff, 1, 0xf8f8f8);
 
     //Enabling collisions when an object hits the boundary
     this.physics.world.setBoundsCollision();
@@ -339,7 +340,7 @@ function create() {
             if (self.proton_array[i]) self.proton_array[i].destroy();
 
             self.proton_array[i] = self.physics.add.image(server_proton_array[i].x, server_proton_array[i].y, 'proton');
-            self.proton_array[i].setScale(0.08);
+            self.proton_array[i].setScale(0.15);
 
             self.physics.add.overlap(self.element, self.proton_array[i], function () {
 
@@ -394,7 +395,7 @@ function create() {
             if (self.electron_array[i]) self.electron_array[i].destroy();
 
             self.electron_array[i] = self.physics.add.image(server_electron_array[i].x, server_electron_array[i].y, 'electron');
-            self.electron_array[i].setScale(0.04);
+            self.electron_array[i].setScale(0.15);
 
             self.physics.add.overlap(self.element, self.electron_array[i], function () {
 
@@ -447,7 +448,7 @@ function create() {
             if (self.neutron_array[i]) self.neutron_array[i].destroy();
 
             self.neutron_array[i] = self.physics.add.image(server_neutron_array[i].x, server_neutron_array[i].y, 'neutron');
-            self.neutron_array[i].setScale(0.08);
+            self.neutron_array[i].setScale(0.15);
 
             self.physics.add.overlap(self.element, self.neutron_array[i], function () {
 
@@ -607,7 +608,9 @@ function create() {
         if (playerInfo.atomicNumServer < gameSettings.texLen + 1) {
             const otherElement = new Element(self, playerInfo.x, playerInfo.y, 45, playerInfo.playerId, this.gameSettings.texture[playerInfo.atomicNumServer - 1]);
             self.otherElements.add(otherElement);
+            otherElement.setScale(0.4);
             otherElement.body.enable = true;
+            
         }
         else {
             const otherElement = new Element(self, playerInfo.x, playerInfo.y, 45, playerInfo.playerId, this.gameSettings.texture[this.gameSettings.texture.length - 1]);
@@ -750,6 +753,7 @@ function update(time) {
                 actinideBullet(bullet, this.element, this.socket, bulletAngle);
             }
             else {
+                //damage /= 10, NEED TO CHANGE, ONLY FOR TESTING
                 this.socket.emit('shoot-bullet', { x: bullet.x, y: bullet.y, angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed, damage: bullet.damage, atomicNumber: this.element.atomicNum, rotAngle: 0 });
             }
             lastShot = time;

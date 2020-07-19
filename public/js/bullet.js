@@ -8,15 +8,26 @@ class Bullet extends Phaser.Physics.Arcade.Sprite {
 
     //starting location of the bullet. angles help determine whether bullet will start to the left of the 
     //player if gun is pointed leftwards, or right of the player if gun is pointed rightwards
-    var x = x + 50 * Math.cos(angle);
-    var y = y + 50 * Math.sin(angle);
 
+    if (scene.element.atomicNum != 5 && scene.element.atomicNum != 6)
+    {
+      var x = x + 50 * Math.cos(angle);
+      var y = y + 50 * Math.sin(angle);
+    
+    }
+    else{
+      var x = x - 18 * Math.cos(angle);
+      var y = y - 18 * Math.sin(angle);
+    }
+    
     //use the super constructor to make a GameObject sprite
 
     var texture = btexture + "bullet";
-
+    console.log("bullet texture: ", texture)
     //super(scene, x, y, "hydrogenbullet");
     super(scene, x, y, texture);
+
+    console.log(btexture);
 
     //add bullet to the scene
     scene.add.existing(this);

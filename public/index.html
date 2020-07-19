@@ -61,7 +61,7 @@
 
   <script type="text/javascript">
     localStorage.setItem("loginState", false);
-
+    localStorage.removeItem("email");
     document.getElementById("myButton").onclick = function () {
       location.href = "/login.html";
     };

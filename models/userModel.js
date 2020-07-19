@@ -20,6 +20,14 @@ const UserSchema = new Schema({
   highScore : {
     type: Number,
     default: 0
+  },
+  kills : {
+    type: Number,
+    default: 0
+  },
+  bestElement : {
+    type: String,
+    default: "Hydrogen"
   }
 });
 

@@ -111,6 +111,17 @@ router.post('/submit-score', async (req, res, next) => {
   res.status(200).json({ status: 'ok' });
 });
 
+router.get('/get-user', async (req, res, next) => {
+  const email = req.body;
+  console.log(email);
+  await UserModel.find({email: "billybob@gmail.com" }, function (err, users) {
+    console.log(err);
+    console.log(users);
+    if (err) return handleError(err);
+    res.send(users)
+  })
+});
+
 router.post('/logout', (req, res, next) => {
 if (req.cookies) {
     console.log(req.cookies);
