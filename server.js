@@ -401,17 +401,17 @@ function ServerGameLoop() {
               io.emit('player-hit', healthInfo); // Tell everyone this player got hit
               players[id].health -= bullet.damage;
               io.emit("update-health", players[id]);
-              //group 5 rocket stuff
-              /*
-              for (let id in players) {
-                if ((Math.pow(players[id].x - bullet.x, 2) + Math.pow(players[id].y - bullet.y,2)) < 20000){
-                  healthInfo.id = id;
-                  io.emit('player-hit', healthInfo);
-                  players[id].health -= bullet.damage;
-                  io.emit("update-health", players[id]);
+              if (typeof players[bullet.owner_id] != "undefined" && serverSettings.group1.includes(players[bullet.owner_id].atomicNumServer)) {
+                for (let id in players) {
+                  dist = Math.pow(players[id].x - bullet.x, 2) + Math.pow(players[id].y - bullet.y,2);
+                  if (id != healthInfo.id && dist < 30000){
+                    healthInfo.id = id;
+                    io.emit('player-hit', healthInfo);
+                    players[id].health -= Math.round(bullet.damage * (1 - dist/30000));
+                    io.emit("update-health", players[id]);
+                  }
                 }
               }
-              */
 
               if (typeof players[owner] != "undefined" && !(serverSettings.group8.includes(players[owner].atomicNumServer) || serverSettings.group7.includes(players[owner].atomicNumServer))) {
                 bullet_array.splice(i, 1);

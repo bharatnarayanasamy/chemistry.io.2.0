@@ -17,10 +17,7 @@ var gameSettings = {
     TOLERANCE: 0.04 * 1 * Math.PI,
     //texture: ["hydrogen", "helium", "lithium", "vrishabkrishna"],
     texture: ["hydrogen", "helium", "lithium", "beryllium", "boron", "carbon", "nitrogen", "oxygen", "fluorine"],
-<<<<<<< HEAD
     texLen: 9,
-=======
->>>>>>> e45f218bf3a2199fafe0a680a02ef36a56d9b205
     upgradePEN: 1,
     group1: [1, 3, 11, 19, 37, 55, 87],
     group2: [4, 12, 20, 38, 56, 88],
