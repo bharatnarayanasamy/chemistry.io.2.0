@@ -85,6 +85,8 @@ class Element extends Phaser.GameObjects.Sprite {
     */
     movePlayer(scene, speed, isHitByTransitionBullet, speedX, speedY, bulletAngle) {
         //reset player velocity
+        let currentSpeedX0 = 0;
+        let currentSpeedY0 = 0;
         var bool = false;
         this.body.setVelocity(0);
         //this.hp.body.setVelocity(0);
@@ -94,21 +96,24 @@ class Element extends Phaser.GameObjects.Sprite {
             //no knockback
             if (scene.input.keyboard.addKey('A').isDown) {
                 this.body.setVelocityX(-speed);
+                currentSpeedX0 = -speed;
                 bool = true;
             } else if (scene.input.keyboard.addKey('D').isDown) {
                 this.body.setVelocityX(speed);
                 bool = true;
-
+                currentSpeedX0 = speed;
             }
 
             //move up or down
             if (scene.input.keyboard.addKey('W').isDown) {
                 this.body.setVelocityY(-speed);
                 bool = true;
+                currentSpeedY0 = -speed;
 
             } else if (scene.input.keyboard.addKey('S').isDown) {
                 this.body.setVelocityY(speed);
                 bool = true;
+                currentSpeedY0 = speed;
 
             }
             this.hp.move(scene, this.body.x + 40, this.body.y + 120);
@@ -130,9 +135,12 @@ class Element extends Phaser.GameObjects.Sprite {
         } else {
             this.body.setAngularVelocity(Math.sign(angleDelta) * gameSettings.ROTATION_SPEED_DEGREES);
         }
-
+        var data = {
+            currentSpeedX: currentSpeedX0, 
+            currentSpeedY: currentSpeedY0
+        }
         if(bool){
-            return gameSettings.playerSpeed;
+            return data;
         }
         else {
             return 0;

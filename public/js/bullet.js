@@ -9,7 +9,7 @@ class Bullet extends Phaser.Physics.Arcade.Sprite {
     //starting location of the bullet. angles help determine whether bullet will start to the left of the 
     //player if gun is pointed leftwards, or right of the player if gun is pointed rightwards
 
-    if (scene.element.atomicNum != 5 && scene.element.atomicNum != 6)
+    if (!(gameSettings.group3.includes(scene.element.atomicNum)) && !(gameSettings.group4.includes(scene.element.atomicNum)))
     {
       var x = x + 50 * Math.cos(angle);
       var y = y + 50 * Math.sin(angle);

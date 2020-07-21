@@ -8,7 +8,7 @@ FOR OFTEN USED VARIABLES REQUIRING INDEXING AND/OR PROCESSSING, CREATE A NEW VAR
 
 var gameSettings = {
     playerSpeed: 300,
-    bulletSpeed: 500,
+    bulletSpeed: 700,
     maxPowerups: 14,
     maxObstacles: 2,
     powerUpVel: 50,
@@ -109,6 +109,11 @@ function preload() {
     this.load.image("neutron", "./assets/images/neutron.png");
     this.load.image("bg", "./assets/images/background.png");
 
+    this.load.spritesheet("explosion", "assets/spritesheets/explosion.png",{
+        frameWidth: 16,
+        frameHeight: 16
+    });
+
     //Setting the maximum number of mouse pointers that can be used on the screen to one
     this.input.maxPointers = 1;
 }
@@ -176,6 +181,14 @@ function create() {
         bb3.setScale(0.03);
         this.neutron_array.push(bb3);
     }
+
+    this.anims.create({
+        key: "explode",
+        frames: this.anims.generateFrameNumbers("explosion"),
+        frameRate: 20,
+        repeat: 0,
+        hideOnComplete: true
+    });
 
     //creates instance of socket.io
     let self = this;
@@ -568,6 +581,10 @@ function create() {
         }
     });
 
+    this.socket.on('explosion', function(bulletInfo) {
+        var explosion = new Explosion(self, bulletInfo.x, bulletInfo.y)
+    });
+
     //displays other players' movement on screen
     this.socket.on('playerMoved', function (playerInfo) {
         if (playerInfo.playerId == self.socket.id) {
@@ -740,13 +757,13 @@ function update(time) {
                 group2Bullet(bullet, distance, this.element, this.socket, bulletAngle);
             }
             else if (gameSettings.group3.includes(this.element.atomicNum)) {
-                group3Bullet(bullet, this.element, this.socket, bulletAngle);
+                group3Bullet(bullet, this.element, this.socket, bulletAngle, currentSpeed.currentSpeedX, currentSpeed.currentSpeedY);
             }
             else if (gameSettings.group4.includes(this.element.atomicNum)) {
                 group4Bullet(bullet, this.element, this.socket, bulletAngle);
             }
             else if (gameSettings.group5.includes(this.element.atomicNum)) {
-                group5Bullet(bullet, this.element, this.socket, bulletAngle, currentSpeed);
+                group5Bullet(bullet, this.element, this.socket, bulletAngle);
             }
             else if (gameSettings.group6.includes(this.element.atomicNum)) {
                 group6Bullet(bullet, this.element, this.socket, bulletAngle);

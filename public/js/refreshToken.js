@@ -13,7 +13,7 @@ function getCookie(cname) {
   }
   return "";
 }
-var limit = 0;
+
 var consecutive = 0;
 setInterval(function () {
   $.ajax({
@@ -26,17 +26,14 @@ setInterval(function () {
       consecutive = 0
     },
     error: function (xhr) {
-      limit = limit + 1;
-      if (limit > 2) {
-        window.location.href = '../index.html';
+      consecutive = consecutive + 1;
+      if (consecutive > 2 && consecutive < 3) {
+        window.location.href = "index.html";
       }
     }
   });
 }, 100);
-
-setInterval(function () {
-  limit = limit - 1;
-}, 500);
+ 
 
 
 

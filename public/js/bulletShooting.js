@@ -64,45 +64,60 @@ function group2Bullet(bullet, distance, element0, socket0, bulletAngle) {
     }
 }
 
-function group3Bullet(bullet, element, socket, bulletAngle) {
+function group3Bullet(bullet, element, socket, bulletAngle, currentSpeedX, currentSpeedY) {
+    console.log("HYPE");
+    
+    var speedScale = 6;
+    var bpeedScale = 2;
+    if (currentSpeedX == undefined)
+    {
+        currentSpeedX = 0;
+    }
+    if (currentSpeedY == undefined)
+    {
+        currentSpeedY = 0;
+    }
+
+    console.log(currentSpeedX);
+    console.log(currentSpeedY);
 
     socket.emit('shoot-bullet', {
-        x: bullet.x, y: bullet.y, angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed,
+        x: bullet.x + (currentSpeedX/speedScale), y: bullet.y + (currentSpeedY/speedScale), angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed * bpeedScale,
         damage: bullet.damage, atomicNumber: element.atomicNum, rotAngle: 0
     });
 
     socket.emit('shoot-bullet', {
-        x: bullet.x, y: bullet.y, angle: bulletAngle + 1.5708, bulletSpeed: gameSettings.bulletSpeed,
+        x: bullet.x + (currentSpeedX/speedScale), y: bullet.y + (currentSpeedY/speedScale), angle: bulletAngle + 1.5708, bulletSpeed: gameSettings.bulletSpeed* bpeedScale,
         damage: bullet.damage, atomicNumber: element.atomicNum, rotAngle: 0
     });
 
     socket.emit('shoot-bullet', {
-        x: bullet.x, y: bullet.y, angle: bulletAngle - 1.5708, bulletSpeed: gameSettings.bulletSpeed,
+        x: bullet.x + (currentSpeedX/speedScale), y: bullet.y + (currentSpeedY/speedScale), angle: bulletAngle - 1.5708, bulletSpeed: gameSettings.bulletSpeed* bpeedScale,
         damage: bullet.damage, atomicNumber: element.atomicNum, rotAngle: 0
     });
 
     socket.emit('shoot-bullet', {
-        x: bullet.x, y: bullet.y, angle: bulletAngle + 3.1416, bulletSpeed: gameSettings.bulletSpeed,
+        x: bullet.x + (currentSpeedX/speedScale), y: bullet.y + (currentSpeedY/speedScale), angle: bulletAngle + 3.1416, bulletSpeed: gameSettings.bulletSpeed* bpeedScale,
         damage: bullet.damage, atomicNumber: element.atomicNum, rotAngle: 0
     });
 
     socket.emit('shoot-bullet', {
-        x: bullet.x, y: bullet.y, angle: bulletAngle + 0.7854, bulletSpeed: gameSettings.bulletSpeed,
+        x: bullet.x + (currentSpeedX/speedScale), y: bullet.y + (currentSpeedY/speedScale), angle: bulletAngle + 0.7854, bulletSpeed: gameSettings.bulletSpeed* bpeedScale,
         damage: bullet.damage, atomicNumber: element.atomicNum, rotAngle: 0
     });
 
     socket.emit('shoot-bullet', {
-        x: bullet.x, y: bullet.y, angle: bulletAngle + 2.3562, bulletSpeed: gameSettings.bulletSpeed,
+        x: bullet.x + (currentSpeedX/speedScale), y: bullet.y + (currentSpeedY/speedScale), angle: bulletAngle + 2.3562, bulletSpeed: gameSettings.bulletSpeed* bpeedScale,
+        damage: bullet.damage, atomicNumber: element.atomicNum, rotAngle: 0
+    });
+ 
+    socket.emit('shoot-bullet', {
+        x: bullet.x + (currentSpeedX/speedScale), y: bullet.y + (currentSpeedY/speedScale), angle: bulletAngle - 0.7854, bulletSpeed: gameSettings.bulletSpeed* bpeedScale,
         damage: bullet.damage, atomicNumber: element.atomicNum, rotAngle: 0
     });
 
     socket.emit('shoot-bullet', {
-        x: bullet.x, y: bullet.y, angle: bulletAngle - 0.7854, bulletSpeed: gameSettings.bulletSpeed,
-        damage: bullet.damage, atomicNumber: element.atomicNum, rotAngle: 0
-    });
-
-    socket.emit('shoot-bullet', {
-        x: bullet.x, y: bullet.y, angle: bulletAngle - 2.3562, bulletSpeed: gameSettings.bulletSpeed,
+        x: bullet.x + (currentSpeedX/speedScale), y: bullet.y + (currentSpeedY/speedScale), angle: bulletAngle - 2.3562, bulletSpeed: gameSettings.bulletSpeed* bpeedScale,
         damage: bullet.damage, atomicNumber: element.atomicNum, rotAngle: 0
     });
 }
@@ -129,9 +144,9 @@ function group4Bullet(bullet, element, socket, bulletAngle) {
     });
 }
 
-function group5Bullet(bullet, element, socket, bulletAngle, currentSpeed) {
+function group5Bullet(bullet, element, socket, bulletAngle) {
     socket.emit('shoot-bullet', {
-        x: bullet.x + (currentSpeed/60)*Math.cos(bulletAngle), y: bullet.y + (currentSpeed/60)*Math.sin(bulletAngle), angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed,
+        x: bullet.x , y: bullet.y, angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed,
         damage: bullet.damage, atomicNumber: element.atomicNum, rotAngle: 0
     });
 
@@ -156,7 +171,7 @@ function group6Bullet(bullet, element, socket, bulletAngle) {
 function group7Bullet(bullet, element, socket, bulletAngle) {
     //DAMAGE DRAMATICALLY LOWERED FOR TESTING
     socket.emit('shoot-bullet', {
-        x: bullet.x, y: bullet.y, angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed,
+        x: bullet.x, y: bullet.y, angle: bulletAngle , bulletSpeed: gameSettings.bulletSpeed,
         damage: bullet.damage / 20, atomicNumber: element.atomicNum, rotAngle: 0
     });
     socket.emit('shoot-bullet', {

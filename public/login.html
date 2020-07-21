@@ -34,7 +34,7 @@
         data,
         success: function (data) {
           localStorage.setItem("email", document.forms[0].elements[0].value);  
-          localStorage.setItem("loginState", true);  
+          localStorage.setItem("loginState", "true");  
           window.location.replace('/game.html');
         },
         error: function (xhr) {

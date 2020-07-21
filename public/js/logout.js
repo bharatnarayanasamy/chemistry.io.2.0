@@ -5,11 +5,23 @@ window.onbeforeunload = function () {
             url: '/logout',
             success: function () {
                 window.alert("Refreshed!")
-                window.location.href = 'index.html';
+                if (localStorage.getItem("loginState") == "true") {
+                    console.log(localStorage.getItem("loginState"))
+                    window.location.href = 'loggedin.html';
+                }
+                else {
+                    window.location.href = 'index.html';
+                }
             },
             error: function () {
                 window.alert("System Error - failed to log you out");
-                window.location.href = 'index.html';
+                if (localStorage.getItem("loginState") == "true") {
+                    console.log(localStorage.getItem("loginState"))
+                    window.location.href = 'loggedin.html';
+                }
+                else {
+                    window.location.href = 'index.html';
+                }
             }
         });
     }, 0);

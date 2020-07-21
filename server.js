@@ -48,6 +48,9 @@ app.get('/', function (req, res) {
 app.get('/game.html', passport.authenticate('jwt', { session : false }), function (req, res) {
   res.sendFile(__dirname + '/public/game.html');
 });
+app.get('/loggedin.html', passport.authenticate('jwt', { session : false }), function (req, res) {
+  res.sendFile(__dirname + '/public/loggedin.html');
+});
 
 // main routes
 app.use('/', routes);
@@ -401,7 +404,9 @@ function ServerGameLoop() {
               io.emit('player-hit', healthInfo); // Tell everyone this player got hit
               players[id].health -= bullet.damage;
               io.emit("update-health", players[id]);
-              if (typeof players[bullet.owner_id] != "undefined" && serverSettings.group1.includes(players[bullet.owner_id].atomicNumServer)) {
+              if (typeof players[bullet.owner_id] != "undefined" && serverSettings.group5.includes(players[bullet.owner_id].atomicNumServer)) {
+                let bulletInfo = {x: bullet.x, y: bullet.y}
+                io.emit("explosion", bulletInfo)
                 for (let id in players) {
                   dist = Math.pow(players[id].x - bullet.x, 2) + Math.pow(players[id].y - bullet.y,2);
                   if (id != healthInfo.id && dist < 30000){

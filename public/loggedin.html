@@ -6,7 +6,6 @@
 
 <body class="text-center">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  <script type="text/javascript" src="js/usernameinfo.js"></script>
 
   <style>
     body {
@@ -48,8 +47,10 @@
   </style>
 
   <div class="signin">
-    <button id="myButton" class="button">Sign In!</button>
+    <p id = "welcome">Welcome back! </p>
   </div>
+  <script type="text/javascript" src="js/getusername.js"></script>
+
   <div class="entergame">
     <form onsubmit="return getValue('commands')">
       <label for="fname">Username:</label><br>
@@ -57,15 +58,6 @@
       <input type="submit" value="Enter Game" class="button">
     </form>
   </div>
-
-
-  <script type="text/javascript">
-    localStorage.setItem("loginState", false);
-    localStorage.removeItem("email");
-    document.getElementById("myButton").onclick = function () {
-      location.href = "/login.html";
-    };
-  </script>
 
   <script>
     function deleteAllCookies() {
