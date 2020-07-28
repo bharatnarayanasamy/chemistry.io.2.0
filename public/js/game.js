@@ -9,9 +9,11 @@ FOR OFTEN USED VARIABLES REQUIRING INDEXING AND/OR PROCESSSING, CREATE A NEW VAR
 var gameSettings = {
     playerSpeed: 300,
     bulletSpeed: 700,
+    speedScale:  6,
     maxPowerups: 14,
     maxObstacles: 2,
     powerUpVel: 50,
+    playerRadius: 50,
     obstacleVel: 0,
     ROTATION_SPEED_DEGREES: Phaser.Math.RadToDeg(2 * Math.PI), // 0.5 arc per sec, 2 sec per arc
     TOLERANCE: 0.04 * 1 * Math.PI,
@@ -63,6 +65,8 @@ var lastShot = 0;
 var lastHealed = 0;
 var lastScoreUpdate = 0;
 var groupCreated = true;
+var isOverlappingOther = false;
+var currentSpeed = 0;
 
 if (typeof localStorage.getItem("username") != undefined) {
     var username0 = localStorage.getItem("username");
@@ -73,6 +77,7 @@ else {
 var email = localStorage.getItem("email");
 var currentHighScore;
 var bestKills;
+
 var bestElement;
 
 let users;
@@ -96,8 +101,9 @@ var elements = JSON.parse(localStorage.getItem("elements"));
 function preload() {
 
     //loading in element images and their bullet images
-    for (let i = 1; i < 11; i++) { //temporary
-        var imageName = elements[i].toLowerCase()
+    
+    for (let i = 1; i < 10; i++) { //temporary
+        var imageName = elements[i].toLowerCase();
         this.load.image(imageName, "./assets/images/elements/" + imageName + ".png")
         this.load.image(imageName + "bullet", "./assets/images/bullets/" + imageName + "bullet" + ".png")
     }
@@ -130,12 +136,12 @@ function create() {
             url: '/get-user',
             data,
             success: function (data) {
+                data = data[0];
                 username0 = data.name;
                 currentHighScore = data.highScore;
                 email = data.email;
                 bestKills = data.kills;
                 bestElement = data.bestElement;
-                console.log(data)
             },
             error: function (xhr) {
             }
@@ -284,25 +290,50 @@ function create() {
     // Listen for bullet update events 
     this.socket.on('bullets-update', function (server_bullet_array) {
         // If there's client and server bullet arrays have mismatch, fix mismatch
+        //console.log(server_bullet_array);
+        
         for (let i = 0; i < server_bullet_array.length; i++) {
             if (self.element.bullet_array[i] == undefined) {
                 //let angle = Phaser.Math.Angle.Between(self.element.x, self.element.y, self.input.activePointer.worldX, self.input.activePointer.worldY);
                 self.element.bullet_array[i] = new Bullet(self, server_bullet_array[i].angle, server_bullet_array[i].x, server_bullet_array[i].y, gameSettings.texture[server_bullet_array[i].atomicNumber - 1]);
+                //self.element.bullet_array[i].initialAngle = angle;
+                //console.log(self.element.bullet_array[i].angle);
+
                 //specific to group8 laser bullets
                 if (gameSettings.group8.includes(server_bullet_array[i].atomicNumber)) {
-                    self.element.bullet_array[i].rotation = server_bullet_array[i].rotAngle;
+                    //self.element.bullet_array[i].rotation = server_bullet_array[i].rotAngle;
                 }
+                self.element.bullet_array[i].setVisible(false);
             }
             else {
 
                 //Otherwise, just update bullet locations
-                self.element.bullet_array[i].enableBody(true, true);
-                self.element.bullet_array[i].setTexture(gameSettings.texture[server_bullet_array[i].atomicNumber - 1] + "bullet");
+                if(server_bullet_array[i].owner_id == self.socket.id){
+                    let changex = self.element.x - server_bullet_array[i].x;
+                    let changey = self.element.y - server_bullet_array[i].y;
+                    let distance = Math.sqrt(changex * changex + changey * changey);
 
+                    if(distance > gameSettings.playerRadius)
+                    {
+                        self.element.bullet_array[i].setVisible(true);
+
+                        self.element.bullet_array[i].enableBody(true, true);
+                    }
+                    // else {
+                    //     self.element.bullet_array[i].disableBody(true, true);
+                    // }
+                }
+
+                self.element.bullet_array[i].setTexture(gameSettings.texture[server_bullet_array[i].atomicNumber - 1] + "bullet");
+                //self.element.bullet_array[i].setRotation(self.element.bullet_array[i].initialAngle);
+                //console.log("INITIAL ANGLE GANG: " + self.element.bullet_array[i].angle);
 
                 if (gameSettings.transitionmetals.includes(server_bullet_array[i].atomicNumber)) {
                     self.element.bullet_array[i].rotation += 0.015;
+                    console.log("YO");
                 }
+
+                
 
                 self.element.bullet_array[i].x = server_bullet_array[i].x;
                 self.element.bullet_array[i].y = server_bullet_array[i].y;
@@ -381,8 +412,6 @@ function create() {
                         this.numNeutrons = 0;
                         this.numProtons = 0;
                         this.numElectrons = 0;
-
-
                         this.protonBar.increment(this, -100, "proton");
                         this.protonBarText.text = "Protons: 0/" + gameSettings.upgradePEN;
                         this.electronBar.increment(this, -100, "electron");
@@ -540,7 +569,7 @@ function create() {
 
     this.leaderboard = [];
     for (var i = 0; i < 5; i++) {
-        this.leaderboard.push(self.add.text(920, 20 + 20 * i, ""));
+        this.leaderboard.push(self.add.text(920, 20 + 20 * i, "").setColor("#00ff00"));
     }
     this.socket.on('update-leaderboard', function (items) {
         //self.killScoreText = self.add.text(16, 40, 'Kills: ' + (0), { fontSize: '25px', fill: '#00FF00' });
@@ -615,6 +644,8 @@ function create() {
             rotation: self.element.rotation
         };
         self.element.body.enable = true;
+        //self.hp = new HealthBar(self, self.element.x - 50, self.element.y + 70);
+
         self.killScoreText = self.add.text(16, 40, 'Kills: ' + (0), { fontSize: '25px', fill: '#00FF00' });
         self.healthLabel = self.add.text(16, 10, "Health: 100", { fontSize: '25px', fill: '#00FF00' });
 
@@ -692,6 +723,9 @@ function create() {
 
 function update(time) {
     if (typeof this.element != "undefined") {
+
+        
+
         this.cameras.main.startFollow(this.element);
         this.cameras.main.followOffset.set(5, 5);
 
@@ -702,8 +736,44 @@ function update(time) {
             this.cameras.main.setZoom(1);
         }
         //Phaser.Math.Clamp
+        
+        let collisionAngle = 0;
+        this.otherElements.getChildren().forEach((otherElement) => {
+            
+            let dist = Math.sqrt(Math.pow(this.element.x - otherElement.x, 2) + Math.pow(this.element.y - otherElement.y, 2));
+            if(dist < 70){
+                isOverlappingOther = true;
+                currentSpeed = this.element.movePlayer(this, gameSettings.playerSpeed, isHit, this.knockbackSpeedX, this.knockbackSpeedY, this.transitionBulletAngle, isOverlappingOther);
+                let speedx = currentSpeed.currentSpeedX;
+                let speedy = currentSpeed.currentSpeedY;
+                console.log(speedx);
+                console.log(speedy);                
+                if (speedx != 0 && speedx != undefined && speedy != undefined)
+                {
+                    collisionAngle = Math.atan(speedy/speedx);
+                }
+                else
+                {
+                    collisionAngle = 0;
+                }
 
-        var currentSpeed = this.element.movePlayer(this, gameSettings.playerSpeed, isHit, this.knockbackSpeedX, this.knockbackSpeedY, this.transitionBulletAngle);
+                console.log(collisionAngle);
+                this.element.x += 50 * Math.cos(collisionAngle);
+                this.element.y += 50 * Math.sin(collisionAngle);
+
+            }
+        });
+        
+        //dist2 = Math.pow(players[id0].x - players[id].x, 2) + Math.pow(players[id0].y - players[id].y, 2);
+        if(isOverlappingOther){
+            //currentSpeed = this.element.movePlayer(this, gameSettings.playerSpeed, isHit, this.knockbackSpeedX, this.knockbackSpeedY, this.transitionBulletAngle, isOverlappingOther);
+            isOverlappingOther = false;
+            //this.element.x += 50 * Math.cos(collisionAngle)
+            //this.element.y += 50 * Math.sin(collisionAngle)
+        }
+        else {
+            currentSpeed = this.element.movePlayer(this, gameSettings.playerSpeed, isHit, this.knockbackSpeedX, this.knockbackSpeedY, this.transitionBulletAngle, isOverlappingOther);
+        }
         if (isHit == true && time - this.element.lastHurtByTransition > 150) {
             isHit = false;
         }
@@ -750,41 +820,41 @@ function update(time) {
             let bulletAngle = Phaser.Math.Angle.Between(this.element.x, this.element.y, this.input.activePointer.worldX, this.input.activePointer.worldY)
 
             if (gameSettings.group8.includes(this.element.atomicNum)) {
-                group8Bullet(bullet, this.element, this.socket, bulletAngle, bulletAngle);
+                console.log(currentSpeed.currentSpeedX);
+                group8Bullet(bullet, this.element, this.socket, bulletAngle, bulletAngle, currentSpeed.currentSpeedX, currentSpeed.currentSpeedY);
             }
             else if (gameSettings.group2.includes(this.element.atomicNum)) {
                 let distance = Math.sqrt((bullet.x - this.element.x) * (bullet.x - this.element.x) + (bullet.y - this.element.y) * (bullet.y - this.element.y));
-                group2Bullet(bullet, distance, this.element, this.socket, bulletAngle);
+                group2Bullet(bullet, distance, this.element, this.socket, bulletAngle, currentSpeed.currentSpeedX, currentSpeed.currentSpeedY);
             }
             else if (gameSettings.group3.includes(this.element.atomicNum)) {
                 group3Bullet(bullet, this.element, this.socket, bulletAngle, currentSpeed.currentSpeedX, currentSpeed.currentSpeedY);
             }
             else if (gameSettings.group4.includes(this.element.atomicNum)) {
-                group4Bullet(bullet, this.element, this.socket, bulletAngle);
+                group4Bullet(bullet, this.element, this.socket, bulletAngle, currentSpeed.currentSpeedX, currentSpeed.currentSpeedY);
             }
             else if (gameSettings.group5.includes(this.element.atomicNum)) {
-                group5Bullet(bullet, this.element, this.socket, bulletAngle);
+                group5Bullet(bullet, this.element, this.socket, bulletAngle, currentSpeed.currentSpeedX, currentSpeed.currentSpeedY);
             }
             else if (gameSettings.group6.includes(this.element.atomicNum)) {
-                group6Bullet(bullet, this.element, this.socket, bulletAngle);
+                group6Bullet(bullet, this.element, this.socket, bulletAngle, currentSpeed.currentSpeedX, currentSpeed.currentSpeedY);
             }
             else if (gameSettings.group7.includes(this.element.atomicNum)) {
-                group7Bullet(bullet, this.element, this.socket, bulletAngle);
+                group7Bullet(bullet, this.element, this.socket, bulletAngle, currentSpeed.currentSpeedX, currentSpeed.currentSpeedY);
             }
             else if (gameSettings.transitionmetals.includes(this.element.atomicNum)) {
-                transitionMetalBullet(bullet, this.element, this.socket, bulletAngle);
+                transitionMetalBullet(bullet, this.element, this.socket, bulletAngle, currentSpeed.currentSpeedX, currentSpeed.currentSpeedY);
             }
             else if (gameSettings.lanthanides.includes(this.element.atomicNum)) {
                 lanthanideBullet(bullet, this.element, this.socket, bulletAngle);
             }
             else if (gameSettings.actinides.includes(this.element.atomicNum)) {
-                actinideBullet(bullet, this.element, this.socket, bulletAngle);
+                actinideBullet(bullet, this.element, this.socket, bulletAngle, currentSpeed.currentSpeedX, currentSpeed.currentSpeedY);
             }
             else {
                 //damage /= 10, NEED TO CHANGE, ONLY FOR TESTING
                 
-                this.socket.emit('shoot-bullet', { x: bullet.x + (currentSpeed/60)*Math.cos(bulletAngle), y: bullet.y + (currentSpeed/60)*Math.sin(bulletAngle), angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed, damage: bullet.damage, atomicNumber: this.element.atomicNum, rotAngle: 0 });
-                
+                group1Bullet(bullet, this.element, this.socket, bulletAngle, currentSpeed.currentSpeedX, currentSpeed.currentSpeedY);                
             }
             lastShot = time;
         }
@@ -808,8 +878,9 @@ function update(time) {
                     });
                     currentHighScore = this.score;
                 }
-                /*
-                if (currentHighScore < this.score) {
+                console.log(bestKills);
+                console.log(this.killScore);
+                if (bestKills < this.killScore) {
                     const data = {
                         email: email,
                         score: this.killScore,
@@ -819,12 +890,15 @@ function update(time) {
                         url: '/submit-kills',
                         data,
                         success: function (data) {
+                            console.log(data);
                         },
                         error: function (xhr) {
+                            console.log(xhr);
                         }
                     });
-                    currentHighScore = this.score;
+                    bestKills = this.killScore;
                 }
+                /*
                 if (currentHighScore < this.score) {
                     const data = {
                         email: email,

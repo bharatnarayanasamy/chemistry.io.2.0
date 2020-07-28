@@ -23,17 +23,21 @@ setInterval(function () {
       refreshToken: getCookie('refreshJwt')
     },
     success: function (data) {
-      consecutive = 0
+      if (localStorage.getItem("exitPage") == "true") {
+        window.alert("Unauthorized - taking you back home...");
+        window.location.href = 'loggedin.html';
+      }
+      localStorage.setItem("exitPage", "false");
     },
     error: function (xhr) {
-      consecutive = consecutive + 1;
-      if (consecutive > 2 && consecutive < 3) {
-        window.location.href = "index.html";
+      window.alert(JSON.stringify(xhr));
+      if (localStorage.getItem("loginState") == "true") {
+        window.location.href = 'loggedin.html';
+      }
+      else {
+        window.alert("boop bop");
+        window.location.href = 'index.html';
       }
     }
   });
-}, 100);
- 
-
-
-
+}, 2000);
