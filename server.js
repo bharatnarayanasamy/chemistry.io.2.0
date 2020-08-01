@@ -133,6 +133,7 @@ for (let i = 0; i < 15; i++) {
 
 }
 var serverSettings = {
+  playerSpeed: 300,
   group1: [1, 3, 11, 19, 37, 55, 87],
   group2: [4, 12, 20, 38, 56, 88],
   group3: [5, 13, 31, 49, 81, 113],
@@ -207,6 +208,19 @@ io.on('connection', (socket) => {
     io.emit('disconnect', socket.id);
   });
 
+  socket.on('move', (movementData) => {
+    //ORDER =          W/S   A/D
+    //W and D are 1, S and A are -1
+    players[socket.id].x += serverSettings.playerSpeed/60 * movementData[1];
+    players[socket.id].y += serverSettings.playerSpeed/60 * movementData[0];
+
+    console.log(players[socket.id].x);
+    console.log(players[socket.id].y);
+
+    
+  });
+  
+  /** 
   // when a player moves, update the player data
   socket.on('playerMovement', (movementData) => {
     if (typeof players[socket.id] != "undefined") {
@@ -216,7 +230,7 @@ io.on('connection', (socket) => {
       // emit a message to all players about the player that moved
       socket.broadcast.emit('playerMoved', players[socket.id]);
     }
-  });
+  });**/
 
   //when protons get collected, this resets its position and increases the score in the entire score array
   socket.on('protonCollected', function (i) {

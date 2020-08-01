@@ -91,31 +91,37 @@ class Element extends Phaser.GameObjects.Sprite {
         this.body.setVelocity(0);
         //this.hp.body.setVelocity(0);
         //move right or left
+        
+        //ORDER =          W/s   a/D
+        //w and d are 1, s and a are -1
+        let command_arr = [0, 0]; 
 
         if (!isHitByTransitionBullet) {
             //no knockback
             if (scene.input.keyboard.addKey('A').isDown) {
-                this.body.setVelocityX(-speed);
-                currentSpeedX0 = -speed;
-                bool = true;
+                /*this.body.setVelocityX(-speed);
+                bool = true;*/
+                command_arr[1] = -1;
             } else if (scene.input.keyboard.addKey('D').isDown) {
-                this.body.setVelocityX(speed);
-                bool = true;
-                currentSpeedX0 = speed;
+                /*this.body.setVelocityX(speed);*/
+                command_arr[1] = 1;
             }
 
             //move up or down
             if (scene.input.keyboard.addKey('W').isDown) {
-                this.body.setVelocityY(-speed);
+                /*this.body.setVelocityY(-speed);
                 bool = true;
-                currentSpeedY0 = -speed;
+                currentSpeedY0 = -speed;*/
+
+                command_arr[0] = 1;
 
             } else if (scene.input.keyboard.addKey('S').isDown) {
-                this.body.setVelocityY(speed);
-                bool = true;
-                currentSpeedY0 = speed;
-
+                // this.body.setVelocityY(speed);
+                // bool = true;
+                // currentSpeedY0 = speed;
+                command_arr[0] = -1;
             }
+            //"fuck the healthbar" - Chris, July 31, 2020
             this.hp.move(scene, this.body.x + 40, this.body.y + 120);
         }
         else {
@@ -135,16 +141,12 @@ class Element extends Phaser.GameObjects.Sprite {
         } else {
             this.body.setAngularVelocity(Math.sign(angleDelta) * gameSettings.ROTATION_SPEED_DEGREES);
         }
-        var data = {
-            currentSpeedX: currentSpeedX0, 
-            currentSpeedY: currentSpeedY0
-        }
-        if(bool){
-            return data;
-        }
-        else {
-            return 0;
-        }
+        //var data = {
+            //currentSpeedX: currentSpeedX0, 
+            //currentSpeedY: currentSpeedY0,
+             
+        //}
+        return command_arr;
 
         
     }

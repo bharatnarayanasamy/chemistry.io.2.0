@@ -723,9 +723,6 @@ function create() {
 
 function update(time) {
     if (typeof this.element != "undefined") {
-
-        
-
         this.cameras.main.startFollow(this.element);
         this.cameras.main.followOffset.set(5, 5);
 
@@ -737,48 +734,13 @@ function update(time) {
         }
         //Phaser.Math.Clamp
         
-        let collisionAngle = 0;
-        this.otherElements.getChildren().forEach((otherElement) => {
-            
-            let dist = Math.sqrt(Math.pow(this.element.x - otherElement.x, 2) + Math.pow(this.element.y - otherElement.y, 2));
-            if(dist < 70){
-                isOverlappingOther = true;
-                currentSpeed = this.element.movePlayer(this, gameSettings.playerSpeed, isHit, this.knockbackSpeedX, this.knockbackSpeedY, this.transitionBulletAngle, isOverlappingOther);
-                let speedx = currentSpeed.currentSpeedX;
-                let speedy = currentSpeed.currentSpeedY;
-                console.log(speedx);
-                console.log(speedy);                
-                if (speedx != 0 && speedx != undefined && speedy != undefined)
-                {
-                    collisionAngle = Math.atan(speedy/speedx);
-                }
-                else
-                {
-                    collisionAngle = 0;
-                }
-
-                console.log(collisionAngle);
-                this.element.x += 50 * Math.cos(collisionAngle);
-                this.element.y += 50 * Math.sin(collisionAngle);
-
-            }
-        });
+ 
         
         //dist2 = Math.pow(players[id0].x - players[id].x, 2) + Math.pow(players[id0].y - players[id].y, 2);
-        if(isOverlappingOther){
-            //currentSpeed = this.element.movePlayer(this, gameSettings.playerSpeed, isHit, this.knockbackSpeedX, this.knockbackSpeedY, this.transitionBulletAngle, isOverlappingOther);
-            isOverlappingOther = false;
-            //this.element.x += 50 * Math.cos(collisionAngle)
-            //this.element.y += 50 * Math.sin(collisionAngle)
-        }
-        else {
-            currentSpeed = this.element.movePlayer(this, gameSettings.playerSpeed, isHit, this.knockbackSpeedX, this.knockbackSpeedY, this.transitionBulletAngle, isOverlappingOther);
-        }
-        if (isHit == true && time - this.element.lastHurtByTransition > 150) {
-            isHit = false;
-        }
-
-
+        
+        movement_command = this.element.movePlayer(this, gameSettings.playerSpeed, isHit, this.knockbackSpeedX, this.knockbackSpeedY, this.transitionBulletAngle, isOverlappingOther);
+        
+        this.socket.emit('move', movement_command);
 
 
         this.healthLabel.text = "Health: " + this.element.hp.value;
@@ -820,47 +782,46 @@ function update(time) {
             let bulletAngle = Phaser.Math.Angle.Between(this.element.x, this.element.y, this.input.activePointer.worldX, this.input.activePointer.worldY)
 
             if (gameSettings.group8.includes(this.element.atomicNum)) {
-                console.log(currentSpeed.currentSpeedX);
-                group8Bullet(bullet, this.element, this.socket, bulletAngle, bulletAngle, currentSpeed.currentSpeedX, currentSpeed.currentSpeedY);
+                group8Bullet(bullet, this.element, this.socket, bulletAngle, bulletAngle);
             }
             else if (gameSettings.group2.includes(this.element.atomicNum)) {
                 let distance = Math.sqrt((bullet.x - this.element.x) * (bullet.x - this.element.x) + (bullet.y - this.element.y) * (bullet.y - this.element.y));
-                group2Bullet(bullet, distance, this.element, this.socket, bulletAngle, currentSpeed.currentSpeedX, currentSpeed.currentSpeedY);
+                group2Bullet(bullet, distance, this.element, this.socket, bulletAngle);
             }
             else if (gameSettings.group3.includes(this.element.atomicNum)) {
-                group3Bullet(bullet, this.element, this.socket, bulletAngle, currentSpeed.currentSpeedX, currentSpeed.currentSpeedY);
+                group3Bullet(bullet, this.element, this.socket, bulletAngle);
             }
             else if (gameSettings.group4.includes(this.element.atomicNum)) {
-                group4Bullet(bullet, this.element, this.socket, bulletAngle, currentSpeed.currentSpeedX, currentSpeed.currentSpeedY);
+                group4Bullet(bullet, this.element, this.socket, bulletAngle);
             }
             else if (gameSettings.group5.includes(this.element.atomicNum)) {
-                group5Bullet(bullet, this.element, this.socket, bulletAngle, currentSpeed.currentSpeedX, currentSpeed.currentSpeedY);
+                group5Bullet(bullet, this.element, this.socket, bulletAngle);
             }
             else if (gameSettings.group6.includes(this.element.atomicNum)) {
-                group6Bullet(bullet, this.element, this.socket, bulletAngle, currentSpeed.currentSpeedX, currentSpeed.currentSpeedY);
+                group6Bullet(bullet, this.element, this.socket, bulletAngle);
             }
             else if (gameSettings.group7.includes(this.element.atomicNum)) {
-                group7Bullet(bullet, this.element, this.socket, bulletAngle, currentSpeed.currentSpeedX, currentSpeed.currentSpeedY);
+                group7Bullet(bullet, this.element, this.socket, bulletAngle);
             }
             else if (gameSettings.transitionmetals.includes(this.element.atomicNum)) {
-                transitionMetalBullet(bullet, this.element, this.socket, bulletAngle, currentSpeed.currentSpeedX, currentSpeed.currentSpeedY);
+                transitionMetalBullet(bullet, this.element, this.socket, bulletAngle);
             }
             else if (gameSettings.lanthanides.includes(this.element.atomicNum)) {
                 lanthanideBullet(bullet, this.element, this.socket, bulletAngle);
             }
             else if (gameSettings.actinides.includes(this.element.atomicNum)) {
-                actinideBullet(bullet, this.element, this.socket, bulletAngle, currentSpeed.currentSpeedX, currentSpeed.currentSpeedY);
+                actinideBullet(bullet, this.element, this.socket, bulletAngle);
             }
             else {
                 //damage /= 10, NEED TO CHANGE, ONLY FOR TESTING
                 
-                group1Bullet(bullet, this.element, this.socket, bulletAngle, currentSpeed.currentSpeedX, currentSpeed.currentSpeedY);                
+                group1Bullet(bullet, this.element, this.socket, bulletAngle);                
             }
             lastShot = time;
         }
 
-        if (lastScoreUpdate + 5000 < time) {
-
+        if (lastScoreUpdate + 10000 < time) {
+            console.log("Current score" + this.score);
             if (typeof email != "object") {
                 if (currentHighScore < this.score) {
                     const data = {
@@ -878,43 +839,44 @@ function update(time) {
                     });
                     currentHighScore = this.score;
                 }
-                console.log(bestKills);
-                console.log(this.killScore);
-                if (bestKills < this.killScore) {
+
+                if (bestKills < this.element.kills) {
                     const data = {
                         email: email,
-                        score: this.killScore,
+                        kills: this.element.kills,
                     };
                     $.ajax({
                         type: 'POST',
                         url: '/submit-kills',
                         data,
                         success: function (data) {
-                            console.log(data);
                         },
                         error: function (xhr) {
-                            console.log(xhr);
                         }
                     });
-                    bestKills = this.killScore;
+                    bestKills = this.element.kills;
                 }
-                /*
-                if (currentHighScore < this.score) {
+                console.log("Element atomic number: " + this.element.atomicNum);
+                console.log("Best element: " + bestElement);
+                if (bestElement < this.element.atomicNum) {
                     const data = {
                         email: email,
-                        score: this.score,
+                        element: this.element.atomicNum,
                     };
+                    console.log(this.element.atomicNum);
+                    console.log(data);
                     $.ajax({
                         type: 'POST',
-                        url: '/submit-score',
+                        url: '/submit-element',
                         data,
                         success: function (data) {
+                            console.log("bestElement updated");
                         },
                         error: function (xhr) {
                         }
                     });
-                    currentHighScore = this.score;
-                }*/
+                    bestElement = this.element.atomicNum;
+                }
             }
             lastScoreUpdate = time;
         }
@@ -922,7 +884,7 @@ function update(time) {
         if (Math.random() < 0.5) this.element.x += 0.000000001;
         else this.element.x -= 0.000000001;
 
-        if (typeof this.element.oldPosition != "undefined") {
+        /**if (typeof this.element.oldPosition != "undefined") {
             let x = this.element.x;
             let y = this.element.y;
 
@@ -936,7 +898,7 @@ function update(time) {
             x: this.element.x,
             y: this.element.y,
             rotation: this.element.rotation,
-        };
+        };**/
 
         upDate = new Date();
 

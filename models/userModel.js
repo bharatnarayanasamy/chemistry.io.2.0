@@ -26,8 +26,8 @@ const UserSchema = new Schema({
     default: 0
   },
   bestElement : {
-    type: String,
-    default: "Hydrogen"
+    type: Number,
+    default: 1
   }
 });
 
