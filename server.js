@@ -203,6 +203,7 @@ io.on('connection', (socket) => {
     console.log('user disconnected: ', socket.id);
     delete players[socket.id];
     delete score_array[socket.id];
+    
     delete player_scores[socket.id];
     delete leaderboardArray[socket.id];
 
@@ -497,7 +498,7 @@ function UpdateLeaderboard() {
 function Movement() {
 
   let messageArray = [];
-  while (typeof game_array[0] != "undefined" && game_array[0].time + 550 < Date.now()) {
+  while (typeof game_array[0] != "undefined" && game_array[0].time + 50 < Date.now()) {
     messageArray.push(game_array[0]);
     game_array.shift();
   }
