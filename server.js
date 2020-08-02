@@ -45,10 +45,10 @@ app.use(express.static(__dirname + '/public'));
 app.get('/', function (req, res) {
   res.sendFile(__dirname + '/index.html');
 });
-app.get('/game.html', passport.authenticate('jwt', { session : false }), function (req, res) {
+app.get('/game.html', passport.authenticate('jwt', { session: false }), function (req, res) {
   res.sendFile(__dirname + '/public/game.html');
 });
-app.get('/loggedin.html', passport.authenticate('jwt', { session : false }), function (req, res) {
+app.get('/loggedin.html', passport.authenticate('jwt', { session: false }), function (req, res) {
   res.sendFile(__dirname + '/public/loggedin.html');
 });
 
@@ -133,7 +133,7 @@ for (let i = 0; i < 15; i++) {
 
 }
 var serverSettings = {
-  playerSpeed: 300,
+  playerSpeed: 300, //normally 300
   group1: [1, 3, 11, 19, 37, 55, 87],
   group2: [4, 12, 20, 38, 56, 88],
   group3: [5, 13, 31, 49, 81, 113],
@@ -143,12 +143,14 @@ var serverSettings = {
   group7: [9, 17, 35, 53, 85, 117],
   group8: [2, 10, 18, 36, 54, 86, 118],
   transitionmetals: [21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
-      39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
-      72, 73, 74, 75, 76, 77, 78, 79, 80,
-      104, 105, 106, 107, 108, 109, 110, 111, 112],
+    39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
+    72, 73, 74, 75, 76, 77, 78, 79, 80,
+    104, 105, 106, 107, 108, 109, 110, 111, 112],
   lanthanides: [57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71],
   actinides: [89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103]
 }
+
+var game_array = [];
 
 //Initialize function for what happens when connection occurs
 io.on('connection', (socket) => {
@@ -211,15 +213,29 @@ io.on('connection', (socket) => {
   socket.on('move', (movementData) => {
     //ORDER =          W/S   A/D
     //W and D are 1, S and A are -1
-    players[socket.id].x += serverSettings.playerSpeed/60 * movementData[1];
-    players[socket.id].y += serverSettings.playerSpeed/60 * movementData[0];
+    var data = {};
+    data.time = Date.now();
 
-    console.log(players[socket.id].x);
-    console.log(players[socket.id].y);
+    if (typeof players[socket.id] != "undefined") {
 
-    
+
+      players[socket.id].x += serverSettings.playerSpeed / 60 * movementData[1];
+      players[socket.id].y += serverSettings.playerSpeed / 60 * movementData[0];
+
+      data.x = players[socket.id].x;
+      data.y = players[socket.id].y;
+      data.rotation = movementData[2];
+      data.playerId = socket.id;
+      game_array.push(data);
+
+    }
+    //add seq number
+
+    //console.log(players[socket.id].x);
+    //console.log(players[socket.id].y);
+
   });
-  
+
   /** 
   // when a player moves, update the player data
   socket.on('playerMovement', (movementData) => {
@@ -293,7 +309,7 @@ io.on('connection', (socket) => {
     data.iy = data.y;
 
     //CHANGE BEFORE FINAL
-    if(data.atomicNumber == 5) {
+    if (data.atomicNumber == 5) {
       data.bulletSpeed /= 3;
     }
     let new_bullet = data;
@@ -336,13 +352,13 @@ function ServerGameLoop() {
 
       bullet.x += speedX / 60; //update bullet position
       bullet.y += speedY / 60;
-      
+
       if (typeof players[bullet.owner_id] != "undefined" && serverSettings.actinides.includes(players[bullet.owner_id].atomicNumServer)) {
         let dx0 = players[bullet.owner_id].x - bullet.x;
         let dy0 = players[bullet.owner_id].y - bullet.y;
         let dist0 = Math.sqrt(dx0 * dx0 + dy0 * dy0);
 
-        if (dist0 > 300 && typeof bullet.firstBullet != "undefined" && bullet.firstBullet==true) {
+        if (dist0 > 300 && typeof bullet.firstBullet != "undefined" && bullet.firstBullet == true) {
 
           let bullet0 = { x: bullet.x, y: bullet.y, angle: bullet.angle + 0.2, bulletSpeed: bullet.bulletSpeed, damage: bullet.damage, atomicNumber: bullet.atomicNumber }
           let bullet1 = { x: bullet.x, y: bullet.y, angle: bullet.angle - 0.2, bulletSpeed: bullet.bulletSpeed, damage: bullet.damage, atomicNumber: bullet.atomicNumber };
@@ -364,16 +380,15 @@ function ServerGameLoop() {
 
       let longdist = 1000000;
 
-      if (typeof players[bullet.owner_id] != "undefined" && serverSettings.group3.includes(players[bullet.owner_id].atomicNumServer))
-      {
+      if (typeof players[bullet.owner_id] != "undefined" && serverSettings.group3.includes(players[bullet.owner_id].atomicNumServer)) {
         longdist = 20000;
       }
 
-      if (typeof players[bullet.owner_id] != "undefined" && serverSettings.group5.includes(players[bullet.owner_id].atomicNumServer)){
+      if (typeof players[bullet.owner_id] != "undefined" && serverSettings.group5.includes(players[bullet.owner_id].atomicNumServer)) {
         bullet_array[i].bulletSpeed += 20;
-      }   
-      
-      if (typeof players[bullet.owner_id] != "undefined" && serverSettings.group7.includes(players[bullet.owner_id].atomicNumServer)){
+      }
+
+      if (typeof players[bullet.owner_id] != "undefined" && serverSettings.group7.includes(players[bullet.owner_id].atomicNumServer)) {
         if (bullet_array[i].bulletSpeed > 20) {
           bullet_array[i].bulletSpeed -= 7;
         }
@@ -382,8 +397,8 @@ function ServerGameLoop() {
         }
 
         longdist = 30000;
-      }   
-      
+      }
+
       if (typeof players[bullet.owner_id] != "undefined" && serverSettings.lanthanides.includes(players[bullet.owner_id].atomicNumServer)) {
         longdist = 2250000;
       }
@@ -393,7 +408,7 @@ function ServerGameLoop() {
         bullet_array.splice(i, 1);
         i--;
       }
-      
+
       //Remove bullet once it has travelled 1000 units
       if ((Math.pow(bullet.x - bullet.ix, 2) + Math.pow(bullet.y - bullet.iy, 2)) > longdist) {
         bullet_array.splice(i, 1);
@@ -402,58 +417,58 @@ function ServerGameLoop() {
 
       for (let id in players) {
         if (bullet.owner_id != id && typeof players[id] != "undefined") {
-            //Your own bullet shouldn't kill you
-            let dx = players[id].x - bullet.x;
-            let dy = players[id].y - bullet.y;
-            let dist = Math.sqrt(dx * dx + dy * dy);
-            let owner = bullet.owner_id;
-            thresh = 70;
-            if (dist < thresh) {
-              healthInfo.i = i;
-              healthInfo.id = id;
-              if(typeof players[bullet.owner_id] != "undefined") healthInfo.atomicNumber = players[bullet.owner_id].atomicNumServer;
-              healthInfo.speedX = speedX;
-              healthInfo.speedY = speedY;
-              healthInfo.bulletAngle = bullet.angle;
-              io.emit('player-hit', healthInfo); // Tell everyone this player got hit
-              players[id].health -= bullet.damage;
-              io.emit("update-health", players[id]);
-              if (typeof players[bullet.owner_id] != "undefined" && serverSettings.group5.includes(players[bullet.owner_id].atomicNumServer)) {
-                let bulletInfo = {x: bullet.x, y: bullet.y}
-                io.emit("explosion", bulletInfo)
-                for (let id in players) {
-                  dist = Math.pow(players[id].x - bullet.x, 2) + Math.pow(players[id].y - bullet.y,2);
-                  if (id != healthInfo.id && dist < 30000){
-                    healthInfo.id = id;
-                    io.emit('player-hit', healthInfo);
-                    players[id].health -= Math.round(bullet.damage * (1 - dist/30000));
-                    io.emit("update-health", players[id]);
-                  }
+          //Your own bullet shouldn't kill you
+          let dx = players[id].x - bullet.x;
+          let dy = players[id].y - bullet.y;
+          let dist = Math.sqrt(dx * dx + dy * dy);
+          let owner = bullet.owner_id;
+          thresh = 70;
+          if (dist < thresh) {
+            healthInfo.i = i;
+            healthInfo.id = id;
+            if (typeof players[bullet.owner_id] != "undefined") healthInfo.atomicNumber = players[bullet.owner_id].atomicNumServer;
+            healthInfo.speedX = speedX;
+            healthInfo.speedY = speedY;
+            healthInfo.bulletAngle = bullet.angle;
+            io.emit('player-hit', healthInfo); // Tell everyone this player got hit
+            players[id].health -= bullet.damage;
+            io.emit("update-health", players[id]);
+            if (typeof players[bullet.owner_id] != "undefined" && serverSettings.group5.includes(players[bullet.owner_id].atomicNumServer)) {
+              let bulletInfo = { x: bullet.x, y: bullet.y }
+              io.emit("explosion", bulletInfo)
+              for (let id in players) {
+                dist = Math.pow(players[id].x - bullet.x, 2) + Math.pow(players[id].y - bullet.y, 2);
+                if (id != healthInfo.id && dist < 30000) {
+                  healthInfo.id = id;
+                  io.emit('player-hit', healthInfo);
+                  players[id].health -= Math.round(bullet.damage * (1 - dist / 30000));
+                  io.emit("update-health", players[id]);
                 }
               }
+            }
 
-              if (typeof players[owner] != "undefined" && !(serverSettings.group8.includes(players[owner].atomicNumServer) || serverSettings.group7.includes(players[owner].atomicNumServer))) {
-                bullet_array.splice(i, 1);
-                i--;
+            if (typeof players[owner] != "undefined" && !(serverSettings.group8.includes(players[owner].atomicNumServer) || serverSettings.group7.includes(players[owner].atomicNumServer))) {
+              bullet_array.splice(i, 1);
+              i--;
+            }
+          }
+          if (players[id].health <= 0) {
+            if (typeof players[owner] != "undefined") {
+              players[owner].kills++;
+              if (id == socketID) {
+                delete players[id];
+                delete score_array[id];
+                io.emit('deleteDeadPlayers', id);
+                io.emit('updateKills', players[owner]);
+              }
+              else {
+                io.emit('deleteDeadPlayers', id);
+                io.emit('updateKills', players[owner]);
+                delete players[id];
+                delete score_array[id];
               }
             }
-            if (players[id].health <= 0) {
-              if (typeof players[owner] != "undefined") {
-                players[owner].kills++;
-                if (id == socketID) {
-                  delete players[id];
-                  delete score_array[id];
-                  io.emit('deleteDeadPlayers', id);
-                  io.emit('updateKills', players[owner]);
-                }
-                else {
-                  io.emit('deleteDeadPlayers', id);
-                  io.emit('updateKills', players[owner]);
-                  delete players[id];
-                  delete score_array[id];
-                }
-              }
-            }
+          }
         }
       }
     }
@@ -479,10 +494,20 @@ function UpdateLeaderboard() {
   io.emit("update-leaderboard", items);
 }
 
+function Movement() {
+
+  let messageArray = [];
+  while (typeof game_array[0] != "undefined" && game_array[0].time + 550 < Date.now()) {
+    messageArray.push(game_array[0]);
+    game_array.shift();
+  }
+  io.emit('playerMoved', messageArray);
+}
+
+setInterval(Movement, 100);
 setInterval(ServerGameLoop, 16);
 setInterval(UpdateLeaderboard, 100);
 
 
 
 
-      

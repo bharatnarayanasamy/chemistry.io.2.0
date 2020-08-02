@@ -9,7 +9,7 @@ FOR OFTEN USED VARIABLES REQUIRING INDEXING AND/OR PROCESSSING, CREATE A NEW VAR
 var gameSettings = {
     playerSpeed: 300,
     bulletSpeed: 700,
-    speedScale:  6,
+    speedScale: 6,
     maxPowerups: 14,
     maxObstacles: 2,
     powerUpVel: 50,
@@ -101,7 +101,7 @@ var elements = JSON.parse(localStorage.getItem("elements"));
 function preload() {
 
     //loading in element images and their bullet images
-    
+
     for (let i = 1; i < 10; i++) { //temporary
         var imageName = elements[i].toLowerCase();
         this.load.image(imageName, "./assets/images/elements/" + imageName + ".png")
@@ -115,7 +115,7 @@ function preload() {
     this.load.image("neutron", "./assets/images/neutron.png");
     this.load.image("bg", "./assets/images/background.png");
 
-    this.load.spritesheet("explosion", "assets/spritesheets/explosion.png",{
+    this.load.spritesheet("explosion", "assets/spritesheets/explosion.png", {
         frameWidth: 16,
         frameHeight: 16
     });
@@ -291,7 +291,7 @@ function create() {
     this.socket.on('bullets-update', function (server_bullet_array) {
         // If there's client and server bullet arrays have mismatch, fix mismatch
         //console.log(server_bullet_array);
-        
+
         for (let i = 0; i < server_bullet_array.length; i++) {
             if (self.element.bullet_array[i] == undefined) {
                 //let angle = Phaser.Math.Angle.Between(self.element.x, self.element.y, self.input.activePointer.worldX, self.input.activePointer.worldY);
@@ -308,13 +308,12 @@ function create() {
             else {
 
                 //Otherwise, just update bullet locations
-                if(server_bullet_array[i].owner_id == self.socket.id){
+                if (server_bullet_array[i].owner_id == self.socket.id) {
                     let changex = self.element.x - server_bullet_array[i].x;
                     let changey = self.element.y - server_bullet_array[i].y;
                     let distance = Math.sqrt(changex * changex + changey * changey);
 
-                    if(distance > gameSettings.playerRadius)
-                    {
+                    if (distance > gameSettings.playerRadius) {
                         self.element.bullet_array[i].setVisible(true);
 
                         self.element.bullet_array[i].enableBody(true, true);
@@ -333,7 +332,7 @@ function create() {
                     console.log("YO");
                 }
 
-                
+
 
                 self.element.bullet_array[i].x = server_bullet_array[i].x;
                 self.element.bullet_array[i].y = server_bullet_array[i].y;
@@ -610,18 +609,39 @@ function create() {
         }
     });
 
-    this.socket.on('explosion', function(bulletInfo) {
+    this.socket.on('explosion', function (bulletInfo) {
         var explosion = new Explosion(self, bulletInfo.x, bulletInfo.y)
     });
 
     //displays other players' movement on screen
     this.socket.on('playerMoved', function (playerInfo) {
-        if (playerInfo.playerId == self.socket.id) {
+        for (let i = 0; i < playerInfo.length; i++) {
+            if (playerInfo[i].playerId == self.socket.id) {
+                self.element.setRotation(playerInfo[i].rotation);
+                self.element.setPosition(playerInfo[i].x, playerInfo[i].y);
+            }
+            else {
+                self.otherElements.getChildren().forEach((otherElement) => {
+                    if (playerInfo[i].playerId == otherElement.playerId) {
+                        //update other player's locations
+                        otherElement.setRotation(playerInfo[i].rotation);
+                        otherElement.setPosition(playerInfo[i].x, playerInfo[i].y);
+
+                        //otherElement.setPosition(playerInfo.x, playerInfo.y);
+                        //otherElement.hp.move(self, otherElement.x - 40, otherElement.y + 70);
+                    }
+                });
+            }
+        }
+
+        /*if (playerInfo.playerId == self.socket.id) {
             //goal --> get to playerInfo.x, y
+            
             self.element.setPosition(playerInfo.x, playerInfo.y);
 
             self.element.hp.move(self, otherElement.x - 40, otherElement.y + 70);
         }
+        
         self.otherElements.getChildren().forEach((otherElement) => {
             if (playerInfo.playerId == otherElement.playerId) {
                 //update other player's locations
@@ -631,7 +651,7 @@ function create() {
                 //otherElement.setPosition(playerInfo.x, playerInfo.y);
                 otherElement.hp.move(self, otherElement.x - 40, otherElement.y + 70);
             }
-        });
+        });*/
     });
 
     //add this player onto the screen
@@ -733,13 +753,13 @@ function update(time) {
             this.cameras.main.setZoom(1);
         }
         //Phaser.Math.Clamp
-        
- 
-        
+
+
+
         //dist2 = Math.pow(players[id0].x - players[id].x, 2) + Math.pow(players[id0].y - players[id].y, 2);
-        
+
         movement_command = this.element.movePlayer(this, gameSettings.playerSpeed, isHit, this.knockbackSpeedX, this.knockbackSpeedY, this.transitionBulletAngle, isOverlappingOther);
-        
+
         this.socket.emit('move', movement_command);
 
 
@@ -814,8 +834,8 @@ function update(time) {
             }
             else {
                 //damage /= 10, NEED TO CHANGE, ONLY FOR TESTING
-                
-                group1Bullet(bullet, this.element, this.socket, bulletAngle);                
+
+                group1Bullet(bullet, this.element, this.socket, bulletAngle);
             }
             lastShot = time;
         }

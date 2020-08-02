@@ -94,7 +94,7 @@ class Element extends Phaser.GameObjects.Sprite {
         
         //ORDER =          W/s   a/D
         //w and d are 1, s and a are -1
-        let command_arr = [0, 0]; 
+        let command_arr = [0, 0, 0]; 
 
         if (!isHitByTransitionBullet) {
             //no knockback
@@ -102,9 +102,11 @@ class Element extends Phaser.GameObjects.Sprite {
                 /*this.body.setVelocityX(-speed);
                 bool = true;*/
                 command_arr[1] = -1;
-            } else if (scene.input.keyboard.addKey('D').isDown) {
+            } 
+            else if (scene.input.keyboard.addKey('D').isDown) {
                 /*this.body.setVelocityX(speed);*/
                 command_arr[1] = 1;
+
             }
 
             //move up or down
@@ -113,16 +115,18 @@ class Element extends Phaser.GameObjects.Sprite {
                 bool = true;
                 currentSpeedY0 = -speed;*/
 
-                command_arr[0] = 1;
+                command_arr[0] = -1;
 
             } else if (scene.input.keyboard.addKey('S').isDown) {
                 // this.body.setVelocityY(speed);
                 // bool = true;
                 // currentSpeedY0 = speed;
-                command_arr[0] = -1;
+                command_arr[0] = 1;
             }
             //"fuck the healthbar" - Chris, July 31, 2020
             this.hp.move(scene, this.body.x + 40, this.body.y + 120);
+            this.x += gameSettings.playerSpeed / 60 * command_arr[1];
+            this.y += gameSettings.playerSpeed / 60 * command_arr[0];
         }
         else {
             //knockback
@@ -134,13 +138,17 @@ class Element extends Phaser.GameObjects.Sprite {
 
         let angleToPointer = Phaser.Math.Angle.Between(this.x, this.y, scene.input.activePointer.worldX, scene.input.activePointer.worldY);
         let angleDelta = Phaser.Math.Angle.Wrap(angleToPointer - this.rotation);
+        this.rotation = angleToPointer;
+
         //some fancy math stuff I got from online
-        if (Phaser.Math.Within(angleDelta, 0, gameSettings.TOLERANCE)) {
-            this.rotation = angleToPointer;
+        /*if (Phaser.Math.Within(angleDelta, 0, gameSettings.TOLERANCE)) {
+            
             this.body.setAngularVelocity(0);
-        } else {
+        } 
+        else {
             this.body.setAngularVelocity(Math.sign(angleDelta) * gameSettings.ROTATION_SPEED_DEGREES);
-        }
+        }*/
+        command_arr[2] = angleToPointer;
         //var data = {
             //currentSpeedX: currentSpeedX0, 
             //currentSpeedY: currentSpeedY0,
