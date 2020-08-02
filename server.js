@@ -201,6 +201,7 @@ io.on('connection', (socket) => {
     console.log('user disconnected: ', socket.id);
     delete players[socket.id];
     delete score_array[socket.id];
+    
     delete player_scores[socket.id];
     delete leaderboardArray[socket.id];
 
@@ -211,6 +212,9 @@ io.on('connection', (socket) => {
   socket.on('move', (movementData) => {
     //ORDER =          W/S   A/D
     //W and D are 1, S and A are -1
+    //time = Date.now();
+    var data = {}
+    data.time = 
     players[socket.id].x += serverSettings.playerSpeed/60 * movementData[1];
     players[socket.id].y += serverSettings.playerSpeed/60 * movementData[0];
 
