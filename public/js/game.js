@@ -96,6 +96,9 @@ var isMoving = false;
 
 var texLen = gameSettings.texture.length;
 
+var movementCommands = [];
+var messageIndex = 0;
+
 var elements = JSON.parse(localStorage.getItem("elements"));
 
 function preload() {
@@ -615,43 +618,87 @@ function create() {
 
     //displays other players' movement on screen
     this.socket.on('playerMoved', function (playerInfo) {
+        var rotation = self.element.rotation;
+        var position = { x: self.element.x, y: self.element.y };
+        var last_processed_input;
         for (let i = 0; i < playerInfo.length; i++) {
             if (playerInfo[i].playerId == self.socket.id) {
-                self.element.setRotation(playerInfo[i].rotation);
-                self.element.setPosition(playerInfo[i].x, playerInfo[i].y);
+                rotation = playerInfo[i].rotation;
+                position = { x: playerInfo[i].x, y: playerInfo[i].y };
+                last_processed_input = playerInfo[i].client_num;
+
             }
             else {
+                //entity interpolation
+                //ERROR ALERT CHECK DEBUG TOMORROW
                 self.otherElements.getChildren().forEach((otherElement) => {
                     if (playerInfo[i].playerId == otherElement.playerId) {
-                        //update other player's locations
-                        otherElement.setRotation(playerInfo[i].rotation);
-                        otherElement.setPosition(playerInfo[i].x, playerInfo[i].y);
-
-                        //otherElement.setPosition(playerInfo.x, playerInfo.y);
-                        //otherElement.hp.move(self, otherElement.x - 40, otherElement.y + 70);
+                        if (otherElement.gs2 == 0) {
+                            otherElement.gs2 = { x: playerInfo[i].x, y: playerInfo[i].y, rot: playerInfo[i].rotation };
+                        }
+                        else {
+                            otherElement.gs1 = otherElement.gs2;
+                            otherElement.gs2 = { x: playerInfo[i].x, y: playerInfo[i].y, rot: playerInfo[i].rotation };
+                            otherElement.diff = {
+                                x: (otherElement.gs2.x - otherElement.gs1.x) / 6,
+                                y: (otherElement.gs2.y - otherElement.gs1.y) / 6,
+                                rot: (otherElement.gs2.rot - otherElement.gs1.rot) / 6
+                            };
+                        }
                     }
                 });
             }
-        }
-
-        /*if (playerInfo.playerId == self.socket.id) {
-            //goal --> get to playerInfo.x, y
-            
-            self.element.setPosition(playerInfo.x, playerInfo.y);
-
-            self.element.hp.move(self, otherElement.x - 40, otherElement.y + 70);
-        }
-        
-        self.otherElements.getChildren().forEach((otherElement) => {
-            if (playerInfo.playerId == otherElement.playerId) {
+            //old_array = new_array;
+            //new_array = [];
+            /*
+            if (playerInfo[i].playerId == otherElement.playerId) {
                 //update other player's locations
-                otherElement.setRotation(playerInfo.rotation);
-                otherElement.setPosition(playerInfo.x, playerInfo.y);
-
+                otherElement.setRotation(playerInfo[i].rotation);
+                otherElement.setPosition(playerInfo[i].x, playerInfo[i].y);
+    
                 //otherElement.setPosition(playerInfo.x, playerInfo.y);
-                otherElement.hp.move(self, otherElement.x - 40, otherElement.y + 70);
+                //otherElement.hp.move(self, otherElement.x - 40, otherElement.y + 70);
+            }*/
+            var j = 0;
+            if (typeof last_processed_input != "undefined") {
+                while (j < movementCommands.length) {
+                    var input = movementCommands[j];
+                    if (input.i <= last_processed_input) {
+                        movementCommands.splice(j, 1);
+                    }
+                    else {
+                        console.log(movementCommands[j].data);
+                        rotation = movementCommands[j].data[2];
+                        position.x += gameSettings.playerSpeed / 60 * movementCommands[j].data[1];
+                        position.y += gameSettings.playerSpeed / 60 * movementCommands[j].data[0];
+                        j++;
+                    }
+                }
             }
-        });*/
+            self.element.setRotation(rotation);
+            self.element.setPosition(position.x, position.y);
+            //self.element.setRotation(rotation);
+            //self.element.setPosition(position.x, position.y);
+
+            /*if (playerInfo.playerId == self.socket.id) {
+                //goal --> get to playerInfo.x, y
+                
+                self.element.setPosition(playerInfo.x, playerInfo.y);
+        
+                self.element.hp.move(self, otherElement.x - 40, otherElement.y + 70);
+            }
+            
+            self.otherElements.getChildren().forEach((otherElement) => {
+                if (playerInfo.playerId == otherElement.playerId) {
+                    //update other player's locations
+                    otherElement.setRotation(playerInfo.rotation);
+                    otherElement.setPosition(playerInfo.x, playerInfo.y);
+        
+                    //otherElement.setPosition(playerInfo.x, playerInfo.y);
+                    otherElement.hp.move(self, otherElement.x - 40, otherElement.y + 70);
+                }
+            });*/
+        }
     });
 
     //add this player onto the screen
@@ -757,10 +804,15 @@ function update(time) {
 
 
         //dist2 = Math.pow(players[id0].x - players[id].x, 2) + Math.pow(players[id0].y - players[id].y, 2);
-
+        //move this out
         movement_command = this.element.movePlayer(this, gameSettings.playerSpeed, isHit, this.knockbackSpeedX, this.knockbackSpeedY, this.transitionBulletAngle, isOverlappingOther);
-
-        this.socket.emit('move', movement_command);
+        var movementData = {
+            data: movement_command,
+            i: messageIndex
+        };
+        messageIndex++;
+        movementCommands.push(movementData);
+        this.socket.emit('move', movementData);
 
 
         this.healthLabel.text = "Health: " + this.element.hp.value;
@@ -931,7 +983,13 @@ function update(time) {
         if (upDate.getTime() > this.element.lastHurtByTransition + 300 && isHit) {
             isHit = false;
         }
+        //entity interpolation
+        this.otherElements.getChildren().forEach((otherElement) => {
+            //const is variable storing the distance needed to move, divided by 6 (player experienced 6 movement increments)
+            otherElement.setPosition(otherElement.x + otherElement.diff.x, otherElement.y + otherElement.diff.y);
+            otherElement.setRotation(otherElement.rotation + otherElement.diff.rot);
+        });
     }
 }
 
-
+//ERROR LINES: 986-990, 633-649

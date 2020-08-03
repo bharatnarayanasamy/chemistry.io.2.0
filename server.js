@@ -151,6 +151,7 @@ var serverSettings = {
 }
 
 var game_array = [];
+var server_seq = 0;
 
 //Initialize function for what happens when connection occurs
 io.on('connection', (socket) => {
@@ -212,6 +213,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('move', (movementData) => {
+    movement = movementData.data
     //ORDER =          W/S   A/D
     //W and D are 1, S and A are -1
     var data = {};
@@ -219,14 +221,19 @@ io.on('connection', (socket) => {
 
     if (typeof players[socket.id] != "undefined") {
 
+      //move this up later
 
-      players[socket.id].x += serverSettings.playerSpeed / 60 * movementData[1];
-      players[socket.id].y += serverSettings.playerSpeed / 60 * movementData[0];
+      players[socket.id].x += serverSettings.playerSpeed / 60 * movement[1];
+      players[socket.id].y += serverSettings.playerSpeed / 60 * movement[0];
 
       data.x = players[socket.id].x;
       data.y = players[socket.id].y;
-      data.rotation = movementData[2];
+      data.rotation = movement[2];
       data.playerId = socket.id;
+      data.client_num = movementData.i;
+      data.server_num = server_seq;
+      server_seq++;
+
       game_array.push(data);
 
     }
