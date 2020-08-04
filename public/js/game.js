@@ -626,39 +626,19 @@ function create() {
                 rotation = playerInfo[i].rotation;
                 position = { x: playerInfo[i].x, y: playerInfo[i].y };
                 last_processed_input = playerInfo[i].client_num;
-
             }
             else {
-                //entity interpolation
-                //ERROR ALERT CHECK DEBUG TOMORROW
                 self.otherElements.getChildren().forEach((otherElement) => {
-                    if (playerInfo[i].playerId == otherElement.playerId) {
-                        if (otherElement.gs2 == 0) {
-                            otherElement.gs2 = { x: playerInfo[i].x, y: playerInfo[i].y, rot: playerInfo[i].rotation };
-                        }
-                        else {
-                            otherElement.gs1 = otherElement.gs2;
-                            otherElement.gs2 = { x: playerInfo[i].x, y: playerInfo[i].y, rot: playerInfo[i].rotation };
-                            otherElement.diff = {
-                                x: (otherElement.gs2.x - otherElement.gs1.x) / 6,
-                                y: (otherElement.gs2.y - otherElement.gs1.y) / 6,
-                                rot: (otherElement.gs2.rot - otherElement.gs1.rot) / 6
-                            };
-                        }
+                    if (playerInfo.playerId == otherElement.playerId) {
+                        //update other player's locations
+                        otherElement.setRotation(playerInfo.rotation);
+                        otherElement.setPosition(playerInfo.x, playerInfo.y);
+
+                        //otherElement.setPosition(playerInfo.x, playerInfo.y);
+                        otherElement.hp.move(self, otherElement.x - 40, otherElement.y + 70);
                     }
                 });
             }
-            //old_array = new_array;
-            //new_array = [];
-            /*
-            if (playerInfo[i].playerId == otherElement.playerId) {
-                //update other player's locations
-                otherElement.setRotation(playerInfo[i].rotation);
-                otherElement.setPosition(playerInfo[i].x, playerInfo[i].y);
-    
-                //otherElement.setPosition(playerInfo.x, playerInfo.y);
-                //otherElement.hp.move(self, otherElement.x - 40, otherElement.y + 70);
-            }*/
             var j = 0;
             if (typeof last_processed_input != "undefined") {
                 while (j < movementCommands.length) {
@@ -677,6 +657,25 @@ function create() {
             }
             self.element.setRotation(rotation);
             self.element.setPosition(position.x, position.y);
+            /*
+            //entity interpolation
+            //ERROR ALERT CHECK DEBUG TOMORROW
+            self.otherElements.getChildren().forEach((otherElement) => {
+                if (playerInfo[i].playerId == otherElement.playerId) {
+                    if (otherElement.gs2 == 0) {
+                        otherElement.gs2 = { x: playerInfo[i].x, y: playerInfo[i].y, rot: playerInfo[i].rotation };
+                    }
+                    else {
+                        otherElement.gs1 = otherElement.gs2;
+                        otherElement.gs2 = { x: playerInfo[i].x, y: playerInfo[i].y, rot: playerInfo[i].rotation };
+                        otherElement.diff = {
+                            x: (otherElement.gs2.x - otherElement.gs1.x) / 6,
+                            y: (otherElement.gs2.y - otherElement.gs1.y) / 6,
+                            rot: (otherElement.gs2.rot - otherElement.gs1.rot) / 6
+                        };
+                    }
+                }
+            });*/
             //self.element.setRotation(rotation);
             //self.element.setPosition(position.x, position.y);
 
@@ -687,17 +686,18 @@ function create() {
         
                 self.element.hp.move(self, otherElement.x - 40, otherElement.y + 70);
             }
-            
-            self.otherElements.getChildren().forEach((otherElement) => {
-                if (playerInfo.playerId == otherElement.playerId) {
-                    //update other player's locations
-                    otherElement.setRotation(playerInfo.rotation);
-                    otherElement.setPosition(playerInfo.x, playerInfo.y);
-        
-                    //otherElement.setPosition(playerInfo.x, playerInfo.y);
-                    otherElement.hp.move(self, otherElement.x - 40, otherElement.y + 70);
-                }
-            });*/
+            */
+                       //old_array = new_array;
+            //new_array = [];
+            /*
+            if (playerInfo[i].playerId == otherElement.playerId) {
+                //update other player's locations
+                otherElement.setRotation(playerInfo[i].rotation);
+                otherElement.setPosition(playerInfo[i].x, playerInfo[i].y);
+    
+                //otherElement.setPosition(playerInfo.x, playerInfo.y);
+                //otherElement.hp.move(self, otherElement.x - 40, otherElement.y + 70);
+            }*/
         }
     });
 
@@ -800,8 +800,6 @@ function update(time) {
             this.cameras.main.setZoom(1);
         }
         //Phaser.Math.Clamp
-
-
 
         //dist2 = Math.pow(players[id0].x - players[id].x, 2) + Math.pow(players[id0].y - players[id].y, 2);
         //move this out
@@ -983,12 +981,12 @@ function update(time) {
         if (upDate.getTime() > this.element.lastHurtByTransition + 300 && isHit) {
             isHit = false;
         }
-        //entity interpolation
+        /*//entity interpolation
         this.otherElements.getChildren().forEach((otherElement) => {
             //const is variable storing the distance needed to move, divided by 6 (player experienced 6 movement increments)
             otherElement.setPosition(otherElement.x + otherElement.diff.x, otherElement.y + otherElement.diff.y);
             otherElement.setRotation(otherElement.rotation + otherElement.diff.rot);
-        });
+        });*/
     }
 }
 
