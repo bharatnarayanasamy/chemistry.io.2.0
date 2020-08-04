@@ -621,6 +621,10 @@ function create() {
         var rotation = self.element.rotation;
         var position = { x: self.element.x, y: self.element.y };
         var last_processed_input;
+        console.log("Current Player Position (Client): ", position);
+        self.otherElements.getChildren().forEach((otherElement) => {
+            otherElement.gs1 = otherElement.gs2;
+        }); 
         for (let i = 0; i < playerInfo.length; i++) {
             if (playerInfo[i].playerId == self.socket.id) {
                 rotation = playerInfo[i].rotation;
@@ -629,76 +633,76 @@ function create() {
             }
             else {
                 self.otherElements.getChildren().forEach((otherElement) => {
-                    if (playerInfo.playerId == otherElement.playerId) {
+                    //entity interpolation
+                    //ERROR ALERT CHECK DEBUG TOMORROW
+                    if (playerInfo[i].playerId == otherElement.playerId) {
+                        if (otherElement.gs2 == 0) {
+                            otherElement.gs2 = { x: playerInfo[i].x, y: playerInfo[i].y, rot: playerInfo[i].rotation };
+                        }
+                        else {
+                            //otherElement.gs1 = otherElement.gs2;
+                            otherElement.gs2 = { x: playerInfo[i].x, y: playerInfo[i].y, rot: playerInfo[i].rotation };
+                            otherElement.diff = {
+                                x: (otherElement.gs2.x - otherElement.gs1.x) / 6,
+                                y: (otherElement.gs2.y - otherElement.gs1.y) / 6,
+                                rot: (otherElement.gs2.rot - otherElement.gs1.rot) / 6
+                            };
+                        }
+                    }
+                    /*if (playerInfo.playerId == otherElement.playerId) {
                         //update other player's locations
                         otherElement.setRotation(playerInfo.rotation);
                         otherElement.setPosition(playerInfo.x, playerInfo.y);
 
                         //otherElement.setPosition(playerInfo.x, playerInfo.y);
                         otherElement.hp.move(self, otherElement.x - 40, otherElement.y + 70);
-                    }
+                    }*/
                 });
             }
-            var j = 0;
-            if (typeof last_processed_input != "undefined") {
-                while (j < movementCommands.length) {
-                    var input = movementCommands[j];
-                    if (input.i <= last_processed_input) {
-                        movementCommands.splice(j, 1);
-                    }
-                    else {
-                        console.log(movementCommands[j].data);
-                        rotation = movementCommands[j].data[2];
-                        position.x += gameSettings.playerSpeed / 60 * movementCommands[j].data[1];
-                        position.y += gameSettings.playerSpeed / 60 * movementCommands[j].data[0];
-                        j++;
-                    }
-                }
-            }
-            self.element.setRotation(rotation);
-            self.element.setPosition(position.x, position.y);
-            /*
-            //entity interpolation
-            //ERROR ALERT CHECK DEBUG TOMORROW
-            self.otherElements.getChildren().forEach((otherElement) => {
-                if (playerInfo[i].playerId == otherElement.playerId) {
-                    if (otherElement.gs2 == 0) {
-                        otherElement.gs2 = { x: playerInfo[i].x, y: playerInfo[i].y, rot: playerInfo[i].rotation };
-                    }
-                    else {
-                        otherElement.gs1 = otherElement.gs2;
-                        otherElement.gs2 = { x: playerInfo[i].x, y: playerInfo[i].y, rot: playerInfo[i].rotation };
-                        otherElement.diff = {
-                            x: (otherElement.gs2.x - otherElement.gs1.x) / 6,
-                            y: (otherElement.gs2.y - otherElement.gs1.y) / 6,
-                            rot: (otherElement.gs2.rot - otherElement.gs1.rot) / 6
-                        };
-                    }
-                }
-            });*/
-            //self.element.setRotation(rotation);
-            //self.element.setPosition(position.x, position.y);
-
-            /*if (playerInfo.playerId == self.socket.id) {
-                //goal --> get to playerInfo.x, y
-                
-                self.element.setPosition(playerInfo.x, playerInfo.y);
-        
-                self.element.hp.move(self, otherElement.x - 40, otherElement.y + 70);
-            }
-            */
-                       //old_array = new_array;
-            //new_array = [];
-            /*
-            if (playerInfo[i].playerId == otherElement.playerId) {
-                //update other player's locations
-                otherElement.setRotation(playerInfo[i].rotation);
-                otherElement.setPosition(playerInfo[i].x, playerInfo[i].y);
-    
-                //otherElement.setPosition(playerInfo.x, playerInfo.y);
-                //otherElement.hp.move(self, otherElement.x - 40, otherElement.y + 70);
-            }*/
         }
+        console.log("Player Position according to server: ", position);
+        var j = 0;
+        if (typeof last_processed_input != "undefined") {
+            while (j < movementCommands.length) {
+                var input = movementCommands[j];
+                if (input.i <= last_processed_input) {
+                    movementCommands.splice(j, 1);
+                }
+                else {
+                    rotation = movementCommands[j].data[2];
+                    position.x += gameSettings.playerSpeed / 60 * movementCommands[j].data[1];
+                    position.y += gameSettings.playerSpeed / 60 * movementCommands[j].data[0];
+                    j++;
+                }
+            }
+        }
+        console.log("New Player position according to client (after reconciliation): ", position);
+        console.log("Old player position according to client (at very beginning): ", { x: self.element.x, y: self.element.y });
+        self.element.setRotation(rotation);
+        self.element.setPosition(position.x, position.y);
+
+        //self.element.setRotation(rotation);
+        //self.element.setPosition(position.x, position.y);
+
+        /*if (playerInfo.playerId == self.socket.id) {
+            //goal --> get to playerInfo.x, y
+            
+            self.element.setPosition(playerInfo.x, playerInfo.y);
+    
+            self.element.hp.move(self, otherElement.x - 40, otherElement.y + 70);
+        }
+        */
+        //old_array = new_array;
+        //new_array = [];
+        /*
+        if (playerInfo[i].playerId == otherElement.playerId) {
+            //update other player's locations
+            otherElement.setRotation(playerInfo[i].rotation);
+            otherElement.setPosition(playerInfo[i].x, playerInfo[i].y);
+ 
+            //otherElement.setPosition(playerInfo.x, playerInfo.y);
+            //otherElement.hp.move(self, otherElement.x - 40, otherElement.y + 70);
+        }*/
     });
 
     //add this player onto the screen
