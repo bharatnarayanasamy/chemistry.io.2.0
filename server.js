@@ -219,6 +219,8 @@ io.on('connection', (socket) => {
     var data = {};
     data.time = Date.now();
 
+    
+
     if (typeof players[socket.id] != "undefined") {
 
       //move this up later
