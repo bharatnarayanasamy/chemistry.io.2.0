@@ -514,7 +514,7 @@ function Movement() {
   io.emit('playerMoved', messageArray);
 }
 
-setInterval(Movement, 200);
+setInterval(Movement, 100);
 setInterval(ServerGameLoop, 16);
 setInterval(UpdateLeaderboard, 100);
 

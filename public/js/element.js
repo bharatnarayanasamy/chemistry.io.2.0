@@ -59,10 +59,11 @@ class Element extends Phaser.GameObjects.Sprite {
         this.hp = new HealthBar(scene, x - 50, y + 70);
 
         this.lastHurt = 0;
-        this.gs1 = { x: this.x, y: this.y, rot: this.rotation };
-        this.gs2 = { x: this.x, y: this.y, rot: this.rotation };
-        this.diff = 0;
+        this.gs1 = 0;//{ x: this.x, y: this.y, rot: this.rotation };
+        this.gs2 = 0;//{ x: this.x, y: this.y, rot: this.rotation };
+        this.diff = {x: 0, y: 0, rot: 0};
         this.firstEntityInterpolation = false;
+        this.counter = 0;
     }
 
 
