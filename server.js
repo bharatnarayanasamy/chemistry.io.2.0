@@ -504,16 +504,20 @@ function UpdateLeaderboard() {
   io.emit("update-leaderboard", items);
 }
 
-function Movement() {
+var messageArray = [];
+function movementHelper() {
 
-  let messageArray = [];
-  while (typeof game_array[0] != "undefined" && game_array[0].time + 50 < Date.now()) {
+  while (typeof game_array[0] != "undefined" && game_array[0].time + 100 < Date.now()) {
     messageArray.push(game_array[0]);
     game_array.shift();
   }
+}
+function Movement() {
   io.emit('playerMoved', messageArray);
+  messageArray = [];
 }
 
+setInterval(movementHelper, 1);
 setInterval(Movement, 100);
 setInterval(ServerGameLoop, 16);
 setInterval(UpdateLeaderboard, 100);

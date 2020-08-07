@@ -23,11 +23,11 @@ class Bullet extends Phaser.Physics.Arcade.Sprite {
     //use the super constructor to make a GameObject sprite
 
     var texture = btexture + "bullet";
-    console.log("bullet texture: ", texture)
+    //console.log("bullet texture: ", texture)
     //super(scene, x, y, "hydrogenbullet");
     super(scene, x, y, texture);
 
-    console.log(btexture);
+    //console.log(btexture);
 
     //add bullet to the scene
     scene.add.existing(this);
