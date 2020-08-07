@@ -958,9 +958,9 @@ function update(time) {
                 //console.log(entry);
                 if (typeof entry != "undefined") {
                     if (Date.now() > entry.commandTime + entry.executionTime) {
-                        //otherElement.x = entry.gs2.x;
+                        otherElement.x = entry.gs2.x;
                         //console.log("X diff (otherELemnt.x = ): ", otherElement.x, " other element gs2 x position: ", otherElement.gs2.x);
-                        //otherElement.y = entry.gs2.y;
+                        otherElement.y = entry.gs2.y;
                         //console.log("Other Element Y Position: ", otherElement.y, " other element gs2 y position: ", otherElement.gs2.y);
                         //otherElement.rotation += entry.gs2.r - entry.gs1.r;
                         //console.log(otherElement.x + " is x and " + otherElement.y + " is y");
@@ -989,6 +989,12 @@ function update(time) {
         }
     }
 }
-//im bharat and im a dumass
 
+
+
+
+
+
+//im bharat and im a dumass
+//mp :)
 //1000TH LINE
