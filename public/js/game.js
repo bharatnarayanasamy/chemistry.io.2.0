@@ -131,11 +131,8 @@ function preload() {
 
 function create() {
     //accessing user information to get username
-    console.log(typeof email);
-
     if (typeof email != "object") {
         const data = { "email": localStorage.getItem("email") };
-        console.log(data);
         $.ajax({
             type: 'GET',
             url: '/get-user',
@@ -299,7 +296,6 @@ function create() {
                 //let angle = Phaser.Math.Angle.Between(self.element.x, self.element.y, self.input.activePointer.worldX, self.input.activePointer.worldY);
                 self.element.bullet_array[i] = new Bullet(self, server_bullet_array[i].angle, server_bullet_array[i].x, server_bullet_array[i].y, gameSettings.texture[server_bullet_array[i].atomicNumber - 1]);
                 //self.element.bullet_array[i].initialAngle = angle;
-                //console.log(self.element.bullet_array[i].angle);
 
                 //specific to group8 laser bullets
                 if (gameSettings.group8.includes(server_bullet_array[i].atomicNumber)) {
@@ -320,18 +316,13 @@ function create() {
 
                         self.element.bullet_array[i].enableBody(true, true);
                     }
-                    // else {
-                    //     self.element.bullet_array[i].disableBody(true, true);
-                    // }
                 }
 
                 self.element.bullet_array[i].setTexture(gameSettings.texture[server_bullet_array[i].atomicNumber - 1] + "bullet");
                 //self.element.bullet_array[i].setRotation(self.element.bullet_array[i].initialAngle);
-                //console.log("INITIAL ANGLE GANG: " + self.element.bullet_array[i].angle);
 
                 if (gameSettings.transitionmetals.includes(server_bullet_array[i].atomicNumber)) {
                     self.element.bullet_array[i].rotation += 0.015;
-                    console.log("YO");
                 }
 
 
@@ -615,9 +606,11 @@ function create() {
         var explosion = new Explosion(self, bulletInfo.x, bulletInfo.y)
     });
     var time;
+    var timeDifference;
+    var timeArray = [];
     //displays other players' movement on screen
     this.socket.on('playerMoved', function (playerInfo) {
-        var timeDifference;
+//        var timeDifference;
         if (typeof time == "undefined") {
             time = Date.now();
             iter = 0;
@@ -627,12 +620,14 @@ function create() {
             if (timeDifference > 50) {
                 time = Date.now();
                 iter++;
-                //console.log("iteration ", iter - 1, " to ", iter, ": ", timeDifference);
+                console.log("iteration ", iter - 1, " to ", iter, ": ", timeDifference);
+                timeArray.push(timeDifference);
             }
             else {
                 return;
             }
         }
+
 
         var rotation = self.element.rotation;
         var position = { x: self.element.x, y: self.element.y };
@@ -641,13 +636,11 @@ function create() {
         self.otherElements.getChildren().forEach((otherElement) => {
             otherElement.timeUpdate++;
             if (otherElement.timeUpdate > 0) {
-                //console.log("in if statmen - otherElement.timeUpdate: ", otherElement.timeUpdate);
                 otherElement.gs1 = otherElement.gs2;
             }
         });
 
         for (let i = 0; i < playerInfo.length; i++) {
-            //console.log(playerInfo[i]);
             if (playerInfo[i].playerId == self.socket.id) {
                 rotation = playerInfo[i].rotation;
                 position = { x: playerInfo[i].x, y: playerInfo[i].y };
@@ -667,14 +660,23 @@ function create() {
             }
         }
 
+
         self.otherElements.getChildren().forEach((otherElement) => {
-            if (otherElement.timeUpdate > 0 && iter > 0) {
-                var updateMovementData = { gs1: otherElement.gs1, gs2: otherElement.gs2, commandTime: time, executionTime: timeDifference };
+            console.log(otherElement.gs1, otherElement.gs2, timeArray[0]);
+            console.log((otherElement.gs2.x-otherElement.gs1.x)/timeArray[0], (otherElement.gs2.y-otherElement.gs1.y)/timeArray[0]);
+        });
+
+        self.otherElements.getChildren().forEach((otherElement) => {
+            if (otherElement.timeUpdate > 0 && iter > 0 && timeArray.length > 1) {
+                var updateMovementData = { gs1: otherElement.gs1, gs2: otherElement.gs2, commandTime: time, executionTime: timeArray[0]};
                 otherElement.updateArray.push(updateMovementData);
             }
         });
+        if (timeArray.length > 1) {
+            timeArray.shift();
+        }
 
-        //console.log("Player Position according to server: ", position);
+
         var j = 0;
         if (typeof last_processed_input != "undefined") {
             while (j < movementCommands.length) {
@@ -728,7 +730,6 @@ function create() {
             otherElement.setScale(0.4);
             otherElement.body.enable = true;
             otherElement.timeUpdate = 0;
-            console.log(otherElement);
         }
         else {
             const otherElement = new Element(self, playerInfo.x, playerInfo.y, 45, playerInfo.playerId, this.gameSettings.texture[this.gameSettings.texture.length - 1]);
@@ -736,7 +737,6 @@ function create() {
             self.otherElements.add(otherElement);
             otherElement.body.enable = true;
             otherElement.timeUpdate = 0;
-            console.log(otherElement);
         }
     }
     this.projectiles = this.add.group();
@@ -837,11 +837,8 @@ function update(time) {
             }
         }
 
-        //console.log(this.dot.x);
         this.dot.x = this.element.x / 30;
         this.dot.y = this.element.y / 26.5;
-
-        //console.log(this.dot.y);
 
         if ((this.input.activePointer.isDown || Phaser.Input.Keyboard.JustDown(this.spacebar)) && (lastShot + 500 < time || (lastShot + 250 < time && this.element.atomicNum == 2))) {
             let bullet = this.element.shootBullet(this);
@@ -881,14 +878,12 @@ function update(time) {
             }
             else {
                 //damage /= 10, NEED TO CHANGE, ONLY FOR TESTING
-
                 group1Bullet(bullet, this.element, this.socket, bulletAngle);
             }
             lastShot = time;
         }
 
         if (lastScoreUpdate + 10000 < time) {
-            console.log("Current score" + this.score);
             if (typeof email != "object") {
                 if (currentHighScore < this.score) {
                     const data = {
@@ -923,8 +918,6 @@ function update(time) {
                     });
                     bestKills = this.element.kills;
                 }
-                console.log("Element atomic number: " + this.element.atomicNum);
-                console.log("Best element: " + bestElement);
                 if (bestElement < this.element.atomicNum) {
                     const data = {
                         email: email,
@@ -937,7 +930,6 @@ function update(time) {
                         url: '/submit-element',
                         data,
                         success: function (data) {
-                            console.log("bestElement updated");
                         },
                         error: function (xhr) {
                         }
@@ -955,22 +947,20 @@ function update(time) {
         this.otherElements.getChildren().forEach((otherElement) => {
             if (otherElement.timeUpdate > 0 && iter > 0) {
                 var entry = otherElement.updateArray[0];
-                //console.log(entry);
                 if (typeof entry != "undefined") {
                     if (Date.now() > entry.commandTime + entry.executionTime) {
                         otherElement.x = entry.gs2.x;
-                        //console.log("X diff (otherELemnt.x = ): ", otherElement.x, " other element gs2 x position: ", otherElement.gs2.x);
                         otherElement.y = entry.gs2.y;
-                        //console.log("Other Element Y Position: ", otherElement.y, " other element gs2 y position: ", otherElement.gs2.y);
-                        //otherElement.rotation += entry.gs2.r - entry.gs1.r;
-                        //console.log(otherElement.x + " is x and " + otherElement.y + " is y");
-                        otherElement.updateArray.splice(0, 1);
+                        //console.log(otherElement.updateArray);
+                        otherElement.updateArray.shift();
+                        //console.log(otherElement.updateArray)
                     }
                     else {
                         var timeRatio = (Date.now() - entry.commandTime) / (entry.executionTime);
+                        //console.log(timeRatio, entry.gs2.x, entry.gs1.x, entry.gs2.y, entry.gs2.x);
                         otherElement.setPosition(entry.gs1.x + timeRatio * (entry.gs2.x - entry.gs1.x), entry.gs1.y + timeRatio * (entry.gs2.y - entry.gs1.y));
                         otherElement.rotation = entry.gs1.r + timeRatio * (entry.gs2.r - entry.gs1.r);
-                        console.log(otherElement.playerId, otherElement.x, otherElement.y);
+                        //console.log(otherElement.playerId, otherElement.x, otherElement.y);
                     }
                 }
             }

@@ -216,9 +216,7 @@ function lanthanideBullet(bullet, element, socket, bulletAngle) {
     });
 }
 
-function actinideBullet(bullet, element, socket, bulletAngle) {
-
-    
+function actinideBullet(bullet, element, socket, bulletAngle) {    
     socket.emit('shoot-bullet', {
         x: bullet.x , y: bullet.y, angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed,
         damage: bullet.damage, atomicNumber: element.atomicNum, rotAngle: 0, firstBullet: true
