@@ -610,7 +610,7 @@ function create() {
     var timeArray = [];
     //displays other players' movement on screen
     this.socket.on('playerMoved', function (playerInfo) {
-//        var timeDifference;
+        //        var timeDifference;
         if (typeof time == "undefined") {
             time = Date.now();
             iter = 0;
@@ -663,12 +663,12 @@ function create() {
 
         self.otherElements.getChildren().forEach((otherElement) => {
             console.log(otherElement.gs1, otherElement.gs2, timeArray[0]);
-            console.log((otherElement.gs2.x-otherElement.gs1.x)/timeArray[0], (otherElement.gs2.y-otherElement.gs1.y)/timeArray[0]);
+            console.log((otherElement.gs2.x - otherElement.gs1.x) / timeArray[0], (otherElement.gs2.y - otherElement.gs1.y) / timeArray[0]);
         });
 
         self.otherElements.getChildren().forEach((otherElement) => {
             if (otherElement.timeUpdate > 0 && iter > 0 && timeArray.length > 1) {
-                var updateMovementData = { gs1: otherElement.gs1, gs2: otherElement.gs2, commandTime: time, executionTime: timeArray[0]};
+                var updateMovementData = { gs1: otherElement.gs1, gs2: otherElement.gs2, commandTime: time, executionTime: timeArray[0] };
                 otherElement.updateArray.push(updateMovementData);
             }
         });
@@ -954,6 +954,14 @@ function update(time) {
                         //console.log(otherElement.updateArray);
                         otherElement.updateArray.shift();
                         //console.log(otherElement.updateArray)
+                        entry = otherElement.updateArray[0];
+                        if (entry != "undefined") {
+                            var timeRatio = (Date.now() - entry.commandTime) / (entry.executionTime);
+                            //console.log(timeRatio, entry.gs2.x, entry.gs1.x, entry.gs2.y, entry.gs2.x);
+                            otherElement.setPosition(entry.gs1.x + timeRatio * (entry.gs2.x - entry.gs1.x), entry.gs1.y + timeRatio * (entry.gs2.y - entry.gs1.y));
+                            otherElement.rotation = entry.gs1.r + timeRatio * (entry.gs2.r - entry.gs1.r);
+                            //console.log(otherElement.playerId, otherElement.x, otherElement.y);
+                        }
                     }
                     else {
                         var timeRatio = (Date.now() - entry.commandTime) / (entry.executionTime);
