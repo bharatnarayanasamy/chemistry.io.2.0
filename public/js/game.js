@@ -954,14 +954,6 @@ function update(time) {
                         //console.log(otherElement.updateArray);
                         otherElement.updateArray.shift();
                         //console.log(otherElement.updateArray)
-                        entry = otherElement.updateArray[0];
-                        if (typeof entry != "undefined") {
-                            var timeRatio = (Date.now() - entry.commandTime) / (entry.executionTime);
-                            //console.log(timeRatio, entry.gs2.x, entry.gs1.x, entry.gs2.y, entry.gs2.x);
-                            otherElement.setPosition(entry.gs1.x + timeRatio * (entry.gs2.x - entry.gs1.x), entry.gs1.y + timeRatio * (entry.gs2.y - entry.gs1.y));
-                            otherElement.rotation = entry.gs1.r + timeRatio * (entry.gs2.r - entry.gs1.r);
-                            //console.log(otherElement.playerId, otherElement.x, otherElement.y);
-                        }
                     }
                     else {
                         var timeRatio = (Date.now() - entry.commandTime) / (entry.executionTime);
