@@ -354,6 +354,8 @@ io.on('connection', (socket) => {
 // Update the bullets 60 times per frame and send updates
 function ServerGameLoop() {
   for (let i = 0; i < bullet_array.length; i++) {
+
+    
     let bullet = bullet_array[i];
     if (typeof bullet != "undefined") {
       let speed = bullet.bulletSpeed;
@@ -483,7 +485,6 @@ function ServerGameLoop() {
       }
     }
     // Tell everyone where all the bullets are by sending the whole array
-    io.emit("bullets-update", bullet_array);
   }
 }
 
@@ -517,8 +518,13 @@ function Movement() {
   messageArray = [];
 }
 
+function bulletMovement(){
+  io.emit("bullets-update", bullet_array);
+}
 setInterval(movementHelper, 1);
 setInterval(Movement, 100);
+setInterval(bulletMovement, 50)
+
 setInterval(ServerGameLoop, 16);
 setInterval(UpdateLeaderboard, 100);
 

@@ -59,6 +59,7 @@ class Bullet extends Phaser.Physics.Arcade.Sprite {
 
     this.bulletTexture = btexture;
     //console.log(this.texture);
+
   }
 
   // changeProperty(ang){
