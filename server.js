@@ -147,7 +147,9 @@ var serverSettings = {
     72, 73, 74, 75, 76, 77, 78, 79, 80,
     104, 105, 106, 107, 108, 109, 110, 111, 112],
   lanthanides: [57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71],
-  actinides: [89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103]
+  actinides: [89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103],
+  mapWidth: 3840,
+  mapHeight: 2160
 }
 
 var game_array = [];
@@ -212,21 +214,48 @@ io.on('connection', (socket) => {
     io.emit('disconnect', socket.id);
   });
 
+  timeDict = {};
   socket.on('move', (movementData) => {
     movement = movementData.data
     //ORDER =          W/S   A/D
     //W and D are 1, S and A are -1
+
     var data = {};
-    data.time = Date.now();
 
+    //timedif = amount of time we will need to travel between game states
     
-
     if (typeof players[socket.id] != "undefined") {
 
       //move this up later
 
-      players[socket.id].x += serverSettings.playerSpeed / 60 * movement[1];
-      players[socket.id].y += serverSettings.playerSpeed / 60 * movement[0];
+      // checking boundary conditions for x
+      /*
+      if (players[socket.id].x < 70){
+        players[socket.id].x = 70;
+      }
+      else if ( players[socket.id].x > (serverSettings.mapWidth-70))
+      {
+         players[socket.id].x = serverSettings.mapWidth - 70;
+      }
+      */
+      //else
+      //{
+        players[socket.id].x += serverSettings.playerSpeed / 60 * movement[1];
+      //}
+
+      // // checking boundary conditions for y
+      // if (players[socket.id].y < 70){
+      //   players[socket.id].y = 70;
+      // }
+      // else if ( players[socket.id].y > (serverSettings.mapHeight-70))
+      // {
+      //    players[socket.id].y = serverSettings.mapHeight - 70;
+      // }
+      // else
+      // {
+         players[socket.id].y += serverSettings.playerSpeed / 60 * movement[0];
+      // }
+
 
       data.x = players[socket.id].x;
       data.y = players[socket.id].y;

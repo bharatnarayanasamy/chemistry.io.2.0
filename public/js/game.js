@@ -34,7 +34,9 @@ var gameSettings = {
         72, 73, 74, 75, 76, 77, 78, 79, 80,
         104, 105, 106, 107, 108, 109, 110, 111, 112],
     lanthanides: [57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71],
-    actinides: [89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103]
+    actinides: [89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103],
+    mapWidth: 3840,
+    mapHeight: 2160
 }
 
 let config = {
@@ -163,7 +165,7 @@ function create() {
     var g2 = this.add.grid(0, 0, 2 * gameWidth, 2 * gameHeight, 20, 20, 0xffffff, 1, 0xf8f8f8);
 
     //Enabling collisions when an object hits the boundary
-    this.physics.world.setBoundsCollision();
+    //this.physics.world.setBoundsCollision();
 
     //creating PEN arrays
     this.proton_array = [];
@@ -820,7 +822,9 @@ function update(time) {
         movement_command = this.element.movePlayer(this, gameSettings.playerSpeed, isHit, this.knockbackSpeedX, this.knockbackSpeedY, this.transitionBulletAngle, isOverlappingOther);
         var movementData = {
             data: movement_command,
-            i: messageIndex
+            i: messageIndex,
+            time: Date.now(),
+            id: this.element.playerId
         };
         messageIndex++;
         movementCommands.push(movementData);
@@ -860,8 +864,8 @@ function update(time) {
         for(let k = 0; k<this.element.bullet_array.length; k++){
             
             // console.log("Angle: " + this.element.bullet_array[k].angle2);
-            // console.log("Orig X: " + this.element.bullet_array[k].x);
-            // console.log("Orig Y: " + this.element.bullet_array[k].y);
+            console.log("Orig X: " + this.element.bullet_array[k].x);
+            console.log("Orig Y: " + this.element.bullet_array[k].y);
             if (this.element.bullet_array[k].x == true && this.element.bullet_array[k].y == true)
             {
                 //console.log("Its true");
@@ -881,8 +885,8 @@ function update(time) {
             this.element.bullet_array[k].lastY = this.element.bullet_array[k].y;
             
             // console.log(this.element.bullet_array[k].lastY);
-            // console.log("Moved X: " + this.element.bullet_array[k].x);
-            // console.log("Moved Y: " + this.element.bullet_array[k].y);
+            console.log("Moved X: " + this.element.bullet_array[k].x);
+            console.log("Moved Y: " + this.element.bullet_array[k].y);
 
 
         }
