@@ -8,7 +8,7 @@ FOR OFTEN USED VARIABLES REQUIRING INDEXING AND/OR PROCESSSING, CREATE A NEW VAR
 
 var gameSettings = {
     playerSpeed: 300,
-    bulletSpeed: 700,
+    bulletSpeed: 300,
     speedScale: 6,
     maxPowerups: 14,
     maxObstacles: 2,
@@ -298,15 +298,28 @@ function create() {
                 //let angle = Phaser.Math.Angle.Between(self.element.x, self.element.y, self.input.activePointer.worldX, self.input.activePointer.worldY);
                 self.element.bullet_array[i] = new Bullet(self, server_bullet_array[i].angle, server_bullet_array[i].x, server_bullet_array[i].y, gameSettings.texture[server_bullet_array[i].atomicNumber - 1]);
                 //self.element.bullet_array[i].initialAngle = angle;
-
+                //self.element.bullet_array[i].enableBody(true, true);
                 //specific to group8 laser bullets
                 if (gameSettings.group8.includes(server_bullet_array[i].atomicNumber)) {
                     //self.element.bullet_array[i].rotation = server_bullet_array[i].rotAngle;
                 }
-                self.element.bullet_array[i].setVisible(false);
+                
+                
+                //self.element.bullet_array[i].setVisible(false);
+                
+                self.element.bullet_array[i].setTexture(gameSettings.texture[server_bullet_array[i].atomicNumber - 1] + "bullet");
+                
+                self.element.bullet_array[i].y = server_bullet_array[i].y;
+                self.element.bullet_array[i].x = server_bullet_array[i].x;
+                
+                self.element.bullet_array[i].lastX = self.element.bullet_array[i].x;
+                self.element.bullet_array[i].lastY = self.element.bullet_array[i].y;
+
             }
             else {
+                //self.element.bullet_array[i].setTexture(gameSettings.texture[server_bullet_array[i].atomicNumber - 1] + "bullet");
 
+                /*
                 //Otherwise, just update bullet locations
                 if (server_bullet_array[i].owner_id == self.socket.id) {
                     let changex = self.element.x - server_bullet_array[i].x;
@@ -319,9 +332,12 @@ function create() {
                         self.element.bullet_array[i].enableBody(true, true);
                     }
                 }
-
-                self.element.bullet_array[i].setTexture(gameSettings.texture[server_bullet_array[i].atomicNumber - 1] + "bullet");
+                */
+                //self.element.bullet_array[i].setTexture(gameSettings.texture[server_bullet_array[i].atomicNumber - 1] + "bullet");
                 //self.element.bullet_array[i].setRotation(self.element.bullet_array[i].initialAngle);
+                
+
+
 
                 if (gameSettings.transitionmetals.includes(server_bullet_array[i].atomicNumber)) {
                     self.element.bullet_array[i].rotation += 0.015;
@@ -329,8 +345,8 @@ function create() {
 
 
 
-                self.element.bullet_array[i].x = server_bullet_array[i].x;
-                self.element.bullet_array[i].y = server_bullet_array[i].y;
+                //self.element.bullet_array[i].x = server_bullet_array[i].x;
+                //self.element.bullet_array[i].y = server_bullet_array[i].y;
 
                 //let changex = self.element.x - server_bullet_array[i].x;
                 //let changey = self.element.y - server_bullet_array[i].y;
@@ -343,6 +359,7 @@ function create() {
             self.element.bullet_array.splice(i, 1);
             i--;
         }
+        //let j =  server_bullet_array.length == self.element.bullet_array.length;
     });
 
     //set number of proton/electron/neutron to zero
@@ -622,7 +639,7 @@ function create() {
             if (timeDifference > 50) {
                 time = Date.now();
                 iter++;
-                console.log("iteration ", iter - 1, " to ", iter, ": ", timeDifference);
+                //console.log("iteration ", iter - 1, " to ", iter, ": ", timeDifference);
                 timeArray.push(timeDifference);
             }
             else {
@@ -664,8 +681,8 @@ function create() {
 
 
         self.otherElements.getChildren().forEach((otherElement) => {
-            console.log(otherElement.gs1, otherElement.gs2, timeArray[0]);
-            console.log((otherElement.gs2.x - otherElement.gs1.x) / timeArray[0], (otherElement.gs2.y - otherElement.gs1.y) / timeArray[0]);
+            //console.log(otherElement.gs1, otherElement.gs2, timeArray[0]);
+            //console.log((otherElement.gs2.x - otherElement.gs1.x) / timeArray[0], (otherElement.gs2.y - otherElement.gs1.y) / timeArray[0]);
         });
 
         self.otherElements.getChildren().forEach((otherElement) => {
@@ -844,6 +861,36 @@ function update(time) {
         this.dot.x = this.element.x / 30;
         this.dot.y = this.element.y / 26.5;
 
+        for(let k = 0; k<this.element.bullet_array.length; k++){
+            
+            // console.log("Angle: " + this.element.bullet_array[k].angle2);
+            console.log("Orig X: " + this.element.bullet_array[k].x);
+            console.log("Orig Y: " + this.element.bullet_array[k].y);
+            if (this.element.bullet_array[k].x == true && this.element.bullet_array[k].y == true)
+            {
+                console.log("Its true");
+                this.element.bullet_array[k].x = this.element.bullet_array[k].lastX;
+                this.element.bullet_array[k].y = this.element.bullet_array[k].lastY;
+            }
+            console.log("chrishna lowkey a dumass");
+            
+
+            let speedY = gameSettings.bulletSpeed * Math.sin(this.element.bullet_array[k].angle2);
+            let speedX = gameSettings.bulletSpeed * Math.cos(this.element.bullet_array[k].angle2);
+
+            this.element.bullet_array[k].x += speedX/60;
+            this.element.bullet_array[k].y += speedY/60;
+
+            this.element.bullet_array[k].lastX = this.element.bullet_array[k].x;
+            this.element.bullet_array[k].lastY = this.element.bullet_array[k].y;
+            
+            // console.log(this.element.bullet_array[k].lastY);
+            console.log("Moved X: " + this.element.bullet_array[k].x);
+            console.log("Moved Y: " + this.element.bullet_array[k].y);
+
+
+        }
+
         if ((this.input.activePointer.isDown || Phaser.Input.Keyboard.JustDown(this.spacebar)) && (lastShot + 500 < time || (lastShot + 250 < time && this.element.atomicNum == 2))) {
             let bullet = this.element.shootBullet(this);
 
@@ -985,10 +1032,5 @@ function update(time) {
 }
 
 
-
-
-
-
-//im bharat and im a dumass
 //mp :)
 //1000TH LINE

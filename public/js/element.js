@@ -121,7 +121,7 @@ class Element extends Phaser.GameObjects.Sprite {
 
                 command_arr[0] = -1;
 
-            } else if (scene.input.keyboard.addKey('S').isDown && this.y < gameSettings.mapHeight - 50 ) {
+            } else if (scene.input.keyboard.addKey('S').isDown && this.y < gameSettings.mapHeight - 50) {
                 // this.body.setVelocityY(speed);
                 // bool = true;
                 // currentSpeedY0 = speed;
