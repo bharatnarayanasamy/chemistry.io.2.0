@@ -54,7 +54,7 @@ class Element extends Phaser.GameObjects.Sprite {
         scene.add.existing(this);
         scene.physics.world.enableBody(this);
 
-        this.body.setCollideWorldBounds(true);
+        //this.body.setCollideWorldBounds(true);
 
         this.hp = new HealthBar(scene, x - 50, y + 70);
 
@@ -102,26 +102,26 @@ class Element extends Phaser.GameObjects.Sprite {
 
         if (!isHitByTransitionBullet) {
             //no knockback
-            if (scene.input.keyboard.addKey('A').isDown) {
+            if (scene.input.keyboard.addKey('A').isDown && this.x > 50 ) {
                 /*this.body.setVelocityX(-speed);
                 bool = true;*/
                 command_arr[1] = -1;
             } 
-            else if (scene.input.keyboard.addKey('D').isDown) {
+            else if (scene.input.keyboard.addKey('D').isDown && this.x < gameSettings.mapWidth - 50) {
                 /*this.body.setVelocityX(speed);*/
                 command_arr[1] = 1;
 
             }
 
             //move up or down
-            if (scene.input.keyboard.addKey('W').isDown) {
+            if (scene.input.keyboard.addKey('W').isDown && this.y > 50) {
                 /*this.body.setVelocityY(-speed);
                 bool = true;
                 currentSpeedY0 = -speed;*/
 
                 command_arr[0] = -1;
 
-            } else if (scene.input.keyboard.addKey('S').isDown) {
+            } else if (scene.input.keyboard.addKey('S').isDown && this.y < gameSettings.mapHeight - 50) {
                 // this.body.setVelocityY(speed);
                 // bool = true;
                 // currentSpeedY0 = speed;

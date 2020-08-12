@@ -317,6 +317,8 @@ io.on('connection', (socket) => {
     data.owner_id = socket.id; // Attach id of the player to the bullet
     data.ix = data.x;  //set initial positions of bullet to track distance travel;ed
     data.iy = data.y;
+    data.time = Date.now();
+
 
     //CHANGE BEFORE FINAL
     if (data.atomicNumber == 5) {
@@ -483,7 +485,6 @@ function ServerGameLoop() {
       }
     }
     // Tell everyone where all the bullets are by sending the whole array
-    io.emit("bullets-update", bullet_array);
   }
 }
 
@@ -505,6 +506,7 @@ function UpdateLeaderboard() {
 }
 
 var messageArray = [];
+var bulletMessageArray = []
 function movementHelper() {
 
   while (typeof game_array[0] != "undefined" && game_array[0].time + 100 < Date.now()) {
@@ -517,8 +519,24 @@ function Movement() {
   messageArray = [];
 }
 
+function bulletHelper(){
+  while (typeof bullet_array[0] != "undefined" && bullet_array[0].time + 100 < Date.now()) {
+    bulletMessageArray.push(bullet_array[0]);
+    bullet_array.shift();
+  }
+}
+
+function bulletMovement(){
+  //io.emit("bullets-update", bulletMessageArray);
+  //bulletMessageArray = [];
+  io.emit("bullets-update", bullet_array);
+}
+
 setInterval(movementHelper, 1);
 setInterval(Movement, 100);
+//setInterval(bulletHelper, 1);
+setInterval(bulletMovement, 50);
+
 setInterval(ServerGameLoop, 16);
 setInterval(UpdateLeaderboard, 100);
 
