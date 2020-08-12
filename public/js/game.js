@@ -8,7 +8,7 @@ FOR OFTEN USED VARIABLES REQUIRING INDEXING AND/OR PROCESSSING, CREATE A NEW VAR
 
 var gameSettings = {
     playerSpeed: 300,
-    bulletSpeed: 500,
+    bulletSpeed: 300,
     speedScale: 6,
     maxPowerups: 14,
     maxObstacles: 2,
