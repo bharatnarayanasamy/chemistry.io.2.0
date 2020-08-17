@@ -565,7 +565,7 @@ function bulletMovement(){
   io.emit("bullets-update", bullet_array);
 }
 
-setInterval(movementHelper, 1);
+setInterval(movementHelper, 10);
 setInterval(Movement, 100);
 //setInterval(bulletHelper, 1);
 setInterval(bulletMovement, 50);
