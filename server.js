@@ -387,6 +387,8 @@ io.on('connection', (socket) => {
 // Update the bullets 60 times per frame and send updates
 function ServerGameLoop() {
   for (let i = 0; i < bullet_array.length; i++) {
+
+    
     let bullet = bullet_array[i];
     if (typeof bullet != "undefined") {
       let speed = bullet.bulletSpeed;
@@ -550,6 +552,7 @@ function Movement() {
   messageArray = [];
 }
 
+<<<<<<< HEAD
 function bulletHelper(){
   while (typeof bullet_array[0] != "undefined" && bullet_array[0].time + 100 < Date.now()) {
     bulletMessageArray.push(bullet_array[0]);
@@ -567,6 +570,14 @@ setInterval(movementHelper, 1);
 setInterval(Movement, 100);
 //setInterval(bulletHelper, 1);
 setInterval(bulletMovement, 50);
+=======
+function bulletMovement(){
+  io.emit("bullets-update", bullet_array);
+}
+setInterval(movementHelper, 1);
+setInterval(Movement, 100);
+setInterval(bulletMovement, 50)
+>>>>>>> 55f385f02cf786d8af0cd1c6cac7cb72d7748166
 
 setInterval(ServerGameLoop, 16);
 setInterval(UpdateLeaderboard, 100);

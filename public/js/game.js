@@ -8,7 +8,11 @@ FOR OFTEN USED VARIABLES REQUIRING INDEXING AND/OR PROCESSSING, CREATE A NEW VAR
 
 var gameSettings = {
     playerSpeed: 300,
+<<<<<<< HEAD
     bulletSpeed: 300,
+=======
+    bulletSpeed: 500,
+>>>>>>> 55f385f02cf786d8af0cd1c6cac7cb72d7748166
     speedScale: 6,
     maxPowerups: 14,
     maxObstacles: 2,
@@ -70,7 +74,7 @@ var groupCreated = true;
 var isOverlappingOther = false;
 var currentSpeed = 0;
 var iter;
-
+var lastX, lastY;
 
 if (typeof localStorage.getItem("username") != undefined) {
     var username0 = localStorage.getItem("username");
@@ -359,7 +363,11 @@ function create() {
             self.element.bullet_array.splice(i, 1);
             i--;
         }
+<<<<<<< HEAD
         //let j =  server_bullet_array.length == self.element.bullet_array.length;
+=======
+        let j =  server_bullet_array.length == self.element.bullet_array.length;
+>>>>>>> 55f385f02cf786d8af0cd1c6cac7cb72d7748166
     });
 
     //set number of proton/electron/neutron to zero
@@ -928,8 +936,8 @@ function update(time) {
                         email: email,
                         element: this.element.atomicNum,
                     };
-                    console.log(this.element.atomicNum);
-                    console.log(data);
+                    //console.log(this.element.atomicNum);
+                    //console.log(data);
                     $.ajax({
                         type: 'POST',
                         url: '/submit-element',
