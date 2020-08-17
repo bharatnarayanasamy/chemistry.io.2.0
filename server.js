@@ -256,13 +256,15 @@ io.on('connection', (socket) => {
          players[socket.id].y += serverSettings.playerSpeed / 60 * movement[0];
       // }
 
-
       data.x = players[socket.id].x;
       data.y = players[socket.id].y;
+      data.dx = movement[1];
+      data.dy = movement[0];
       data.rotation = movement[2];
       data.playerId = socket.id;
       data.client_num = movementData.i;
       data.server_num = server_seq;
+      data.time = Date.now()
       server_seq++;
 
       game_array.push(data);

@@ -629,36 +629,12 @@ function create() {
     var timeArray = [];
     //displays other players' movement on screen
     this.socket.on('playerMoved', function (playerInfo) {
-        //        var timeDifference;
-        if (typeof time == "undefined") {
-            time = Date.now();
-            iter = 0;
-        }
-        else {
-            timeDifference = Date.now() - time;
-            if (timeDifference > 50) {
-                time = Date.now();
-                iter++;
-                //console.log("iteration ", iter - 1, " to ", iter, ": ", timeDifference);
-                timeArray.push(timeDifference);
-            }
-            else {
-                return;
-            }
-        }
-
 
         var rotation = self.element.rotation;
         var position = { x: self.element.x, y: self.element.y };
         var last_processed_input;
-
-        self.otherElements.getChildren().forEach((otherElement) => {
-            otherElement.timeUpdate++;
-            if (otherElement.timeUpdate > 0) {
-                otherElement.gs1 = otherElement.gs2;
-            }
-        });
-
+        
+        
         for (let i = 0; i < playerInfo.length; i++) {
             if (playerInfo[i].playerId == self.socket.id) {
                 rotation = playerInfo[i].rotation;
@@ -668,31 +644,10 @@ function create() {
             else {
                 self.otherElements.getChildren().forEach((otherElement) => {
                     if (otherElement.playerId == playerInfo[i].playerId) {
-                        if (otherElement.timeUpdate == 0) {
-                            otherElement.gs1 = { x: playerInfo[i].x, y: playerInfo[i].y, r: playerInfo[i].rotation };
-                        }
-                        else {
-                            otherElement.gs2 = { x: playerInfo[i].x, y: playerInfo[i].y, r: playerInfo[i].rotation };
-                        }
+                        otherElement.updateArray.push({x: playerInfo[i].dx, y: playerInfo[i].dy, r: playerInfo[i].rotation});
                     }
                 });
             }
-        }
-
-
-        self.otherElements.getChildren().forEach((otherElement) => {
-            //console.log(otherElement.gs1, otherElement.gs2, timeArray[0]);
-            //console.log((otherElement.gs2.x - otherElement.gs1.x) / timeArray[0], (otherElement.gs2.y - otherElement.gs1.y) / timeArray[0]);
-        });
-
-        self.otherElements.getChildren().forEach((otherElement) => {
-            if (otherElement.timeUpdate > 0 && iter > 0 && timeArray.length > 1) {
-                var updateMovementData = { gs1: otherElement.gs1, gs2: otherElement.gs2, commandTime: time, executionTime: timeArray[0] };
-                otherElement.updateArray.push(updateMovementData);
-            }
-        });
-        if (timeArray.length > 1) {
-            timeArray.shift();
         }
 
 
@@ -864,15 +819,14 @@ function update(time) {
         for(let k = 0; k<this.element.bullet_array.length; k++){
             
             // console.log("Angle: " + this.element.bullet_array[k].angle2);
-            console.log("Orig X: " + this.element.bullet_array[k].x);
-            console.log("Orig Y: " + this.element.bullet_array[k].y);
+            //console.log("Orig X: " + this.element.bullet_array[k].x);
+            //console.log("Orig Y: " + this.element.bullet_array[k].y);
             if (this.element.bullet_array[k].x == true && this.element.bullet_array[k].y == true)
             {
                 console.log("Its true");
                 this.element.bullet_array[k].x = this.element.bullet_array[k].lastX;
                 this.element.bullet_array[k].y = this.element.bullet_array[k].lastY;
             }
-            console.log("chrishna lowkey a dumass");
             
 
             let speedY = gameSettings.bulletSpeed * Math.sin(this.element.bullet_array[k].angle2);
@@ -885,8 +839,8 @@ function update(time) {
             this.element.bullet_array[k].lastY = this.element.bullet_array[k].y;
             
             // console.log(this.element.bullet_array[k].lastY);
-            console.log("Moved X: " + this.element.bullet_array[k].x);
-            console.log("Moved Y: " + this.element.bullet_array[k].y);
+            //console.log("Moved X: " + this.element.bullet_array[k].x);
+            //console.log("Moved Y: " + this.element.bullet_array[k].y);
 
 
         }
@@ -996,24 +950,15 @@ function update(time) {
 
         //Entity Interpolation
         this.otherElements.getChildren().forEach((otherElement) => {
-            if (otherElement.timeUpdate > 0 && iter > 0) {
-                var entry = otherElement.updateArray[0];
-                if (typeof entry != "undefined") {
-                    if (Date.now() > entry.commandTime + entry.executionTime) {
-                        otherElement.x = entry.gs2.x;
-                        otherElement.y = entry.gs2.y;
-                        //console.log(otherElement.updateArray);
-                        otherElement.updateArray.shift();
-                        //console.log(otherElement.updateArray)
-                    }
-                    else {
-                        var timeRatio = (Date.now() - entry.commandTime) / (entry.executionTime);
-                        //console.log(timeRatio, entry.gs2.x, entry.gs1.x, entry.gs2.y, entry.gs2.x);
-                        otherElement.setPosition(entry.gs1.x + timeRatio * (entry.gs2.x - entry.gs1.x), entry.gs1.y + timeRatio * (entry.gs2.y - entry.gs1.y));
-                        otherElement.rotation = entry.gs1.r + timeRatio * (entry.gs2.r - entry.gs1.r);
-                        //console.log(otherElement.playerId, otherElement.x, otherElement.y);
-                    }
-                }
+
+            if (typeof otherElement.updateArray[0] != "undefined") {
+                otherElement.x += gameSettings.playerSpeed / 60 * otherElement.updateArray[0].x;
+
+                otherElement.y += gameSettings.playerSpeed / 60 * otherElement.updateArray[0].y;
+    
+                otherElement.rotation = otherElement.updateArray[0].r;
+
+                otherElement.updateArray.shift();
             }
         });
 
