@@ -8,11 +8,7 @@ FOR OFTEN USED VARIABLES REQUIRING INDEXING AND/OR PROCESSSING, CREATE A NEW VAR
 
 var gameSettings = {
     playerSpeed: 300,
-<<<<<<< HEAD
-    bulletSpeed: 300,
-=======
     bulletSpeed: 500,
->>>>>>> 55f385f02cf786d8af0cd1c6cac7cb72d7748166
     speedScale: 6,
     maxPowerups: 14,
     maxObstacles: 2,
@@ -363,11 +359,7 @@ function create() {
             self.element.bullet_array.splice(i, 1);
             i--;
         }
-<<<<<<< HEAD
         //let j =  server_bullet_array.length == self.element.bullet_array.length;
-=======
-        let j =  server_bullet_array.length == self.element.bullet_array.length;
->>>>>>> 55f385f02cf786d8af0cd1c6cac7cb72d7748166
     });
 
     //set number of proton/electron/neutron to zero
