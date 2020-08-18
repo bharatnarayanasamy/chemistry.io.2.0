@@ -950,7 +950,7 @@ function update(time) {
 
         //Entity Interpolation
         this.otherElements.getChildren().forEach((otherElement) => {
-
+            console.log(otherElement.updateArray);
             if (typeof otherElement.updateArray[0] != "undefined") {
                 otherElement.x += gameSettings.playerSpeed / 60 * otherElement.updateArray[0].x;
 

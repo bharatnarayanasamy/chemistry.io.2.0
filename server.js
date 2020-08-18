@@ -215,6 +215,7 @@ io.on('connection', (socket) => {
   });
 
   timeDict = {};
+  playerToServerDelay = {};
   socket.on('move', (movementData) => {
     movement = movementData.data
     //ORDER =          W/S   A/D
@@ -225,36 +226,9 @@ io.on('connection', (socket) => {
     //timedif = amount of time we will need to travel between game states
     
     if (typeof players[socket.id] != "undefined") {
-
-      //move this up later
-
-      // checking boundary conditions for x
-      /*
-      if (players[socket.id].x < 70){
-        players[socket.id].x = 70;
-      }
-      else if ( players[socket.id].x > (serverSettings.mapWidth-70))
-      {
-         players[socket.id].x = serverSettings.mapWidth - 70;
-      }
-      */
-      //else
-      //{
         players[socket.id].x += serverSettings.playerSpeed / 60 * movement[1];
-      //}
+        players[socket.id].y += serverSettings.playerSpeed / 60 * movement[0];
 
-      // // checking boundary conditions for y
-      // if (players[socket.id].y < 70){
-      //   players[socket.id].y = 70;
-      // }
-      // else if ( players[socket.id].y > (serverSettings.mapHeight-70))
-      // {
-      //    players[socket.id].y = serverSettings.mapHeight - 70;
-      // }
-      // else
-      // {
-         players[socket.id].y += serverSettings.playerSpeed / 60 * movement[0];
-      // }
 
       data.x = players[socket.id].x;
       data.y = players[socket.id].y;
@@ -264,7 +238,18 @@ io.on('connection', (socket) => {
       data.playerId = socket.id;
       data.client_num = movementData.i;
       data.server_num = server_seq;
-      data.time = Date.now()
+      data.time = movementData.time;
+      if (typeof playerToServerDelay[socket.id] != "undefined") {
+        playerToServerDelay[socket.id].val += (Date.now() - movementData.time);
+        playerToServerDelay[socket.id].count += 1;
+        if (playerToServerDelay[socket.id].count % 60 == 0) {
+          console.log(socket.id + " " + playerToServerDelay[socket.id].val / playerToServerDelay[socket.id].count);
+        }
+      }
+      else {
+        playerToServerDelay[socket.id] = {val: Date.now() - movementData.time, count : 1}
+      }
+
       server_seq++;
 
       game_array.push(data);
@@ -541,7 +526,6 @@ function UpdateLeaderboard() {
 var messageArray = [];
 var bulletMessageArray = []
 function movementHelper() {
-
   while (typeof game_array[0] != "undefined" && game_array[0].time + 100 < Date.now()) {
     messageArray.push(game_array[0]);
     game_array.shift();
@@ -562,6 +546,7 @@ function bulletHelper(){
 function bulletMovement(){
   //io.emit("bullets-update", bulletMessageArray);
   //bulletMessageArray = [];
+  
   io.emit("bullets-update", bullet_array);
 }
 
