@@ -353,12 +353,14 @@ function create() {
                 //let distance = Math.sqrt(changex * changex + changey * changey);
             }
         }
+        
+    
         // Otherwise if there's too many, delete the extra bullets
-        for (let i = server_bullet_array.length; i < self.element.bullet_array.length; i++) {
+        /*for (let i = server_bullet_array.length; i < self.element.bullet_array.length; i++) {
             self.element.bullet_array[i].destroy();
             self.element.bullet_array.splice(i, 1);
             i--;
-        }
+        }*/
         //let j =  server_bullet_array.length == self.element.bullet_array.length;
     });
 
@@ -644,7 +646,7 @@ function create() {
             else {
                 self.otherElements.getChildren().forEach((otherElement) => {
                     if (otherElement.playerId == playerInfo[i].playerId) {
-                        otherElement.updateArray.push({x: playerInfo[i].dx, y: playerInfo[i].dy, r: playerInfo[i].rotation});
+                        otherElement.updateArray.push({x: playerInfo[i].dx, y: playerInfo[i].dy, r: playerInfo[i].rotation, t: playerInfo[i].time});
                     }
                 });
             }
@@ -845,8 +847,12 @@ function update(time) {
 
         }
 
+      
         if ((this.input.activePointer.isDown || Phaser.Input.Keyboard.JustDown(this.spacebar)) && (lastShot + 500 < time || (lastShot + 250 < time && this.element.atomicNum == 2))) {
             let bullet = this.element.shootBullet(this);
+
+            //self.element.bullet_array[i] = new Bullet(self, server_bullet_array[i].angle, server_bullet_array[i].x, server_bullet_array[i].y, gameSettings.texture[server_bullet_array[i].atomicNumber - 1]);
+            
 
             let bulletAngle = Phaser.Math.Angle.Between(this.element.x, this.element.y, this.input.activePointer.worldX, this.input.activePointer.worldY)
 
@@ -957,7 +963,7 @@ function update(time) {
                 otherElement.y += gameSettings.playerSpeed / 60 * otherElement.updateArray[0].y;
     
                 otherElement.rotation = otherElement.updateArray[0].r;
-
+                console.log(Date.now() - otherElement.updateArray[0].t);
                 otherElement.updateArray.shift();
             }
         });
@@ -973,9 +979,27 @@ function update(time) {
         if (upDate.getTime() > this.element.lastHurtByTransition + 300 && isHit) {
             isHit = false;
         }
+
+        
     }
 }
 
 
-//mp :)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //1000TH LINE

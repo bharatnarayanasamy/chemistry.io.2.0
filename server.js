@@ -206,7 +206,7 @@ io.on('connection', (socket) => {
     console.log('user disconnected: ', socket.id);
     delete players[socket.id];
     delete score_array[socket.id];
-    
+
     delete player_scores[socket.id];
     delete leaderboardArray[socket.id];
 
@@ -224,10 +224,10 @@ io.on('connection', (socket) => {
     var data = {};
 
     //timedif = amount of time we will need to travel between game states
-    
+
     if (typeof players[socket.id] != "undefined") {
-        players[socket.id].x += serverSettings.playerSpeed / 60 * movement[1];
-        players[socket.id].y += serverSettings.playerSpeed / 60 * movement[0];
+      players[socket.id].x += serverSettings.playerSpeed / 60 * movement[1];
+      players[socket.id].y += serverSettings.playerSpeed / 60 * movement[0];
 
 
       data.x = players[socket.id].x;
@@ -243,11 +243,11 @@ io.on('connection', (socket) => {
         playerToServerDelay[socket.id].val += (Date.now() - movementData.time);
         playerToServerDelay[socket.id].count += 1;
         if (playerToServerDelay[socket.id].count % 60 == 0) {
-          console.log(socket.id + " " + playerToServerDelay[socket.id].val / playerToServerDelay[socket.id].count);
+          //console.log(socket.id + " " + playerToServerDelay[socket.id].val / playerToServerDelay[socket.id].count);
         }
       }
       else {
-        playerToServerDelay[socket.id] = {val: Date.now() - movementData.time, count : 1}
+        playerToServerDelay[socket.id] = { val: Date.now() - movementData.time, count: 1 }
       }
 
       server_seq++;
@@ -373,7 +373,7 @@ io.on('connection', (socket) => {
 function ServerGameLoop() {
   for (let i = 0; i < bullet_array.length; i++) {
 
-    
+
     let bullet = bullet_array[i];
     if (typeof bullet != "undefined") {
       let speed = bullet.bulletSpeed;
@@ -435,14 +435,14 @@ function ServerGameLoop() {
 
       // Remove if it goes off screen
       if (bullet.x < -10 || bullet.x > gameWidth + 10 || bullet.y < -10 || bullet.y > gameHeight + 10) {
-        bullet_array.splice(i, 1);
-        i--;
+        // bullet_array.splice(i, 1);
+        // i--;
       }
 
       //Remove bullet once it has travelled 1000 units
       if ((Math.pow(bullet.x - bullet.ix, 2) + Math.pow(bullet.y - bullet.iy, 2)) > longdist) {
-        bullet_array.splice(i, 1);
-        i--;
+        //bullet_array.splice(i, 1);
+        //i--;
       }
 
       for (let id in players) {
@@ -477,10 +477,10 @@ function ServerGameLoop() {
               }
             }
 
-            if (typeof players[owner] != "undefined" && !(serverSettings.group8.includes(players[owner].atomicNumServer) || serverSettings.group7.includes(players[owner].atomicNumServer))) {
-              bullet_array.splice(i, 1);
-              i--;
-            }
+            // if (typeof players[owner] != "undefined" && !(serverSettings.group8.includes(players[owner].atomicNumServer) || serverSettings.group7.includes(players[owner].atomicNumServer))) {
+            //   bullet_array.splice(i, 1);
+            //   i--;
+            // }
           }
           if (players[id].health <= 0) {
             if (typeof players[owner] != "undefined") {
@@ -532,21 +532,28 @@ function movementHelper() {
   }
 }
 function Movement() {
+  try {
+    console.log(messageArray[0]);
+    console.log(messageArray[0].time);
+    console.log(messageArray.length + " " + (Date.now() - messageArray[0].time));
+  }
+  catch(err) {
+  }
   io.emit('playerMoved', messageArray);
   messageArray = [];
 }
 
-function bulletHelper(){
+function bulletHelper() {
   while (typeof bullet_array[0] != "undefined" && bullet_array[0].time + 100 < Date.now()) {
     bulletMessageArray.push(bullet_array[0]);
     bullet_array.shift();
   }
 }
 
-function bulletMovement(){
+function bulletMovement() {
   //io.emit("bullets-update", bulletMessageArray);
   //bulletMessageArray = [];
-  
+
   io.emit("bullets-update", bullet_array);
 }
 
