@@ -49,7 +49,7 @@ class Bullet extends Phaser.Physics.Arcade.Sprite {
     var angleInDegrees = (angle * (180 / 3.1415)) + 90;
     this.angle = angleInDegrees;
     
-    this.damage = 20;
+    this.damage = 0;
 
     //defining some variables needed for the server game loop
     this.x = x;
