@@ -30,12 +30,12 @@ setInterval(function () {
       localStorage.setItem("exitPage", "false");
     },
     error: function (xhr) {
-      window.alert(JSON.stringify(xhr));
+      //window.alert(JSON.stringify(xhr));
       if (localStorage.getItem("loginState") == "true") {
         window.location.href = 'loggedin.html';
       }
       else {
-        window.alert("boop bop");
+        //window.alert("boop bop");
         window.location.href = 'index.html';
       }
     }

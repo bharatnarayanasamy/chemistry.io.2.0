@@ -71,6 +71,8 @@ var isOverlappingOther = false;
 var currentSpeed = 0;
 var iter;
 var lastX, lastY;
+var count = 0;
+
 
 if (typeof localStorage.getItem("username") != undefined) {
     var username0 = localStorage.getItem("username");
@@ -293,6 +295,8 @@ function create() {
         // If there's client and server bullet arrays have mismatch, fix mismatch
         //console.log(server_bullet_array);
 
+        
+
         for (let i = 0; i < server_bullet_array.length; i++) {
             if (self.element.bullet_array[i] == undefined) {
                 //let angle = Phaser.Math.Angle.Between(self.element.x, self.element.y, self.input.activePointer.worldX, self.input.activePointer.worldY);
@@ -356,12 +360,17 @@ function create() {
         
     
         // Otherwise if there's too many, delete the extra bullets
-        /*for (let i = server_bullet_array.length; i < self.element.bullet_array.length; i++) {
+        console.log("server array len:" + server_bullet_array.length);
+        console.log("self array len: " + self.element.bullet_array.length);
+        
+        for (let i = server_bullet_array.length; i < self.element.bullet_array.length; i++) {
             self.element.bullet_array[i].destroy();
+            console.log("a bullet has been destroyed")
             self.element.bullet_array.splice(i, 1);
             i--;
-        }*/
-        //let j =  server_bullet_array.length == self.element.bullet_array.length;
+        }
+        let j =  server_bullet_array.length == self.element.bullet_array.length;
+       
     });
 
     //set number of proton/electron/neutron to zero
@@ -763,9 +772,12 @@ function create() {
 
 function update(time) {
     if (typeof this.element != "undefined") {
+
+        
+        
         this.cameras.main.startFollow(this.element);
         this.cameras.main.followOffset.set(5, 5);
-
+        
         if (gameSettings.lanthanides.includes(this.element.atomicNum)) {
             this.cameras.main.setZoom(0.7);
         }
@@ -818,7 +830,14 @@ function update(time) {
         this.dot.x = this.element.x / 30;
         this.dot.y = this.element.y / 26.5;
 
+        count++;
+
         for(let k = 0; k<this.element.bullet_array.length; k++){
+
+            if(count%60==0)
+            {
+                console.log(this.element.bullet_array[k]);
+            }
             
             // console.log("Angle: " + this.element.bullet_array[k].angle2);
             //console.log("Orig X: " + this.element.bullet_array[k].x);
@@ -956,14 +975,14 @@ function update(time) {
 
         //Entity Interpolation
         this.otherElements.getChildren().forEach((otherElement) => {
-            console.log(otherElement.updateArray);
+            //console.log(otherElement.updateArray);
             if (typeof otherElement.updateArray[0] != "undefined") {
                 otherElement.x += gameSettings.playerSpeed / 60 * otherElement.updateArray[0].x;
 
                 otherElement.y += gameSettings.playerSpeed / 60 * otherElement.updateArray[0].y;
     
                 otherElement.rotation = otherElement.updateArray[0].r;
-                console.log(Date.now() - otherElement.updateArray[0].t);
+                //console.log(Date.now() - otherElement.updateArray[0].t);
                 otherElement.updateArray.shift();
             }
         });
