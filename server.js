@@ -435,14 +435,14 @@ function ServerGameLoop() {
 
       // Remove if it goes off screen
       if (bullet.x < -10 || bullet.x > gameWidth + 10 || bullet.y < -10 || bullet.y > gameHeight + 10) {
-        bullet_array.splice(i, 1);
-        i--;
+        //bullet_array.splice(i, 1);
+        //i--;
       }
 
       //Remove bullet once it has travelled 1000 units
       if ((Math.pow(bullet.x - bullet.ix, 2) + Math.pow(bullet.y - bullet.iy, 2)) > longdist) {
-        //bullet_array.splice(i, 1);
-        //i--;
+        bullet_array.splice(i, 1);
+        i--;
       }
 
       for (let id in players) {
