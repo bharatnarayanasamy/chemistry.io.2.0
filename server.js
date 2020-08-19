@@ -441,8 +441,8 @@ function ServerGameLoop() {
 
       //Remove bullet once it has travelled 1000 units
       if ((Math.pow(bullet.x - bullet.ix, 2) + Math.pow(bullet.y - bullet.iy, 2)) > longdist) {
-        bullet_array.splice(i, 1);
-        i--;
+        //bullet_array.splice(i, 1);
+        //i--;
       }
 
       for (let id in players) {
@@ -477,10 +477,10 @@ function ServerGameLoop() {
               }
             }
 
-            // if (typeof players[owner] != "undefined" && !(serverSettings.group8.includes(players[owner].atomicNumServer) || serverSettings.group7.includes(players[owner].atomicNumServer))) {
-            //   bullet_array.splice(i, 1);
-            //   i--;
-            // }
+            if (typeof players[owner] != "undefined" && !(serverSettings.group8.includes(players[owner].atomicNumServer) || serverSettings.group7.includes(players[owner].atomicNumServer))) {
+               bullet_array.splice(i, 1);
+               i--;
+            }
           }
           if (players[id].health <= 0) {
             if (typeof players[owner] != "undefined") {
