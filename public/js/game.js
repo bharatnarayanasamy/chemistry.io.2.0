@@ -635,16 +635,6 @@ function create() {
         var position = { x: self.element.x, y: self.element.y };
         var last_processed_input;
 
-        /*if (typeof time != "undefined") {
-            console.log(Date.now() - time);
-        }
-        time = Date.now();*/
-
-        /*self.otherElements.getChildren().forEach((otherElement) => {
-            console.log(otherElement.updateArray)
-        });*/
-
-
         for (let i = 0; i < playerInfo.length; i++) {
             if (playerInfo[i].playerId == self.socket.id) {
                 rotation = playerInfo[i].rotation;
@@ -659,10 +649,6 @@ function create() {
                 });
             }
         }
-        /*self.otherElements.getChildren().forEach((otherElement) => {
-            console.log(otherElement.updateArray)
-        });*/
-
 
         var j = 0;
         if (typeof last_processed_input != "undefined") {
@@ -972,7 +958,7 @@ function update(time) {
 
         //Entity Interpolation
         this.otherElements.getChildren().forEach((otherElement) => {
-            //console.log(otherElement.updateArray);
+            console.log(otherElement.updateArray.length);
             if (typeof otherElement.updateArray[0] != "undefined") {
                 while (typeof otherElement.updateArray[0] != "undefined" && Date.now() - otherElement.updateArray[0].t > 300) {
                     otherElement.x += gameSettings.playerSpeed / 60 * otherElement.updateArray[0].x;
@@ -996,8 +982,6 @@ function update(time) {
         if (upDate.getTime() > this.element.lastHurtByTransition + 300 && isHit) {
             isHit = false;
         }
-
-
     }
 }
 
