@@ -303,15 +303,15 @@ function create() {
                 if (gameSettings.group8.includes(server_bullet_array[i].atomicNumber)) {
                     //self.element.bullet_array[i].rotation = server_bullet_array[i].rotAngle;
                 }
-                
-                
+
+
                 //self.element.bullet_array[i].setVisible(false);
-                
+
                 self.element.bullet_array[i].setTexture(gameSettings.texture[server_bullet_array[i].atomicNumber - 1] + "bullet");
-                
+
                 self.element.bullet_array[i].y = server_bullet_array[i].y;
                 self.element.bullet_array[i].x = server_bullet_array[i].x;
-                
+
                 self.element.bullet_array[i].lastX = self.element.bullet_array[i].x;
                 self.element.bullet_array[i].lastY = self.element.bullet_array[i].y;
 
@@ -335,7 +335,7 @@ function create() {
                 */
                 //self.element.bullet_array[i].setTexture(gameSettings.texture[server_bullet_array[i].atomicNumber - 1] + "bullet");
                 //self.element.bullet_array[i].setRotation(self.element.bullet_array[i].initialAngle);
-                
+
 
 
 
@@ -353,8 +353,8 @@ function create() {
                 //let distance = Math.sqrt(changex * changex + changey * changey);
             }
         }
-        
-    
+
+
         // Otherwise if there's too many, delete the extra bullets
         /*for (let i = server_bullet_array.length; i < self.element.bullet_array.length; i++) {
             self.element.bullet_array[i].destroy();
@@ -627,16 +627,24 @@ function create() {
         var explosion = new Explosion(self, bulletInfo.x, bulletInfo.y)
     });
     var time;
-    var timeDifference;
-    var timeArray = [];
+
     //displays other players' movement on screen
     this.socket.on('playerMoved', function (playerInfo) {
 
         var rotation = self.element.rotation;
         var position = { x: self.element.x, y: self.element.y };
         var last_processed_input;
-        
-        
+
+        /*if (typeof time != "undefined") {
+            console.log(Date.now() - time);
+        }
+        time = Date.now();*/
+
+        /*self.otherElements.getChildren().forEach((otherElement) => {
+            console.log(otherElement.updateArray)
+        });*/
+
+
         for (let i = 0; i < playerInfo.length; i++) {
             if (playerInfo[i].playerId == self.socket.id) {
                 rotation = playerInfo[i].rotation;
@@ -646,11 +654,14 @@ function create() {
             else {
                 self.otherElements.getChildren().forEach((otherElement) => {
                     if (otherElement.playerId == playerInfo[i].playerId) {
-                        otherElement.updateArray.push({x: playerInfo[i].dx, y: playerInfo[i].dy, r: playerInfo[i].rotation, t: playerInfo[i].time});
+                        otherElement.updateArray.push({ x: playerInfo[i].dx, y: playerInfo[i].dy, r: playerInfo[i].rotation, t: playerInfo[i].time });
                     }
                 });
             }
         }
+        /*self.otherElements.getChildren().forEach((otherElement) => {
+            console.log(otherElement.updateArray)
+        });*/
 
 
         var j = 0;
@@ -760,9 +771,15 @@ function create() {
     this.neutronBar.bar.setScrollFactor(0);
 }
 
+var d;
 
 function update(time) {
     if (typeof this.element != "undefined") {
+        /*if (typeof d != "undefined") {
+            console.log(Date.now() - d);
+        }
+        d = Date.now();*/
+
         this.cameras.main.startFollow(this.element);
         this.cameras.main.followOffset.set(5, 5);
 
@@ -818,28 +835,27 @@ function update(time) {
         this.dot.x = this.element.x / 30;
         this.dot.y = this.element.y / 26.5;
 
-        for(let k = 0; k<this.element.bullet_array.length; k++){
-            
+        for (let k = 0; k < this.element.bullet_array.length; k++) {
+
             // console.log("Angle: " + this.element.bullet_array[k].angle2);
             //console.log("Orig X: " + this.element.bullet_array[k].x);
             //console.log("Orig Y: " + this.element.bullet_array[k].y);
-            if (this.element.bullet_array[k].x == true && this.element.bullet_array[k].y == true)
-            {
+            if (this.element.bullet_array[k].x == true && this.element.bullet_array[k].y == true) {
                 console.log("Its true");
                 this.element.bullet_array[k].x = this.element.bullet_array[k].lastX;
                 this.element.bullet_array[k].y = this.element.bullet_array[k].lastY;
             }
-            
+
 
             let speedY = gameSettings.bulletSpeed * Math.sin(this.element.bullet_array[k].angle2);
             let speedX = gameSettings.bulletSpeed * Math.cos(this.element.bullet_array[k].angle2);
 
-            this.element.bullet_array[k].x += speedX/60;
-            this.element.bullet_array[k].y += speedY/60;
+            this.element.bullet_array[k].x += speedX / 60;
+            this.element.bullet_array[k].y += speedY / 60;
 
             this.element.bullet_array[k].lastX = this.element.bullet_array[k].x;
             this.element.bullet_array[k].lastY = this.element.bullet_array[k].y;
-            
+
             // console.log(this.element.bullet_array[k].lastY);
             //console.log("Moved X: " + this.element.bullet_array[k].x);
             //console.log("Moved Y: " + this.element.bullet_array[k].y);
@@ -847,12 +863,12 @@ function update(time) {
 
         }
 
-      
+
         if ((this.input.activePointer.isDown || Phaser.Input.Keyboard.JustDown(this.spacebar)) && (lastShot + 500 < time || (lastShot + 250 < time && this.element.atomicNum == 2))) {
             let bullet = this.element.shootBullet(this);
 
             //self.element.bullet_array[i] = new Bullet(self, server_bullet_array[i].angle, server_bullet_array[i].x, server_bullet_array[i].y, gameSettings.texture[server_bullet_array[i].atomicNumber - 1]);
-            
+
 
             let bulletAngle = Phaser.Math.Angle.Between(this.element.x, this.element.y, this.input.activePointer.worldX, this.input.activePointer.worldY)
 
@@ -956,15 +972,16 @@ function update(time) {
 
         //Entity Interpolation
         this.otherElements.getChildren().forEach((otherElement) => {
-            console.log(otherElement.updateArray);
+            //console.log(otherElement.updateArray);
             if (typeof otherElement.updateArray[0] != "undefined") {
-                otherElement.x += gameSettings.playerSpeed / 60 * otherElement.updateArray[0].x;
+                while (typeof otherElement.updateArray[0] != "undefined" && Date.now() - otherElement.updateArray[0].t > 300) {
+                    otherElement.x += gameSettings.playerSpeed / 60 * otherElement.updateArray[0].x;
 
-                otherElement.y += gameSettings.playerSpeed / 60 * otherElement.updateArray[0].y;
-    
-                otherElement.rotation = otherElement.updateArray[0].r;
-                console.log(Date.now() - otherElement.updateArray[0].t);
-                otherElement.updateArray.shift();
+                    otherElement.y += gameSettings.playerSpeed / 60 * otherElement.updateArray[0].y;
+
+                    otherElement.rotation = otherElement.updateArray[0].r;
+                    otherElement.updateArray.shift();
+                }
             }
         });
 
@@ -980,7 +997,7 @@ function update(time) {
             isHit = false;
         }
 
-        
+
     }
 }
 
