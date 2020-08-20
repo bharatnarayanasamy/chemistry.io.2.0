@@ -533,8 +533,6 @@ function movementHelper() {
 }
 function Movement() {
   try {
-    console.log(messageArray[0]);
-    console.log(messageArray[0].time);
     console.log(messageArray.length + " " + (Date.now() - messageArray[0].time));
   }
   catch(err) {
@@ -558,7 +556,7 @@ function bulletMovement() {
 }
 
 setInterval(movementHelper, 1);
-setInterval(Movement, 16);
+setInterval(Movement, 100);
 //setInterval(bulletHelper, 1);
 setInterval(bulletMovement, 50);
 
