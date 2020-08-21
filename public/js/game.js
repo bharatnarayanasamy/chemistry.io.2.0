@@ -363,12 +363,13 @@ function create() {
         console.log("server array len:" + server_bullet_array.length);
         console.log("self array len: " + self.element.bullet_array.length);
         
-        /*for (let i = server_bullet_array.length; i < self.element.bullet_array.length; i++) {
+        for (let i = server_bullet_array.length; i < self.element.bullet_array.length; i++) {
             self.element.bullet_array[i].destroy();
             console.log("a bullet has been destroyed")
             self.element.bullet_array.splice(i, 1);
             i--;
-        }*/
+        }
+        
         let j =  server_bullet_array.length == self.element.bullet_array.length;
        
     });
