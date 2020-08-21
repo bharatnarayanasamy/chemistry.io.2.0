@@ -709,15 +709,16 @@ function create() {
     //add other players onto the screen
     function addOtherPlayers(self, playerInfo) {
 
+        // +1.75, +3.11 determined by proportion of game width to game height
         if (playerInfo.atomicNumServer < texLen + 1) {
-            const otherElement = new Element(self, playerInfo.x, playerInfo.y, 45, playerInfo.playerId, this.gameSettings.texture[playerInfo.atomicNumServer - 1]);
+            const otherElement = new Element(self, playerInfo.x + 1.7, playerInfo.y + 2.9, 45, playerInfo.playerId, this.gameSettings.texture[playerInfo.atomicNumServer - 1]);
             self.otherElements.add(otherElement);
             otherElement.setScale(0.4);
             otherElement.body.enable = true;
             otherElement.timeUpdate = 0;
         }
         else {
-            const otherElement = new Element(self, playerInfo.x, playerInfo.y, 45, playerInfo.playerId, this.gameSettings.texture[this.gameSettings.texture.length - 1]);
+            const otherElement = new Element(self, playerInfo.x + 1.7, playerInfo.y + 2.9, 45, playerInfo.playerId, this.gameSettings.texture[this.gameSettings.texture.length - 1]);
             //otherElement.setTint(0x0000ff);
             self.otherElements.add(otherElement);
             otherElement.body.enable = true;
@@ -983,7 +984,7 @@ function update(time) {
                     otherElement.x += gameSettings.playerSpeed / 60 * otherElement.updateArray[0].x;
 
                     otherElement.y += gameSettings.playerSpeed / 60 * otherElement.updateArray[0].y;
-
+                    
                     otherElement.rotation = otherElement.updateArray[0].r;
                     otherElement.updateArray.shift();
                 }
@@ -1003,8 +1004,6 @@ function update(time) {
         }
     }
 }
-
-
 
 
 
