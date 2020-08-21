@@ -360,16 +360,18 @@ function create() {
 
 
         // Otherwise if there's too many, delete the extra bullets
-        console.log("server array len:" + server_bullet_array.length);
-        console.log("self array len: " + self.element.bullet_array.length);
+        //console.log("server array len:" + server_bullet_array.length);
+        //console.log("self array len: " + self.element.bullet_array.length);
         
         for (let i = server_bullet_array.length; i < self.element.bullet_array.length; i++) {
-            self.element.bullet_array[i].destroy();
             console.log("a bullet has been destroyed")
+
+            self.element.bullet_array[i].destroy();
+            console.log("bullet log #2")
             self.element.bullet_array.splice(i, 1);
             i--;
         }
-        
+
         let j =  server_bullet_array.length == self.element.bullet_array.length;
        
     });
@@ -975,7 +977,7 @@ function update(time) {
 
         //Entity Interpolation
         this.otherElements.getChildren().forEach((otherElement) => {
-            console.log(otherElement.updateArray.length);
+            //console.log(otherElement.updateArray.length);
             if (typeof otherElement.updateArray[0] != "undefined") {
                 while (typeof otherElement.updateArray[0] != "undefined" && Date.now() - otherElement.updateArray[0].t > 300) {
                     otherElement.x += gameSettings.playerSpeed / 60 * otherElement.updateArray[0].x;
