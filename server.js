@@ -533,7 +533,9 @@ function movementHelper() {
 }
 function Movement() {
   try {
-    console.log(messageArray.length + " " + (Date.now() - messageArray[0].time));
+    if (Date.now() - messageArray[0].time > 500) {
+      console.log(messageArray.length + " " + (Date.now() - messageArray[0].time));
+    }
   }
   catch(err) {
   }

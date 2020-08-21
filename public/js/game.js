@@ -364,10 +364,10 @@ function create() {
         //console.log("self array len: " + self.element.bullet_array.length);
         
         for (let i = server_bullet_array.length; i < self.element.bullet_array.length; i++) {
-            console.log("a bullet has been destroyed")
+            //console.log("a bullet has been destroyed")
 
             self.element.bullet_array[i].destroy();
-            console.log("bullet log #2")
+            //console.log("bullet log #2")
             self.element.bullet_array.splice(i, 1);
             i--;
         }
@@ -771,6 +771,8 @@ function create() {
 }
 
 var d;
+let g = 0;
+let counter = 0;
 
 function update(time) {
     if (typeof this.element != "undefined") {
@@ -976,12 +978,13 @@ function update(time) {
         if (Math.random() < 0.5) this.element.x += 0.000000001;
         else this.element.x -= 0.000000001;
 
+
         //Entity Interpolation
         this.otherElements.getChildren().forEach((otherElement) => {
             //console.log(otherElement.updateArray.length);
             let i = 0;
             if (typeof otherElement.updateArray[0] != "undefined") {
-                while (typeof otherElement.updateArray[0] != "undefined" && (Date.now() - otherElement.updateArray[0].t > 400) && i < 9) {
+                while (typeof otherElement.updateArray[0] != "undefined" && (Date.now() - otherElement.updateArray[0].t > 300) && i < 7) {
                     otherElement.x += gameSettings.playerSpeed / 60 * otherElement.updateArray[0].x;
 
                     otherElement.y += gameSettings.playerSpeed / 60 * otherElement.updateArray[0].y;
@@ -991,7 +994,15 @@ function update(time) {
                     i++;
                 }
             }
-        });
+            if (i != 0) {
+                g += i;
+                counter++;
+            }
+            if (counter%20 == 0) {
+                console.log("avg: " + g/counter);
+            }
+            console.log("i: " + i);
+        }); 
 
         upDate = new Date();
 
