@@ -979,14 +979,16 @@ function update(time) {
         //Entity Interpolation
         this.otherElements.getChildren().forEach((otherElement) => {
             //console.log(otherElement.updateArray.length);
+            let i = 0;
             if (typeof otherElement.updateArray[0] != "undefined") {
-                while (typeof otherElement.updateArray[0] != "undefined" && Date.now() - otherElement.updateArray[0].t > 300) {
+                while (typeof otherElement.updateArray[0] != "undefined" && (Date.now() - otherElement.updateArray[0].t > 400) && i < 9) {
                     otherElement.x += gameSettings.playerSpeed / 60 * otherElement.updateArray[0].x;
 
                     otherElement.y += gameSettings.playerSpeed / 60 * otherElement.updateArray[0].y;
                     
                     otherElement.rotation = otherElement.updateArray[0].r;
                     otherElement.updateArray.shift();
+                    i++;
                 }
             }
         });
