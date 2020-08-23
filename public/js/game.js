@@ -984,7 +984,7 @@ function update(time) {
             //console.log(otherElement.updateArray.length);
             let i = 0;
             if (typeof otherElement.updateArray[0] != "undefined") {
-                while (typeof otherElement.updateArray[0] != "undefined" && (Date.now() - otherElement.updateArray[0].t > 300) && i < 7) {
+                while (typeof otherElement.updateArray[0] != "undefined" && (Date.now() - otherElement.updateArray[0].t > 300) /*&& i < 7*/) {
                     otherElement.x += gameSettings.playerSpeed / 60 * otherElement.updateArray[0].x;
 
                     otherElement.y += gameSettings.playerSpeed / 60 * otherElement.updateArray[0].y;
