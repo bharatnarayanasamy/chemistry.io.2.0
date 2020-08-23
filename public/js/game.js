@@ -61,6 +61,7 @@ let config = {
 };
 
 var game = new Phaser.Game(config);
+var c = 0;
 
 //initializing some global vars
 var lastShot = 0;
@@ -70,7 +71,7 @@ var groupCreated = true;
 var isOverlappingOther = false;
 var currentSpeed = 0;
 var iter;
-var lastX, lastY;
+
 var count = 0;
 
 
@@ -291,88 +292,131 @@ function create() {
     });
 
     // Listen for bullet update events 
-    this.socket.on('bullets-update', function (server_bullet_array) {
+    this.socket.on('bullets-update', function (server_bullet_array_all) {
         // If there's client and server bullet arrays have mismatch, fix mismatch
         //console.log(server_bullet_array);
+        let test = server_bullet_array_all.delete_set;
+        let new_bullet_array = server_bullet_array_all.new_bullet_array;
+        let delete_set = new Set(test);
+        
+        //console.log(test.has(5));
+        
+        //console.log(delete_set.has(5));
+        //onsole.log(typeof new_bullet_array);
 
         
+        
 
-        for (let i = 0; i < server_bullet_array.length; i++) {
-            if (self.element.bullet_array[i] == undefined) {
-                //let angle = Phaser.Math.Angle.Between(self.element.x, self.element.y, self.input.activePointer.worldX, self.input.activePointer.worldY);
-                self.element.bullet_array[i] = new Bullet(self, server_bullet_array[i].angle, server_bullet_array[i].x, server_bullet_array[i].y, gameSettings.texture[server_bullet_array[i].atomicNumber - 1]);
-                //self.element.bullet_array[i].initialAngle = angle;
-                //self.element.bullet_array[i].enableBody(true, true);
-                //specific to group8 laser bullets
-                if (gameSettings.group8.includes(server_bullet_array[i].atomicNumber)) {
-                    //self.element.bullet_array[i].rotation = server_bullet_array[i].rotAngle;
-                }
+        //adds all new bullets?
+        for(let i = 0; i < new_bullet_array.length; i++){
+           
+           
+            let bullet = new Bullet(self, new_bullet_array[i].angle, new_bullet_array[i].x, new_bullet_array[i].y, gameSettings.texture[new_bullet_array[i].atomicNumber - 1]);
+            bullet.id = new_bullet_array[i].id;
 
+            console.log(new_bullet_array[i].id);
+            bullet.setTexture(gameSettings.texture[new_bullet_array[i].atomicNumber - 1] + "bullet");
 
-                //self.element.bullet_array[i].setVisible(false);
+           
+           self.element.bullet_array.push(bullet);
 
-                self.element.bullet_array[i].setTexture(gameSettings.texture[server_bullet_array[i].atomicNumber - 1] + "bullet");
-
-                self.element.bullet_array[i].y = server_bullet_array[i].y;
-                self.element.bullet_array[i].x = server_bullet_array[i].x;
-
-                self.element.bullet_array[i].lastX = self.element.bullet_array[i].x;
-                self.element.bullet_array[i].lastY = self.element.bullet_array[i].y;
-
+        }
+        
+        for(let i = self.element.bullet_array.length-1;i >= 0;i--){
+            
+            console.log(self.element.bullet_array[i].id);
+            if(delete_set.has(self.element.bullet_array[i].id))
+            {
+                console.log("ID FOUND!!!");
+                self.element.bullet_array[i].destroy();
+                self.element.bullet_array.splice(i, 1);
             }
-            else {
-                //self.element.bullet_array[i].setTexture(gameSettings.texture[server_bullet_array[i].atomicNumber - 1] + "bullet");
 
-                /*
-                //Otherwise, just update bullet locations
-                if (server_bullet_array[i].owner_id == self.socket.id) {
-                    let changex = self.element.x - server_bullet_array[i].x;
-                    let changey = self.element.y - server_bullet_array[i].y;
-                    let distance = Math.sqrt(changex * changex + changey * changey);
-
-                    if (distance > gameSettings.playerRadius) {
-                        self.element.bullet_array[i].setVisible(true);
-
-                        self.element.bullet_array[i].enableBody(true, true);
-                    }
-                }
-                */
-                //self.element.bullet_array[i].setTexture(gameSettings.texture[server_bullet_array[i].atomicNumber - 1] + "bullet");
-                //self.element.bullet_array[i].setRotation(self.element.bullet_array[i].initialAngle);
-
-
-
-
-                if (gameSettings.transitionmetals.includes(server_bullet_array[i].atomicNumber)) {
-                    self.element.bullet_array[i].rotation += 0.015;
-                }
-
-
-
-                //self.element.bullet_array[i].x = server_bullet_array[i].x;
-                //self.element.bullet_array[i].y = server_bullet_array[i].y;
-
-                //let changex = self.element.x - server_bullet_array[i].x;
-                //let changey = self.element.y - server_bullet_array[i].y;
-                //let distance = Math.sqrt(changex * changex + changey * changey);
-            }
         }
 
 
-        // Otherwise if there's too many, delete the extra bullets
-        //console.log("server array len:" + server_bullet_array.length);
-        //console.log("self array len: " + self.element.bullet_array.length);
+
+
+
+
+
+
+
+
+        // for (let i = 0; i < server_bullet_array.length; i++) {
+        //     if (self.element.bullet_array[i] == undefined) {
+        //         //let angle = Phaser.Math.Angle.Between(self.element.x, self.element.y, self.input.activePointer.worldX, self.input.activePointer.worldY);
+        //         self.element.bullet_array[i] = new Bullet(self, server_bullet_array[i].angle, server_bullet_array[i].x, server_bullet_array[i].y, gameSettings.texture[server_bullet_array[i].atomicNumber - 1]);
+        //         //self.element.bullet_array[i].initialAngle = angle;
+        //         //self.element.bullet_array[i].enableBody(true, true);
+        //         //specific to group8 laser bullets
+        //         if (gameSettings.group8.includes(server_bullet_array[i].atomicNumber)) {
+        //             //self.element.bullet_array[i].rotation = server_bullet_array[i].rotAngle;
+        //         }
+
+
+        //         //self.element.bullet_array[i].setVisible(false);
+
+        //         self.element.bullet_array[i].setTexture(gameSettings.texture[server_bullet_array[i].atomicNumber - 1] + "bullet");
+
+        //         self.element.bullet_array[i].y = server_bullet_array[i].y;
+        //         self.element.bullet_array[i].x = server_bullet_array[i].x;
+
+
+        //     }
+        //     else {
+        //         //self.element.bullet_array[i].setTexture(gameSettings.texture[server_bullet_array[i].atomicNumber - 1] + "bullet");
+
+        //         /*
+        //         //Otherwise, just update bullet locations
+        //         if (server_bullet_array[i].owner_id == self.socket.id) {
+        //             let changex = self.element.x - server_bullet_array[i].x;
+        //             let changey = self.element.y - server_bullet_array[i].y;
+        //             let distance = Math.sqrt(changex * changex + changey * changey);
+
+        //             if (distance > gameSettings.playerRadius) {
+        //                 self.element.bullet_array[i].setVisible(true);
+
+        //                 self.element.bullet_array[i].enableBody(true, true);
+        //             }
+        //         }
+        //         */
+        //         //self.element.bullet_array[i].setTexture(gameSettings.texture[server_bullet_array[i].atomicNumber - 1] + "bullet");
+        //         //self.element.bullet_array[i].setRotation(self.element.bullet_array[i].initialAngle);
+
+
+
+
+        //         if (gameSettings.transitionmetals.includes(server_bullet_array[i].atomicNumber)) {
+        //             self.element.bullet_array[i].rotation += 0.015;
+        //         }
+
+
+
+        //         //self.element.bullet_array[i].x = server_bullet_array[i].x;
+        //         //self.element.bullet_array[i].y = server_bullet_array[i].y;
+
+        //         //let changex = self.element.x - server_bullet_array[i].x;
+        //         //let changey = self.element.y - server_bullet_array[i].y;
+        //         //let distance = Math.sqrt(changex * changex + changey * changey);
+        //     }
+        // }
+
+
+        // // Otherwise if there's too many, delete the extra bullets
+        // //console.log("server array len:" + server_bullet_array.length);
+        // //console.log("self array len: " + self.element.bullet_array.length);
         
-        for (let i = server_bullet_array.length; i < self.element.bullet_array.length; i++) {
-            //console.log("a bullet has been destroyed")
+        // for (let i = server_bullet_array.length; i < self.element.bullet_array.length; i++) {
+        //     //console.log("a bullet has been destroyed")
 
-            self.element.bullet_array[i].destroy();
-            //console.log("bullet log #2")
-            self.element.bullet_array.splice(i, 1);
-            i--;
-        }
+        //     self.element.bullet_array[i].destroy();
+        //     //console.log("bullet log #2")
+        //     self.element.bullet_array.splice(i, 1);
+        //     i--;
+        // }
 
-        let j =  server_bullet_array.length == self.element.bullet_array.length;
+        // let j =  server_bullet_array.length == self.element.bullet_array.length;
        
     });
 
@@ -840,33 +884,28 @@ function update(time) {
 
         for(let k = 0; k<this.element.bullet_array.length; k++){
 
-            if(count%60==0)
-            {
-                //console.log(this.element.bullet_array[k]);
-            }
-            
-            // console.log("Angle: " + this.element.bullet_array[k].angle2);
-            //console.log("Orig X: " + this.element.bullet_array[k].x);
-            //console.log("Orig Y: " + this.element.bullet_array[k].y);
-            if (this.element.bullet_array[k].x == true && this.element.bullet_array[k].y == true) {
-                console.log("Its true");
-                this.element.bullet_array[k].x = this.element.bullet_array[k].lastX;
-                this.element.bullet_array[k].y = this.element.bullet_array[k].lastY;
-            }
-
-
             let speedY = gameSettings.bulletSpeed * Math.sin(this.element.bullet_array[k].angle2);
             let speedX = gameSettings.bulletSpeed * Math.cos(this.element.bullet_array[k].angle2);
 
             this.element.bullet_array[k].x += speedX / 60;
             this.element.bullet_array[k].y += speedY / 60;
 
-            this.element.bullet_array[k].lastX = this.element.bullet_array[k].x;
-            this.element.bullet_array[k].lastY = this.element.bullet_array[k].y;
 
-            // console.log(this.element.bullet_array[k].lastY);
-            //console.log("Moved X: " + this.element.bullet_array[k].x);
-            //console.log("Moved Y: " + this.element.bullet_array[k].y);
+            this.otherElements.getChildren().forEach((otherElement) => {
+
+                let dist = Math.sqrt( Math.pow(otherElement.x - this.element.bullet_array[k].x, 2) + Math.pow(otherElement.y - this.element.bullet_array[k].y, 2) );
+                if (dist < 70){
+                    this.element.bullet_array[k].setVisible(false);
+                    
+                }
+                
+            }); 
+
+            let dist0 = Math.sqrt( Math.pow(this.element.x - this.element.bullet_array[k].x, 2) + Math.pow(this.element.y - this.element.bullet_array[k].y, 2) );
+            if (dist0 < 70){
+                this.element.bullet_array[k].setVisible(false);  
+            }
+            
 
 
         }

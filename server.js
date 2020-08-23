@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const passport = require('passport');
 var fs = require('fs');
+var c = 1;
 
 // create an instance of an express app
 var app = express();
@@ -74,6 +75,9 @@ server.listen(PORT, () => {
 //Creating data storage objects
 let players = {};
 let bullet_array = [];
+let new_bullet_array = [];
+//let delete_bullet_array = [];
+let delete_set = [];
 //score_array stores the scores for the protons/electrons/neutrons
 let score_array = {};
 //player_scores stores
@@ -334,14 +338,15 @@ io.on('connection', (socket) => {
     data.ix = data.x;  //set initial positions of bullet to track distance travel;ed
     data.iy = data.y;
     data.time = Date.now();
-
-
+    data.id = socket.id + c;
+    c += 1;
     //CHANGE BEFORE FINAL
     if (data.atomicNumber == 5) {
       data.bulletSpeed /= 3;
     }
     let new_bullet = data;
     bullet_array.push(new_bullet);
+    new_bullet_array.push(new_bullet);
   });
 
   //gets called once a player is ready to upgrade
@@ -435,14 +440,17 @@ function ServerGameLoop() {
 
       // Remove if it goes off screen
       if (bullet.x < -10 || bullet.x > gameWidth + 10 || bullet.y < -10 || bullet.y > gameHeight + 10) {
-        //bullet_array.splice(i, 1);
-        //i--;
+        bullet_array.splice(i, 1);
+        i--;
+        delete_set.push(bullet.id);
+
       }
 
       //Remove bullet once it has travelled 1000 units
       if ((Math.pow(bullet.x - bullet.ix, 2) + Math.pow(bullet.y - bullet.iy, 2)) > longdist) {
-        //bullet_array.splice(i, 1);
-        //i--;
+        bullet_array.splice(i, 1);
+        i--;
+        delete_set.push(bullet.id);
       }
 
       for (let id in players) {
@@ -478,8 +486,9 @@ function ServerGameLoop() {
             }
 
             if (typeof players[owner] != "undefined" && !(serverSettings.group8.includes(players[owner].atomicNumServer) || serverSettings.group7.includes(players[owner].atomicNumServer))) {
-               //bullet_array.splice(i, 1);
-               //i--;
+               bullet_array.splice(i, 1);
+               i--;
+               delete_set.push(bullet.id)
             }
           }
           if (players[id].health <= 0) {
@@ -534,7 +543,7 @@ function movementHelper() {
 function Movement() {
   try {
     if (Date.now() - messageArray[0].time > 500) {
-      console.log(messageArray.length + " " + (Date.now() - messageArray[0].time));
+      //console.log(messageArray.length + " " + (Date.now() - messageArray[0].time));
     }
   }
   catch(err) {
@@ -554,7 +563,10 @@ function bulletMovement() {
   //io.emit("bullets-update", bulletMessageArray);
   //bulletMessageArray = [];
 
-  io.emit("bullets-update", bullet_array);
+  io.emit("bullets-update", {new_bullet_array: new_bullet_array, delete_set: delete_set});
+  new_bullet_array = [];
+  delete_set = [];
+
 }
 
 setInterval(movementHelper, 1);
