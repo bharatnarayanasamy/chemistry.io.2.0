@@ -71,6 +71,7 @@ var groupCreated = true;
 var isOverlappingOther = false;
 var currentSpeed = 0;
 var iter;
+var speedX = 0, speedY = 0;
 
 var count = 0;
 
@@ -107,7 +108,8 @@ var movementCommands = [];
 var messageIndex = 0;
 
 var elements = JSON.parse(localStorage.getItem("elements"));
-
+let s = 0;
+let z = 0;
 function preload() {
 
     //loading in element images and their bullet images
@@ -298,51 +300,45 @@ function create() {
         let test = server_bullet_array_all.delete_set;
         let new_bullet_array = server_bullet_array_all.new_bullet_array;
         let delete_set = new Set(test);
-        
+
         //console.log(test.has(5));
-        
+
         //console.log(delete_set.has(5));
         //onsole.log(typeof new_bullet_array);
 
-        
-        
+
+
 
         //adds all new bullets?
-        for(let i = 0; i < new_bullet_array.length; i++){
-           
-           
+        for (let i = 0; i < new_bullet_array.length; i++) {
+
+
             let bullet = new Bullet(self, new_bullet_array[i].angle, new_bullet_array[i].x, new_bullet_array[i].y, gameSettings.texture[new_bullet_array[i].atomicNumber - 1]);
             bullet.id = new_bullet_array[i].id;
             bullet.owner_id = new_bullet_array[i].owner_id;
+            if (typeof new_bullet_array[i].acc != "undefined") {
+                bullet.acc = new_bullet_array[i].acc;
+                bullet.increment = 1;
+            }
 
             console.log(new_bullet_array[i].id);
             bullet.setTexture(gameSettings.texture[new_bullet_array[i].atomicNumber - 1] + "bullet");
 
-           
-           self.element.bullet_array.push(bullet);
 
+            self.element.bullet_array.push(bullet);
         }
-        
-        for(let i = self.element.bullet_array.length-1;i >= 0;i--){
-            
-            if(delete_set.has(self.element.bullet_array[i].id))
-            {
+
+        for (let i = self.element.bullet_array.length - 1; i >= 0; i--) {
+
+            if (delete_set.has(self.element.bullet_array[i].id)) {
                 console.log("ID FOUND!!!");
                 self.element.bullet_array[i].destroy();
                 self.element.bullet_array.splice(i, 1);
             }
-            console.log(self.element.bullet_array[i].id);
+            //console.log(self.element.bullet_array[i].id);
 
 
         }
-
-
-
-
-
-
-
-
 
 
         // for (let i = 0; i < server_bullet_array.length; i++) {
@@ -408,7 +404,7 @@ function create() {
         // // Otherwise if there's too many, delete the extra bullets
         // //console.log("server array len:" + server_bullet_array.length);
         // //console.log("self array len: " + self.element.bullet_array.length);
-        
+
         // for (let i = server_bullet_array.length; i < self.element.bullet_array.length; i++) {
         //     //console.log("a bullet has been destroyed")
 
@@ -419,7 +415,7 @@ function create() {
         // }
 
         // let j =  server_bullet_array.length == self.element.bullet_array.length;
-       
+
     });
 
     //set number of proton/electron/neutron to zero
@@ -684,7 +680,18 @@ function create() {
     this.socket.on('explosion', function (bulletInfo) {
         var explosion = new Explosion(self, bulletInfo.x, bulletInfo.y)
     });
-    var time;
+
+
+    this.socket.on('test', function (date) {
+        console.log("hi");
+        s += (Date.now() - date);
+        z++
+        console.log(Date.now() - date);
+        if (z%50 == 0) {
+            console.log("Average: " + s/z);
+        }
+    });
+
 
     //displays other players' movement on screen
     this.socket.on('playerMoved', function (playerInfo) {
@@ -814,6 +821,13 @@ function create() {
     this.protonBar.bar.setScrollFactor(0);
     this.electronBar.bar.setScrollFactor(0);
     this.neutronBar.bar.setScrollFactor(0);
+
+    var date = Date.now();
+    function test() {
+        //console.log(Date.now() - date);
+        //date = Date.now();
+    }
+    var intervalID = setInterval(test, 16);    
 }
 
 var d;
@@ -829,7 +843,7 @@ function update(time) {
 
         this.cameras.main.startFollow(this.element);
         this.cameras.main.followOffset.set(5, 5);
-        
+
         if (gameSettings.lanthanides.includes(this.element.atomicNum)) {
             this.cameras.main.setZoom(0.7);
         }
@@ -884,10 +898,30 @@ function update(time) {
 
         count++;
 
-        for(let k = 0; k<this.element.bullet_array.length; k++){
 
-            let speedY = gameSettings.bulletSpeed * Math.sin(this.element.bullet_array[k].angle2);
-            let speedX = gameSettings.bulletSpeed * Math.cos(this.element.bullet_array[k].angle2);
+
+
+        for (let k = 0; k < this.element.bullet_array.length; k++) {
+
+
+
+            speedY = gameSettings.bulletSpeed * Math.sin(this.element.bullet_array[k].angle2);
+            speedX = gameSettings.bulletSpeed * Math.cos(this.element.bullet_array[k].angle2);
+
+            if (gameSettings.group8.includes(this.element.atomicNum)) {
+
+
+
+                speedY = (-20 + 60 * this.element.bullet_array[k].increment) * Math.sin(this.element.bullet_array[k].angle2);
+                speedX = (-20 + 60 * this.element.bullet_array[k].increment) * Math.cos(this.element.bullet_array[k].angle2);
+                
+                // speedY = speedY + 20*this.element.bullet_array[k].increment;
+                // speedX = speedX + 20*this.element.bullet_array[k].increment;
+                this.element.bullet_array[k].increment++;
+            }
+
+            //let speedY = gameSettings.bulletSpeed * Math.sin(this.element.bullet_array[k].angle2);
+            //let speedX = gameSettings.bulletSpeed * Math.cos(this.element.bullet_array[k].angle2);
 
             this.element.bullet_array[k].x += speedX / 60;
             this.element.bullet_array[k].y += speedY / 60;
@@ -895,26 +929,25 @@ function update(time) {
 
             this.otherElements.getChildren().forEach((otherElement) => {
 
-                let dist = Math.sqrt( Math.pow(otherElement.x - this.element.bullet_array[k].x, 2) + Math.pow(otherElement.y - this.element.bullet_array[k].y, 2) );
-                if (dist < 70 && !(gameSettings.group8.includes(this.element.atomicNum) || gameSettings.group7.includes(this.element.atomicNum))){
-                    if (this.element.bullet_array[k].owner_id != otherElement.playerId)
-                    {
+                let dist = Math.sqrt(Math.pow(otherElement.x - this.element.bullet_array[k].x, 2) + Math.pow(otherElement.y - this.element.bullet_array[k].y, 2));
+                if (dist < 70 && !(gameSettings.group8.includes(this.element.atomicNum) || gameSettings.group7.includes(this.element.atomicNum))) {
+                    if (this.element.bullet_array[k].owner_id != otherElement.playerId) {
                         this.element.bullet_array[k].setVisible(false);
-                    } 
-                    
+                    }
+
                 }
-    
-            }); 
-            
-            let dist0 = Math.sqrt( Math.pow(this.element.x - this.element.bullet_array[k].x, 2) + Math.pow(this.element.y - this.element.bullet_array[k].y, 2) );
+
+            });
+
+            let dist0 = Math.sqrt(Math.pow(this.element.x - this.element.bullet_array[k].x, 2) + Math.pow(this.element.y - this.element.bullet_array[k].y, 2));
             console.log(this.element.bullet_array[k].owner_id);
             console.log(this.socket.id);
 
-            if (dist0 < 70 && this.element.bullet_array[k].owner_id != this.socket.id){
-                
-                this.element.bullet_array[k].setVisible(false);  
+            if (dist0 < 70 && this.element.bullet_array[k].owner_id != this.socket.id) {
+
+                this.element.bullet_array[k].setVisible(false);
             }
-            
+
 
 
         }
@@ -1023,10 +1056,6 @@ function update(time) {
             lastScoreUpdate = time;
         }
 
-        if (Math.random() < 0.5) this.element.x += 0.000000001;
-        else this.element.x -= 0.000000001;
-
-
         //Entity Interpolation
         this.otherElements.getChildren().forEach((otherElement) => {
             //console.log(otherElement.updateArray.length);
@@ -1036,21 +1065,16 @@ function update(time) {
                     otherElement.x += gameSettings.playerSpeed / 60 * otherElement.updateArray[0].x;
 
                     otherElement.y += gameSettings.playerSpeed / 60 * otherElement.updateArray[0].y;
-                    
+
                     otherElement.rotation = otherElement.updateArray[0].r;
                     otherElement.updateArray.shift();
                     i++;
                 }
             }
-            if (i != 0) {
-                g += i;
-                counter++;
-            }
-            if (counter%20 == 0) {
-                console.log("avg: " + g/counter);
-            }
-            console.log("i: " + i);
-        }); 
+        });
+
+        if (Math.random() < 0.5) this.element.x += 0.000000001;
+        else this.element.x -= 0.000000001;
 
         upDate = new Date();
 
@@ -1065,8 +1089,6 @@ function update(time) {
         }
     }
 }
-
-
 
 
 
