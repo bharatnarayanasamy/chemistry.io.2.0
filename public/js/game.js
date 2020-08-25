@@ -313,6 +313,7 @@ function create() {
            
             let bullet = new Bullet(self, new_bullet_array[i].angle, new_bullet_array[i].x, new_bullet_array[i].y, gameSettings.texture[new_bullet_array[i].atomicNumber - 1]);
             bullet.id = new_bullet_array[i].id;
+            bullet.owner_id = new_bullet_array[i].owner_id;
 
             console.log(new_bullet_array[i].id);
             bullet.setTexture(gameSettings.texture[new_bullet_array[i].atomicNumber - 1] + "bullet");
@@ -324,13 +325,14 @@ function create() {
         
         for(let i = self.element.bullet_array.length-1;i >= 0;i--){
             
-            console.log(self.element.bullet_array[i].id);
             if(delete_set.has(self.element.bullet_array[i].id))
             {
                 console.log("ID FOUND!!!");
                 self.element.bullet_array[i].destroy();
                 self.element.bullet_array.splice(i, 1);
             }
+            console.log(self.element.bullet_array[i].id);
+
 
         }
 
@@ -894,15 +896,22 @@ function update(time) {
             this.otherElements.getChildren().forEach((otherElement) => {
 
                 let dist = Math.sqrt( Math.pow(otherElement.x - this.element.bullet_array[k].x, 2) + Math.pow(otherElement.y - this.element.bullet_array[k].y, 2) );
-                if (dist < 70){
-                    this.element.bullet_array[k].setVisible(false);
+                if (dist < 70 && !(gameSettings.group8.includes(this.element.atomicNum) || gameSettings.group7.includes(this.element.atomicNum))){
+                    if (this.element.bullet_array[k].owner_id != otherElement.playerId)
+                    {
+                        this.element.bullet_array[k].setVisible(false);
+                    } 
                     
                 }
-                
+    
             }); 
-
+            
             let dist0 = Math.sqrt( Math.pow(this.element.x - this.element.bullet_array[k].x, 2) + Math.pow(this.element.y - this.element.bullet_array[k].y, 2) );
-            if (dist0 < 70){
+            console.log(this.element.bullet_array[k].owner_id);
+            console.log(this.socket.id);
+
+            if (dist0 < 70 && this.element.bullet_array[k].owner_id != this.socket.id){
+                
                 this.element.bullet_array[k].setVisible(false);  
             }
             

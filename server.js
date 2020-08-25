@@ -488,7 +488,7 @@ function ServerGameLoop() {
             if (typeof players[owner] != "undefined" && !(serverSettings.group8.includes(players[owner].atomicNumServer) || serverSettings.group7.includes(players[owner].atomicNumServer))) {
                bullet_array.splice(i, 1);
                i--;
-               delete_set.push(bullet.id)
+               delete_set.push(bullet.id);
             }
           }
           if (players[id].health <= 0) {

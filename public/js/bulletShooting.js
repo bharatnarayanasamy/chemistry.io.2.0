@@ -1,6 +1,8 @@
 
 function group1Bullet(bullet, element, socket, bulletAngle){
 
+
+    
     socket.emit('shoot-bullet', {
         x: bullet.x, y: bullet.y, angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed,
         damage: bullet.damage, atomicNumber: element.atomicNum, rotAngle: 0
@@ -9,7 +11,8 @@ function group1Bullet(bullet, element, socket, bulletAngle){
 
 function group2Bullet(bullet, distance, element0, socket0, bulletAngle) {
     this.element = element0;
-    bullet.damage /= 1.5;
+    //change bullet damage to lower
+    bullet.damage /= 1.0;
 
     if (bullet.x > this.element.x && bullet.y > this.element.y) {
         let tempangle = Math.atan((bullet.x - this.element.x) / (bullet.y - this.element.y));
@@ -166,6 +169,7 @@ function group6Bullet(bullet, element, socket, bulletAngle) {
         x: bullet.x , y: bullet.y , angle: bulletAngle - 0.2, bulletSpeed: gameSettings.bulletSpeed,
         damage: bullet.damage, atomicNumber: element.atomicNum, rotAngle: 0
     });
+
 }
 
 function group7Bullet(bullet, element, socket, bulletAngle) {
