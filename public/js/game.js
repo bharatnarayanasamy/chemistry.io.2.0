@@ -854,7 +854,7 @@ function create() {
     this.protonBar.bar.setScrollFactor(0);
     this.electronBar.bar.setScrollFactor(0);
     this.neutronBar.bar.setScrollFactor(0);
-    var date = Date.now(); 
+    var date = Date.now();
     function entityInterpolation() {
         //console.log(Date.now()-date);
         //date = Date.now();
@@ -879,7 +879,7 @@ function create() {
                 var timedif = Date.now() - otherElement.updateArray[0].time;
                 var deltax = timedif / 1000 * gameSettings.playerSpeed;
                 var deltay = timedif / 1000 * gameSettings.playerSpeed;
-                var deltar = (otherElement.updateArray[1].r - otherElement.updateArray[0].r) * timedif/(otherElement.updateArray[1].time - otherElement.updateArray[0].time);
+                var deltar = (otherElement.updateArray[1].r - otherElement.updateArray[0].r) * timedif / (otherElement.updateArray[1].time - otherElement.updateArray[0].time);
                 var correcteddx = deltax;
                 var correcteddy = deltay;
                 if (otherElement.updateArray[1].x == otherElement.updateArray[0].x) {
@@ -921,42 +921,44 @@ function create() {
             }
             console.log(otherElement.x, otherElement.y)
         });
+
         //entity interpolatrion idea 2
         /*
         self.otherElements.getChildren().forEach((otherElement) => {
-            var timedif = Date.now() - otherElement.updateArray[0].time;
-            var deltax = timedif / 100 * otherElement.updateArray[1].x- otherElement.updateArray[0].x;
-            var deltay = timedif / 100 * otherElement.updateArray[1].y- otherElement.updateArray[0].y;
-            //var deltar = (otherElement.updateArray[1].r - otherElement.updateArray[0].r) * timedif/(otherElement.updateArray[1].time - otherElement.updateArray[0].time);
-            var correcteddx = deltax;
-            var correcteddy = deltay;
-            if (otherElement.updateArray[1].x == otherElement.updateArray[0].x) {
-                correcteddx = 0;
-            }
-            else {
-                if (otherElement.updateArray[1].x < otherElement.updateArray[0].x) {
-                    correcteddx = -correcteddx;
+            if (otherElement.updateArray.length > 1) {
+                var timedif = Date.now() - otherElement.updateArray[0].time;
+                var deltax = timedif / 100 * otherElement.updateArray[1].x- otherElement.updateArray[0].x;
+                var deltay = timedif / 100 * otherElement.updateArray[1].y- otherElement.updateArray[0].y;
+                //var deltar = (otherElement.updateArray[1].r - otherElement.updateArray[0].r) * timedif/(otherElement.updateArray[1].time - otherElement.updateArray[0].time);
+                var correcteddx = deltax;
+                var correcteddy = deltay;
+                if (otherElement.updateArray[1].x == otherElement.updateArray[0].x) {
+                    correcteddx = 0;
+                }
+                else {
+                    if (otherElement.updateArray[1].x < otherElement.updateArray[0].x) {
+                        correcteddx = -correcteddx;
+                    }
+                }
+                if (otherElement.updateArray[1].y == otherElement.updateArray[0].y) {
+                    correcteddy = 0;
+                }
+                else {
+                    if (otherElement.updateArray[1].y < otherElement.updateArray[0].y) {
+                        correcteddy = -correcteddy;
+                    }
+                }
+                if (deltax + otherElement.updateArray[0].x > otherElement.updateArray[1].x && deltay + otherElement.updateArray[0].y > otherElement.updateArray[1].y) {
+                    otherElement.x = otherElement.updateArray[1].x;
+                    otherElement.y = otherElement.updateArray[1].y;
+                    //otherElement.rotation = otherElement.updateArray[1].rotation;
+                    otherElement.updateArray.shift();
+                }
+                else {
+                    otherElement.x = otherElement.updateArray[0].x + deltax;
+                    otherElement.y = otherElement.updateArray[0].y + deltay;
                 }
             }
-            if (otherElement.updateArray[1].y == otherElement.updateArray[0].y) {
-                correcteddy = 0;
-            }
-            else {
-                if (otherElement.updateArray[1].y < otherElement.updateArray[0].y) {
-                    correcteddy = -correcteddy;
-                }
-            }
-            if (deltax + otherElement.updateArray[0].x > otherElement.updateArray[1].x && deltay + otherElement.updateArray[0].y > otherElement.updateArray[1].y) {
-                otherElement.x = otherElement.updateArray[1].x;
-                otherElement.y = otherElement.updateArray[1].y;
-                //otherElement.rotation = otherElement.updateArray[1].rotation;
-                otherElement.updateArray.shift();
-            }
-            else {
-                otherElement.x = otherElement.updateArray[0].x + deltax;
-                otherElement.y = otherElement.updateArray[0].y + deltay;
-            }
-
         });*/
     }
     setInterval(entityInterpolation, 16)
