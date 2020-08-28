@@ -60,7 +60,7 @@ class Element extends Phaser.GameObjects.Sprite {
 
         this.lastHurt = 0;
         this.updateArray = [];
-        
+        this.temp = [];
     }
 
 

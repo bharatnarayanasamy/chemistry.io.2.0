@@ -7,7 +7,7 @@ FOR OFTEN USED VARIABLES REQUIRING INDEXING AND/OR PROCESSSING, CREATE A NEW VAR
 //Dictionary of game settings
 
 var gameSettings = {
-    playerSpeed: 300,
+    playerSpeed: 150,
     bulletSpeed: 500,
     speedScale: 6,
     maxPowerups: 14,
@@ -298,35 +298,34 @@ function create() {
         let test = server_bullet_array_all.delete_set;
         let new_bullet_array = server_bullet_array_all.new_bullet_array;
         let delete_set = new Set(test);
-        
+
         //console.log(test.has(5));
-        
+
         //console.log(delete_set.has(5));
         //onsole.log(typeof new_bullet_array);
 
-        
-        
+
+
 
         //adds all new bullets?
-        for(let i = 0; i < new_bullet_array.length; i++){
-           
-           
+        for (let i = 0; i < new_bullet_array.length; i++) {
+
+
             let bullet = new Bullet(self, new_bullet_array[i].angle, new_bullet_array[i].x, new_bullet_array[i].y, gameSettings.texture[new_bullet_array[i].atomicNumber - 1]);
             bullet.id = new_bullet_array[i].id;
 
             console.log(new_bullet_array[i].id);
             bullet.setTexture(gameSettings.texture[new_bullet_array[i].atomicNumber - 1] + "bullet");
 
-           
-           self.element.bullet_array.push(bullet);
+
+            self.element.bullet_array.push(bullet);
 
         }
-        
-        for(let i = self.element.bullet_array.length-1;i >= 0;i--){
-            
-            console.log(self.element.bullet_array[i].id);
-            if(delete_set.has(self.element.bullet_array[i].id))
-            {
+
+        for (let i = self.element.bullet_array.length - 1; i >= 0; i--) {
+
+            //console.log(self.element.bullet_array[i].id);
+            if (delete_set.has(self.element.bullet_array[i].id)) {
                 console.log("ID FOUND!!!");
                 self.element.bullet_array[i].destroy();
                 self.element.bullet_array.splice(i, 1);
@@ -406,7 +405,7 @@ function create() {
         // // Otherwise if there's too many, delete the extra bullets
         // //console.log("server array len:" + server_bullet_array.length);
         // //console.log("self array len: " + self.element.bullet_array.length);
-        
+
         // for (let i = server_bullet_array.length; i < self.element.bullet_array.length; i++) {
         //     //console.log("a bullet has been destroyed")
 
@@ -417,7 +416,7 @@ function create() {
         // }
 
         // let j =  server_bullet_array.length == self.element.bullet_array.length;
-       
+
     });
 
     //set number of proton/electron/neutron to zero
@@ -683,15 +682,52 @@ function create() {
         var explosion = new Explosion(self, bulletInfo.x, bulletInfo.y)
     });
     var time;
+    var timeDifference;
+    var timeArray = [];
+    var avg = 0;
 
     //displays other players' movement on screen
     this.socket.on('playerMoved', function (playerInfo) {
+        //        var timeDifference;
+        if (typeof time == "undefined") {
+            time = Date.now();
+            iter = 0;
+        }
+        else {
+            /*if (timeDifference < 50) {
+                console.log(avg/iter);
+            }*/
+            timeDifference = Date.now() - time;
+            avg += timeDifference;
+            time = Date.now();
+            iter++;
+            //console.log("iteration ", iter - 1, " to ", iter, ": ", timeDifference);
+            timeArray.push(timeDifference);
+        }
 
         var rotation = self.element.rotation;
         var position = { x: self.element.x, y: self.element.y };
         var last_processed_input;
 
-        for (let i = 0; i < playerInfo.length; i++) {
+
+        Object.keys(playerInfo).forEach(function (key) {
+            //console.log(key + " " + playerInfo[key]);
+
+            if (playerInfo[key].playerId == self.socket.id) {
+                rotation = playerInfo[key].rotation;
+                position = { x: playerInfo[key].x, y: playerInfo[key].y };
+                last_processed_input = playerInfo[key].client_num;
+            }
+            else {
+                self.otherElements.getChildren().forEach((otherElement) => {
+                    if (otherElement.playerId == playerInfo[key].playerId) {
+                        otherElement.updateArray.push({ x: playerInfo[key].x, y: playerInfo[key].y, r: playerInfo[key].rotation, time: Date.now() });
+                    }
+                });
+            }
+        });
+
+        /*for (let i = 0; i < playerInfo.length; i++) {
             if (playerInfo[i].playerId == self.socket.id) {
                 rotation = playerInfo[i].rotation;
                 position = { x: playerInfo[i].x, y: playerInfo[i].y };
@@ -700,11 +736,17 @@ function create() {
             else {
                 self.otherElements.getChildren().forEach((otherElement) => {
                     if (otherElement.playerId == playerInfo[i].playerId) {
-                        otherElement.updateArray.push({ x: playerInfo[i].dx, y: playerInfo[i].dy, r: playerInfo[i].rotation, t: playerInfo[i].time });
+                        otherElement.updateArray.push({ x: playerInfo[i].x, y: playerInfo[i].y, r: playerInfo[i].rotation, time:Date.now()});
                     }
                 });
             }
+        }*/
+
+
+        if (timeArray.length > 1) {
+            timeArray.shift();
         }
+
 
         var j = 0;
         if (typeof last_processed_input != "undefined") {
@@ -812,6 +854,112 @@ function create() {
     this.protonBar.bar.setScrollFactor(0);
     this.electronBar.bar.setScrollFactor(0);
     this.neutronBar.bar.setScrollFactor(0);
+    var date = Date.now(); 
+    function entityInterpolation() {
+        //console.log(Date.now()-date);
+        //date = Date.now();
+
+
+        // Position 1 
+        // Position 2
+        //Position 3
+        //Position 4
+        //Position 5
+        //client time
+        //current Position 
+        //(Date.now - client time) * Speed = deltax, delta y
+        //gs1 + deltax > gs2:
+
+
+        //entity interpolation option 1
+        self.otherElements.getChildren().forEach((otherElement) => {
+            if (otherElement.updateArray.length > 1) {
+                //console.log(otherElement.updateArray[0]);
+                //console.log(otherElement.updateArray[1]);
+                var timedif = Date.now() - otherElement.updateArray[0].time;
+                var deltax = timedif / 1000 * gameSettings.playerSpeed;
+                var deltay = timedif / 1000 * gameSettings.playerSpeed;
+                var deltar = (otherElement.updateArray[1].r - otherElement.updateArray[0].r) * timedif/(otherElement.updateArray[1].time - otherElement.updateArray[0].time);
+                var correcteddx = deltax;
+                var correcteddy = deltay;
+                if (otherElement.updateArray[1].x == otherElement.updateArray[0].x) {
+                    correcteddx = 0;
+                }
+                else {
+                    if (otherElement.updateArray[1].x < otherElement.updateArray[0].x) {
+                        correcteddx = -correcteddx;
+                    }
+                }
+                if (otherElement.updateArray[1].y == otherElement.updateArray[0].y) {
+                    correcteddy = 0;
+                }
+                else {
+                    if (otherElement.updateArray[1].y < otherElement.updateArray[0].y) {
+                        correcteddy = -correcteddy;
+                    }
+                }
+
+                //console.log(timedif, deltax, deltay);
+                if (deltax + otherElement.updateArray[0].x > otherElement.updateArray[1].x && deltay + otherElement.updateArray[0].y > otherElement.updateArray[1].y) {
+                    while (deltax + otherElement.updateArray[0].x > otherElement.updateArray[1].x && deltay + otherElement.updateArray[0].y > otherElement.updateArray[1].y && //in case movement
+                        timedif > otherElement.updateArray[1].time - otherElement.updateArray[0].time) {
+                        otherElement.x = otherElement.updateArray[1].x
+                        otherElement.y = otherElement.updateArray[1].y;
+                        //otherElement.rotation = otherElement.updateArray[1].rotation;
+                        otherElement.updateArray.shift();
+                        if (otherElement.updateArray.length < 2) {
+                            break;
+                        }
+                    }
+                }
+                else {
+                    //console.log(correcteddx, correcteddy);
+                    otherElement.x = otherElement.updateArray[0].x + correcteddx;
+                    otherElement.y = otherElement.updateArray[0].y + correcteddy;
+                    //otherElement.rotation = otherElement.updateArray[0].rotation + deltar;
+                }
+            }
+            console.log(otherElement.x, otherElement.y)
+        });
+        //entity interpolatrion idea 2
+        /*
+        self.otherElements.getChildren().forEach((otherElement) => {
+            var timedif = Date.now() - otherElement.updateArray[0].time;
+            var deltax = timedif / 100 * otherElement.updateArray[1].x- otherElement.updateArray[0].x;
+            var deltay = timedif / 100 * otherElement.updateArray[1].y- otherElement.updateArray[0].y;
+            //var deltar = (otherElement.updateArray[1].r - otherElement.updateArray[0].r) * timedif/(otherElement.updateArray[1].time - otherElement.updateArray[0].time);
+            var correcteddx = deltax;
+            var correcteddy = deltay;
+            if (otherElement.updateArray[1].x == otherElement.updateArray[0].x) {
+                correcteddx = 0;
+            }
+            else {
+                if (otherElement.updateArray[1].x < otherElement.updateArray[0].x) {
+                    correcteddx = -correcteddx;
+                }
+            }
+            if (otherElement.updateArray[1].y == otherElement.updateArray[0].y) {
+                correcteddy = 0;
+            }
+            else {
+                if (otherElement.updateArray[1].y < otherElement.updateArray[0].y) {
+                    correcteddy = -correcteddy;
+                }
+            }
+            if (deltax + otherElement.updateArray[0].x > otherElement.updateArray[1].x && deltay + otherElement.updateArray[0].y > otherElement.updateArray[1].y) {
+                otherElement.x = otherElement.updateArray[1].x;
+                otherElement.y = otherElement.updateArray[1].y;
+                //otherElement.rotation = otherElement.updateArray[1].rotation;
+                otherElement.updateArray.shift();
+            }
+            else {
+                otherElement.x = otherElement.updateArray[0].x + deltax;
+                otherElement.y = otherElement.updateArray[0].y + deltay;
+            }
+
+        });*/
+    }
+    setInterval(entityInterpolation, 16)
 }
 
 var d;
@@ -827,7 +975,7 @@ function update(time) {
 
         this.cameras.main.startFollow(this.element);
         this.cameras.main.followOffset.set(5, 5);
-        
+
         if (gameSettings.lanthanides.includes(this.element.atomicNum)) {
             this.cameras.main.setZoom(0.7);
         }
@@ -882,7 +1030,7 @@ function update(time) {
 
         count++;
 
-        for(let k = 0; k<this.element.bullet_array.length; k++){
+        for (let k = 0; k < this.element.bullet_array.length; k++) {
 
             let speedY = gameSettings.bulletSpeed * Math.sin(this.element.bullet_array[k].angle2);
             let speedX = gameSettings.bulletSpeed * Math.cos(this.element.bullet_array[k].angle2);
@@ -893,19 +1041,19 @@ function update(time) {
 
             this.otherElements.getChildren().forEach((otherElement) => {
 
-                let dist = Math.sqrt( Math.pow(otherElement.x - this.element.bullet_array[k].x, 2) + Math.pow(otherElement.y - this.element.bullet_array[k].y, 2) );
-                if (dist < 70){
+                let dist = Math.sqrt(Math.pow(otherElement.x - this.element.bullet_array[k].x, 2) + Math.pow(otherElement.y - this.element.bullet_array[k].y, 2));
+                if (dist < 70) {
                     this.element.bullet_array[k].setVisible(false);
-                    
-                }
-                
-            }); 
 
-            let dist0 = Math.sqrt( Math.pow(this.element.x - this.element.bullet_array[k].x, 2) + Math.pow(this.element.y - this.element.bullet_array[k].y, 2) );
-            if (dist0 < 70){
-                this.element.bullet_array[k].setVisible(false);  
+                }
+
+            });
+
+            let dist0 = Math.sqrt(Math.pow(this.element.x - this.element.bullet_array[k].x, 2) + Math.pow(this.element.y - this.element.bullet_array[k].y, 2));
+            if (dist0 < 70) {
+                this.element.bullet_array[k].setVisible(false);
             }
-            
+
 
 
         }
@@ -1018,30 +1166,7 @@ function update(time) {
         else this.element.x -= 0.000000001;
 
 
-        //Entity Interpolation
-        this.otherElements.getChildren().forEach((otherElement) => {
-            //console.log(otherElement.updateArray.length);
-            let i = 0;
-            if (typeof otherElement.updateArray[0] != "undefined") {
-                while (typeof otherElement.updateArray[0] != "undefined" && (Date.now() - otherElement.updateArray[0].t > 300) /*&& i < 7*/) {
-                    otherElement.x += gameSettings.playerSpeed / 60 * otherElement.updateArray[0].x;
 
-                    otherElement.y += gameSettings.playerSpeed / 60 * otherElement.updateArray[0].y;
-                    
-                    otherElement.rotation = otherElement.updateArray[0].r;
-                    otherElement.updateArray.shift();
-                    i++;
-                }
-            }
-            if (i != 0) {
-                g += i;
-                counter++;
-            }
-            if (counter%20 == 0) {
-                console.log("avg: " + g/counter);
-            }
-            console.log("i: " + i);
-        }); 
 
         upDate = new Date();
 
