@@ -250,7 +250,6 @@ io.on('connection', (socket) => {
       data.playerId = socket.id;
       data.client_num = movementData.i;
       data.server_num = server_seq;
-<<<<<<< HEAD
       data.server_time = movementData.time;
       */
       /*if (typeof playerToServerDelay[socket.id] != "undefined") {
@@ -265,8 +264,6 @@ io.on('connection', (socket) => {
       }*/
 
       //server_seq++;
-=======
->>>>>>> c3d708e8c13f8b9f81618e4b5d1570cd70953ddd
 
       game_array[socket.id] = {x: players[socket.id].x, y: players[socket.id].y, rotation: movement[2], playerId: socket.id, server_time: movementData.time, client_num: movementData.i}
       
@@ -356,11 +353,7 @@ io.on('connection', (socket) => {
     data.iy = data.y;
     data.time = Date.now();
     data.id = socket.id + c;
-<<<<<<< HEAD
     data.increment = 1;
-=======
-    
->>>>>>> c3d708e8c13f8b9f81618e4b5d1570cd70953ddd
     c += 1;
     let new_bullet = data;
     //bullet_array.push(new_bullet);
@@ -444,13 +437,6 @@ function ServerGameLoop() {
         longdist = 20000;
       }
 
-<<<<<<< HEAD
-=======
-      //if (typeof players[bullet.owner_id] != "undefined" && serverSettings.group5.includes(players[bullet.owner_id].atomicNumServer)) {
-      //  bullet_array[i].bulletSpeed += 20;
-      //}
-
->>>>>>> c3d708e8c13f8b9f81618e4b5d1570cd70953ddd
       if (typeof players[bullet.owner_id] != "undefined" && serverSettings.group7.includes(players[bullet.owner_id].atomicNumServer)) {
         if (bullet_array[i].bulletSpeed > 20) {
           bullet_array[i].bulletSpeed -= 7;
@@ -570,13 +556,8 @@ function movementHelper() {
   
 }*/
 function Movement() {
-<<<<<<< HEAD
   io.emit('playerMoved', game_array);
   game_array = {};
-=======
-  io.emit('playerMoved', messageArray);
-  messageArray = [];
->>>>>>> c3d708e8c13f8b9f81618e4b5d1570cd70953ddd
 }
 function test() {
   io.emit('test', Date.now());

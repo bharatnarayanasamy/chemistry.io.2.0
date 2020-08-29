@@ -18,16 +18,9 @@ function group1Bullet(gamejs, bullet, element, socket, bulletAngle) {
 
 }
 
-<<<<<<< HEAD
 function group2Bullet(gamejs, bullet, distance, element, socket, bulletAngle) {
 
     bullet.damage /= 1.5;
-=======
-function group2Bullet(bullet, distance, element0, socket0, bulletAngle) {
-    this.element = element0;
-    //change bullet damage to lower
-    bullet.damage /= 1.0;
->>>>>>> c3d708e8c13f8b9f81618e4b5d1570cd70953ddd
 
     let tempangle1 = bulletAngle + 0.35;
     let tempangle2 = bulletAngle - 0.35;
@@ -220,11 +213,7 @@ function group5Bullet(gamejs, bullet, element, socket, bulletAngle) {
     element.bullet_array.push(pushbullet);
     
     socket.emit('shoot-bullet', {
-<<<<<<< HEAD
         x: bullet.x, y: bullet.y, angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed,
-=======
-        x: bullet.x , y: bullet.y , angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed,
->>>>>>> c3d708e8c13f8b9f81618e4b5d1570cd70953ddd
         damage: bullet.damage, atomicNumber: element.atomicNum, rotAngle: 0, acc: true
     });
 
@@ -314,11 +303,7 @@ function group8Bullet(gamejs, bullet, element, socket, bulletAngle, rotationAngl
 
 
     socket.emit('shoot-bullet', {
-<<<<<<< HEAD
         x: bullet.x, y: bullet.y, angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed,
-=======
-        x: bullet.x , y: bullet.y , angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed,
->>>>>>> c3d708e8c13f8b9f81618e4b5d1570cd70953ddd
         damage: bullet.damage / 20, atomicNumber: element.atomicNum, rotAngle: rotationAngle - 1.571, acc: true
     });
 }
