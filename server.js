@@ -161,7 +161,8 @@ var serverSettings = {
   lanthanides: [57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71],
   actinides: [89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103],
   mapWidth: 3840,
-  mapHeight: 2160
+  mapHeight: 2160,
+  bulletSpeed: 500
 }
 
 var game_array = {};
@@ -249,6 +250,7 @@ io.on('connection', (socket) => {
       data.playerId = socket.id;
       data.client_num = movementData.i;
       data.server_num = server_seq;
+<<<<<<< HEAD
       data.server_time = movementData.time;
       */
       /*if (typeof playerToServerDelay[socket.id] != "undefined") {
@@ -263,6 +265,8 @@ io.on('connection', (socket) => {
       }*/
 
       //server_seq++;
+=======
+>>>>>>> c3d708e8c13f8b9f81618e4b5d1570cd70953ddd
 
       game_array[socket.id] = {x: players[socket.id].x, y: players[socket.id].y, rotation: movement[2], playerId: socket.id, server_time: movementData.time, client_num: movementData.i}
       
@@ -352,10 +356,14 @@ io.on('connection', (socket) => {
     data.iy = data.y;
     data.time = Date.now();
     data.id = socket.id + c;
+<<<<<<< HEAD
     data.increment = 1;
+=======
+    
+>>>>>>> c3d708e8c13f8b9f81618e4b5d1570cd70953ddd
     c += 1;
     let new_bullet = data;
-    bullet_array.push(new_bullet);
+    //bullet_array.push(new_bullet);
     new_bullet_array.push(new_bullet);
   });
 
@@ -436,6 +444,13 @@ function ServerGameLoop() {
         longdist = 20000;
       }
 
+<<<<<<< HEAD
+=======
+      //if (typeof players[bullet.owner_id] != "undefined" && serverSettings.group5.includes(players[bullet.owner_id].atomicNumServer)) {
+      //  bullet_array[i].bulletSpeed += 20;
+      //}
+
+>>>>>>> c3d708e8c13f8b9f81618e4b5d1570cd70953ddd
       if (typeof players[bullet.owner_id] != "undefined" && serverSettings.group7.includes(players[bullet.owner_id].atomicNumServer)) {
         if (bullet_array[i].bulletSpeed > 20) {
           bullet_array[i].bulletSpeed -= 7;
@@ -501,7 +516,7 @@ function ServerGameLoop() {
             if (typeof players[owner] != "undefined" && !(serverSettings.group8.includes(players[owner].atomicNumServer) || serverSettings.group7.includes(players[owner].atomicNumServer))) {
                bullet_array.splice(i, 1);
                i--;
-               delete_set.push(bullet.id)
+               delete_set.push(bullet.id);
             }
           }
           if (players[id].health <= 0) {
@@ -555,9 +570,18 @@ function movementHelper() {
   
 }*/
 function Movement() {
+<<<<<<< HEAD
   io.emit('playerMoved', game_array);
   game_array = {};
+=======
+  io.emit('playerMoved', messageArray);
+  messageArray = [];
+>>>>>>> c3d708e8c13f8b9f81618e4b5d1570cd70953ddd
 }
+function test() {
+  io.emit('test', Date.now());
+}
+
 
 function bulletHelper() {
   while (typeof bullet_array[0] != "undefined" && bullet_array[0].time + 100 < Date.now()) {
@@ -571,6 +595,7 @@ function bulletMovement() {
   //bulletMessageArray = [];
 
   io.emit("bullets-update", {new_bullet_array: new_bullet_array, delete_set: delete_set});
+  bullet_array.push(new_bullet_array);
   new_bullet_array = [];
   delete_set = [];
 
@@ -582,6 +607,7 @@ setInterval(Movement, 100);
 setInterval(bulletMovement, 50);
 
 setInterval(ServerGameLoop, 16);
+setInterval(test, 100);
 setInterval(UpdateLeaderboard, 100);
 
 

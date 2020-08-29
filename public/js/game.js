@@ -71,6 +71,7 @@ var groupCreated = true;
 var isOverlappingOther = false;
 var currentSpeed = 0;
 var iter;
+var speedX = 0, speedY = 0;
 
 var count = 0;
 
@@ -107,7 +108,8 @@ var movementCommands = [];
 var messageIndex = 0;
 
 var elements = JSON.parse(localStorage.getItem("elements"));
-
+let s = 0;
+let z = 0;
 function preload() {
 
     //loading in element images and their bullet images
@@ -333,6 +335,7 @@ function create() {
            self.element.bullet_array.push(bullet);
            self.element.bullet_array[self.element.bullet_array.length-1].setVisible(true);
 
+            self.element.bullet_array.push(bullet);
         }
         
          
@@ -944,8 +947,29 @@ function update(time) {
             // }
             //console.log(this.element.bullet_array[k].x);
 
-            let speedY = gameSettings.bulletSpeed * Math.sin(this.element.bullet_array[k].angle2);
-            let speedX = gameSettings.bulletSpeed * Math.cos(this.element.bullet_array[k].angle2);
+
+
+        for (let k = 0; k < this.element.bullet_array.length; k++) {
+
+
+
+            speedY = gameSettings.bulletSpeed * Math.sin(this.element.bullet_array[k].angle2);
+            speedX = gameSettings.bulletSpeed * Math.cos(this.element.bullet_array[k].angle2);
+
+            if (gameSettings.group8.includes(this.element.atomicNum)) {
+
+
+
+                speedY = (-20 + 60 * this.element.bullet_array[k].increment) * Math.sin(this.element.bullet_array[k].angle2);
+                speedX = (-20 + 60 * this.element.bullet_array[k].increment) * Math.cos(this.element.bullet_array[k].angle2);
+                
+                // speedY = speedY + 20*this.element.bullet_array[k].increment;
+                // speedX = speedX + 20*this.element.bullet_array[k].increment;
+                this.element.bullet_array[k].increment++;
+            }
+
+            //let speedY = gameSettings.bulletSpeed * Math.sin(this.element.bullet_array[k].angle2);
+            //let speedX = gameSettings.bulletSpeed * Math.cos(this.element.bullet_array[k].angle2);
 
             if (gameSettings.lanthanides.includes(this.element.atomicNum)) {
                 speedY = gameSettings.bulletSpeed * 2 * Math.sin(this.element.bullet_array[k].angle2);
@@ -1136,10 +1160,5 @@ function update(time) {
 
 
 
-
-
-
-
-
-
+//
 //1000TH LINE
