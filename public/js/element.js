@@ -59,8 +59,8 @@ class Element extends Phaser.GameObjects.Sprite {
         this.hp = new HealthBar(scene, x - 50, y + 70);
 
         this.lastHurt = 0;
-        this.updateArray = [];
-        this.temp = [];
+        this.destx = x;
+        this.desty = y;
     }
 
 

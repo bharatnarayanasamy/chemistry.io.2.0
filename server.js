@@ -137,7 +137,7 @@ for (let i = 0; i < 15; i++) {
 
 }
 var serverSettings = {
-  playerSpeed: 150, //normally 300
+  playerSpeed: 300, //normally 300
   group1: [1, 3, 11, 19, 37, 55, 87],
   group2: [4, 12, 20, 38, 56, 88],
   group3: [5, 13, 31, 49, 81, 113],
