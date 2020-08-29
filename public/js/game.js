@@ -614,15 +614,56 @@ function create() {
         var explosion = new Explosion(self, bulletInfo.x, bulletInfo.y)
     });
     var time;
+    var timeDifference;
+    var timeArray = [];
+    var avg = 0;
 
     //displays other players' movement on screen
     this.socket.on('playerMoved', function (playerInfo) {
+        //        var timeDifference;
+        if (typeof time == "undefined") {
+            time = Date.now();
+            iter = 0;
+        }
+        else {
+            /*if (timeDifference < 50) {
+                console.log(avg/iter);
+            }*/
+            timeDifference = Date.now() - time;
+            avg += timeDifference;
+            time = Date.now();
+            iter++;
+            //console.log("iteration ", iter - 1, " to ", iter, ": ", timeDifference);
+            timeArray.push(timeDifference);
+        }
 
         var rotation = self.element.rotation;
         var position = { x: self.element.x, y: self.element.y };
         var last_processed_input;
 
-        for (let i = 0; i < playerInfo.length; i++) {
+
+        Object.keys(playerInfo).forEach(function (key) {
+            //console.log(key + " " + playerInfo[key]);
+
+            if (playerInfo[key].playerId == self.socket.id) {
+                rotation = playerInfo[key].rotation;
+                position = { x: playerInfo[key].x, y: playerInfo[key].y };
+                last_processed_input = playerInfo[key].client_num;
+            }
+            else {
+                self.otherElements.getChildren().forEach((otherElement) => {
+                    if (otherElement.playerId == playerInfo[key].playerId) {
+                        //self.physics.moveTo(otherElement, playerInfo[key].x, playerInfo[key].y, 300);
+                        //otherElement.destx = playerInfo[key].x;
+                        //otherElement.desty = playerInfo[key].y;
+                        otherElement.updateArray.push({ x: playerInfo[key].x, y: playerInfo[key].y, r: playerInfo[key].rotation, time: Date.now() });
+                    }
+                });
+            }
+        });
+
+
+        /*for (let i = 0; i < playerInfo.length; i++) {
             if (playerInfo[i].playerId == self.socket.id) {
                 rotation = playerInfo[i].rotation;
                 position = { x: playerInfo[i].x, y: playerInfo[i].y };
@@ -631,11 +672,17 @@ function create() {
             else {
                 self.otherElements.getChildren().forEach((otherElement) => {
                     if (otherElement.playerId == playerInfo[i].playerId) {
-                        otherElement.updateArray.push({ x: playerInfo[i].dx, y: playerInfo[i].dy, r: playerInfo[i].rotation, t: playerInfo[i].time });
+                        otherElement.updateArray.push({ x: playerInfo[i].x, y: playerInfo[i].y, r: playerInfo[i].rotation, time:Date.now()});
                     }
                 });
             }
+        }*/
+
+
+        if (timeArray.length > 1) {
+            timeArray.shift();
         }
+
 
         var j = 0;
         if (typeof last_processed_input != "undefined") {
@@ -743,6 +790,79 @@ function create() {
     this.protonBar.bar.setScrollFactor(0);
     this.electronBar.bar.setScrollFactor(0);
     this.neutronBar.bar.setScrollFactor(0);
+    
+    
+    function entityInterpolation() {
+        //console.log(Date.now()-date);
+        //date = Date.now();
+
+
+        // Position 1 
+        // Position 2
+        //Position 3
+        //Position 4
+        //Position 5
+        //client time
+        //current Position 
+        //(Date.now - client time) * Speed = deltax, delta y
+        //gs1 + deltax > gs2:
+
+
+        //entity interpolation option 1
+        self.otherElements.getChildren().forEach((otherElement) => {
+            if (otherElement.updateArray.length > 1) {
+                //console.log(otherElement.updateArray[0]);
+                //console.log(otherElement.updateArray[1]);
+                var timedif = Date.now() - otherElement.updateArray[0].time;
+                var deltax = timedif / 1000 * gameSettings.playerSpeed;
+                var deltay = timedif / 1000 * gameSettings.playerSpeed;
+                var deltar = (otherElement.updateArray[1].r - otherElement.updateArray[0].r) * timedif / (otherElement.updateArray[1].time - otherElement.updateArray[0].time);
+                var correcteddx = deltax;
+                var correcteddy = deltay;
+                if (otherElement.updateArray[1].x == otherElement.updateArray[0].x) {
+                    correcteddx = 0;
+                }
+                else {
+                    if (otherElement.updateArray[1].x < otherElement.updateArray[0].x) {
+                        correcteddx = -correcteddx;
+                    }
+                }
+                if (otherElement.updateArray[1].y == otherElement.updateArray[0].y) {
+                    correcteddy = 0;
+                }
+                else {
+                    if (otherElement.updateArray[1].y < otherElement.updateArray[0].y) {
+                        correcteddy = -correcteddy;
+                    }
+                }
+
+                //console.log(timedif, deltax, deltay);
+                if (deltax + otherElement.updateArray[0].x > otherElement.updateArray[1].x && deltay + otherElement.updateArray[0].y > otherElement.updateArray[1].y) {
+                    while (deltax + otherElement.updateArray[0].x > otherElement.updateArray[1].x && deltay + otherElement.updateArray[0].y > otherElement.updateArray[1].y && //in case movement
+                        timedif > otherElement.updateArray[1].time - otherElement.updateArray[0].time) {
+                        otherElement.setPosition(otherElement.updateArray[1].x, otherElement.updateArray[1].y);
+                        //otherElement.setPosition(otherElement.updateArray[1].x, otherElement.updateArray[1].y);
+                        //self.physics.moveTo(otherElement, otherElement.updateArray[1].x, otherElement.updateArray[1].y, 300)
+                        //otherElement.rotation = otherElement.updateArray[1].rotation;
+                        otherElement.updateArray.shift();
+                        if (otherElement.updateArray.length < 2) {
+                            break;
+                        }
+                        console.log(self.physics);
+                    }
+                }
+                else {
+                    //console.log(correcteddx, correcteddy);
+                    otherElement.setPosition(otherElement.updateArray[0].x + correcteddx, otherElement.updateArray[0].y + correcteddy);
+                    //self.physics.moveTo(otherElement, otherElement.updateArray[0].x + correcteddx, otherElement.updateArray[0].y + correcteddy, 300);
+                    //otherElement.rotation = otherElement.updateArray[0].rotation + deltar;
+                }
+            }
+            console.log(otherElement.x, otherElement.y)
+        });
+    }
+    setInterval(entityInterpolation, 16)
+    
 }
 
 var d;
@@ -756,7 +876,7 @@ function update(time) {
 
         this.cameras.main.startFollow(this.element);
         this.cameras.main.followOffset.set(5, 5);
-        
+
         if (gameSettings.lanthanides.includes(this.element.atomicNum)) {
             this.cameras.main.setZoom(0.7);
         }
@@ -976,24 +1096,19 @@ function update(time) {
         if (Math.random() < 0.5) this.element.x += 0.000000001;
         else this.element.x -= 0.000000001;
 
-
-
-        //Entity Interpolation
-        this.otherElements.getChildren().forEach((otherElement) => {
-            //console.log(otherElement.updateArray.length);
-            let i = 0;
-            if (typeof otherElement.updateArray[0] != "undefined") {
-                while (typeof otherElement.updateArray[0] != "undefined" && (Date.now() - otherElement.updateArray[0].t > 300) /*&& i < 7*/) {
-                    otherElement.x += gameSettings.playerSpeed / 60 * otherElement.updateArray[0].x;
-
-                    otherElement.y += gameSettings.playerSpeed / 60 * otherElement.updateArray[0].y;
-                    
-                    otherElement.rotation = otherElement.updateArray[0].r;
-                    otherElement.updateArray.shift();
-                    i++;
+        
+        /*this.otherElements.getChildren().forEach((otherElement) => {
+            var distance = Phaser.Math.Distance.Between(otherElement.x, otherElement.y, otherElement.destx, otherElement.y);
+            if (otherElement.body.speed > 0) {
+                console.log(distance);
+                //  6 is our distance tolerance, i.e. how close the source can get to the target
+                //  before it is considered as being there. The faster it moves, the more tolerance is required.
+                if (distance < 6) {
+                    otherElement.body.reset(otherElement.destx, otherElement.desty);
                 }
             }
-        }); 
+        });*/
+
 
         upDate = new Date();
 

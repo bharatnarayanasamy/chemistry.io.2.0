@@ -164,7 +164,7 @@ var serverSettings = {
   mapHeight: 2160
 }
 
-var game_array = [];
+var game_array = {};
 var server_seq = 0;
 
 //Initialize function for what happens when connection occurs
@@ -233,7 +233,7 @@ io.on('connection', (socket) => {
     //ORDER =          W/S   A/D
     //W and D are 1, S and A are -1
 
-    var data = {};
+    //var data = {};
 
     //timedif = amount of time we will need to travel between game states
 
@@ -241,17 +241,17 @@ io.on('connection', (socket) => {
       players[socket.id].x += serverSettings.playerSpeed / 60 * movement[1];
       players[socket.id].y += serverSettings.playerSpeed / 60 * movement[0];
 
+      /*
 
       data.x = players[socket.id].x;
       data.y = players[socket.id].y;
-      data.dx = movement[1];
-      data.dy = movement[0];
       data.rotation = movement[2];
       data.playerId = socket.id;
       data.client_num = movementData.i;
       data.server_num = server_seq;
-      data.time = movementData.time;
-      if (typeof playerToServerDelay[socket.id] != "undefined") {
+      data.server_time = movementData.time;
+      */
+      /*if (typeof playerToServerDelay[socket.id] != "undefined") {
         playerToServerDelay[socket.id].val += (Date.now() - movementData.time);
         playerToServerDelay[socket.id].count += 1;
         if (playerToServerDelay[socket.id].count % 60 == 0) {
@@ -260,11 +260,16 @@ io.on('connection', (socket) => {
       }
       else {
         playerToServerDelay[socket.id] = { val: Date.now() - movementData.time, count: 1 }
-      }
+      }*/
 
-      server_seq++;
+      //server_seq++;
 
-      game_array.push(data);
+      game_array[socket.id] = {x: players[socket.id].x, y: players[socket.id].y, rotation: movement[2], playerId: socket.id, server_time: movementData.time, client_num: movementData.i}
+      
+      //game_array a dictionary
+      //player id, value = data object
+
+      //game_array.push(data);
 
     }
     //add seq number
@@ -540,24 +545,18 @@ function UpdateLeaderboard() {
   io.emit("update-leaderboard", items);
 }
 
-var messageArray = [];
 var bulletMessageArray = []
+/*
 function movementHelper() {
-  while (typeof game_array[0] != "undefined" && game_array[0].time + 100 < Date.now()) {
+  while (typeof game_array[0] != "undefined" && game_array[0].server_time + 100 < Date.now()) {
     messageArray.push(game_array[0]);
     game_array.shift();
   }
-}
+  
+}*/
 function Movement() {
-  try {
-    if (Date.now() - messageArray[0].time > 500) {
-      //console.log(messageArray.length + " " + (Date.now() - messageArray[0].time));
-    }
-  }
-  catch(err) {
-  }
-  io.emit('playerMoved', messageArray);
-  messageArray = [];
+  io.emit('playerMoved', game_array);
+  game_array = {};
 }
 
 function bulletHelper() {
@@ -577,7 +576,7 @@ function bulletMovement() {
 
 }
 
-setInterval(movementHelper, 1);
+//setInterval(movementHelper, 1);
 setInterval(Movement, 100);
 //setInterval(bulletHelper, 1);
 setInterval(bulletMovement, 50);
