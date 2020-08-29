@@ -293,38 +293,52 @@ function create() {
 
     // Listen for bullet update events 
     this.socket.on('bullets-update', function (server_bullet_array_all) {
+
+        
         // If there's client and server bullet arrays have mismatch, fix mismatch
         //console.log(server_bullet_array);
         let test = server_bullet_array_all.delete_set;
         let new_bullet_array = server_bullet_array_all.new_bullet_array;
         let delete_set = new Set(test);
-        
-        //console.log(test.has(5));
-        
-        //console.log(delete_set.has(5));
-        //onsole.log(typeof new_bullet_array);
+                
+        //Deleting out own bullets from the array
+        for(let i = new_bullet_array.length-1; i >=0; i--){
+            console.log(new_bullet_array[i].x);
 
-        
-        
+            if (new_bullet_array[i].owner_id == self.socket.id)
+            {
+                console.log("own bullet deleted!");
+                new_bullet_array.splice(i, 1);
+            }
 
-        //adds all new bullets?
+        }
+
+
+        //Adding all new bullest to the array
         for(let i = 0; i < new_bullet_array.length; i++){
-           
            
             let bullet = new Bullet(self, new_bullet_array[i].angle, new_bullet_array[i].x, new_bullet_array[i].y, gameSettings.texture[new_bullet_array[i].atomicNumber - 1]);
             bullet.id = new_bullet_array[i].id;
+            bullet.owner_id = new_bullet_array[i].owner_id;
+            
 
-            console.log(new_bullet_array[i].id);
+            if (typeof new_bullet_array[i].acc != "undefined") {
+                bullet.acc = new_bullet_array[i].acc;
+                bullet.increment = 1;
+            }
+
             bullet.setTexture(gameSettings.texture[new_bullet_array[i].atomicNumber - 1] + "bullet");
 
            
            self.element.bullet_array.push(bullet);
+           self.element.bullet_array[self.element.bullet_array.length-1].setVisible(true);
 
         }
         
+         
+
         for(let i = self.element.bullet_array.length-1;i >= 0;i--){
             
-            console.log(self.element.bullet_array[i].id);
             if(delete_set.has(self.element.bullet_array[i].id))
             {
                 console.log("ID FOUND!!!");
@@ -334,89 +348,6 @@ function create() {
 
         }
 
-
-
-
-
-
-
-
-
-
-        // for (let i = 0; i < server_bullet_array.length; i++) {
-        //     if (self.element.bullet_array[i] == undefined) {
-        //         //let angle = Phaser.Math.Angle.Between(self.element.x, self.element.y, self.input.activePointer.worldX, self.input.activePointer.worldY);
-        //         self.element.bullet_array[i] = new Bullet(self, server_bullet_array[i].angle, server_bullet_array[i].x, server_bullet_array[i].y, gameSettings.texture[server_bullet_array[i].atomicNumber - 1]);
-        //         //self.element.bullet_array[i].initialAngle = angle;
-        //         //self.element.bullet_array[i].enableBody(true, true);
-        //         //specific to group8 laser bullets
-        //         if (gameSettings.group8.includes(server_bullet_array[i].atomicNumber)) {
-        //             //self.element.bullet_array[i].rotation = server_bullet_array[i].rotAngle;
-        //         }
-
-
-        //         //self.element.bullet_array[i].setVisible(false);
-
-        //         self.element.bullet_array[i].setTexture(gameSettings.texture[server_bullet_array[i].atomicNumber - 1] + "bullet");
-
-        //         self.element.bullet_array[i].y = server_bullet_array[i].y;
-        //         self.element.bullet_array[i].x = server_bullet_array[i].x;
-
-
-        //     }
-        //     else {
-        //         //self.element.bullet_array[i].setTexture(gameSettings.texture[server_bullet_array[i].atomicNumber - 1] + "bullet");
-
-        //         /*
-        //         //Otherwise, just update bullet locations
-        //         if (server_bullet_array[i].owner_id == self.socket.id) {
-        //             let changex = self.element.x - server_bullet_array[i].x;
-        //             let changey = self.element.y - server_bullet_array[i].y;
-        //             let distance = Math.sqrt(changex * changex + changey * changey);
-
-        //             if (distance > gameSettings.playerRadius) {
-        //                 self.element.bullet_array[i].setVisible(true);
-
-        //                 self.element.bullet_array[i].enableBody(true, true);
-        //             }
-        //         }
-        //         */
-        //         //self.element.bullet_array[i].setTexture(gameSettings.texture[server_bullet_array[i].atomicNumber - 1] + "bullet");
-        //         //self.element.bullet_array[i].setRotation(self.element.bullet_array[i].initialAngle);
-
-
-
-
-        //         if (gameSettings.transitionmetals.includes(server_bullet_array[i].atomicNumber)) {
-        //             self.element.bullet_array[i].rotation += 0.015;
-        //         }
-
-
-
-        //         //self.element.bullet_array[i].x = server_bullet_array[i].x;
-        //         //self.element.bullet_array[i].y = server_bullet_array[i].y;
-
-        //         //let changex = self.element.x - server_bullet_array[i].x;
-        //         //let changey = self.element.y - server_bullet_array[i].y;
-        //         //let distance = Math.sqrt(changex * changex + changey * changey);
-        //     }
-        // }
-
-
-        // // Otherwise if there's too many, delete the extra bullets
-        // //console.log("server array len:" + server_bullet_array.length);
-        // //console.log("self array len: " + self.element.bullet_array.length);
-        
-        // for (let i = server_bullet_array.length; i < self.element.bullet_array.length; i++) {
-        //     //console.log("a bullet has been destroyed")
-
-        //     self.element.bullet_array[i].destroy();
-        //     //console.log("bullet log #2")
-        //     self.element.bullet_array.splice(i, 1);
-        //     i--;
-        // }
-
-        // let j =  server_bullet_array.length == self.element.bullet_array.length;
        
     });
 
@@ -820,10 +751,8 @@ let counter = 0;
 
 function update(time) {
     if (typeof this.element != "undefined") {
-        /*if (typeof d != "undefined") {
-            console.log(Date.now() - d);
-        }
-        d = Date.now();*/
+        //this.element.bringToTop();
+        
 
         this.cameras.main.startFollow(this.element);
         this.cameras.main.followOffset.set(5, 5);
@@ -883,9 +812,33 @@ function update(time) {
         count++;
 
         for(let k = 0; k<this.element.bullet_array.length; k++){
+            if(typeof this.element.bullet_array[k].actualX != "undefined"){
+                this.element.bullet_array[k].x = this.element.bullet_array[k].actualX;
+                this.element.bullet_array[k].y = this.element.bullet_array[k].actualY;
+                this.element.bullet_array[k].setVisible(true);
+                
+                this.element.bullet_array[k].actualX = undefined;
+            }
+            // if(this.element.bullet_array[k].owner_id != this.socket.id){
+            //     this.element.bullet_array[k].setVisible(true);
+            // }
+            //console.log(this.element.bullet_array[k].x);
 
             let speedY = gameSettings.bulletSpeed * Math.sin(this.element.bullet_array[k].angle2);
             let speedX = gameSettings.bulletSpeed * Math.cos(this.element.bullet_array[k].angle2);
+
+            if (gameSettings.lanthanides.includes(this.element.atomicNum)) {
+                speedY = gameSettings.bulletSpeed * 2 * Math.sin(this.element.bullet_array[k].angle2);
+                speedX = gameSettings.bulletSpeed * 2 * Math.cos(this.element.bullet_array[k].angle2);
+            }
+
+            if (gameSettings.group5.includes(this.element.atomicNum)) {
+
+                speedY = (100 * this.element.bullet_array[k].increment) * Math.sin(this.element.bullet_array[k].angle2);
+                speedX = (100 * this.element.bullet_array[k].increment) * Math.cos(this.element.bullet_array[k].angle2);
+                this.element.bullet_array[k].increment++;
+            }
+            
 
             this.element.bullet_array[k].x += speedX / 60;
             this.element.bullet_array[k].y += speedY / 60;
@@ -894,19 +847,26 @@ function update(time) {
             this.otherElements.getChildren().forEach((otherElement) => {
 
                 let dist = Math.sqrt( Math.pow(otherElement.x - this.element.bullet_array[k].x, 2) + Math.pow(otherElement.y - this.element.bullet_array[k].y, 2) );
-                if (dist < 70){
-                    this.element.bullet_array[k].setVisible(false);
+                if (dist < 70 && !(gameSettings.group8.includes(this.element.atomicNum) || gameSettings.group7.includes(this.element.atomicNum))){
+                    if (this.element.bullet_array[k].owner_id != otherElement.playerId)
+                    {
+                        this.element.bullet_array[k].setVisible(false);
+                    } 
                     
                 }
-                
+    
             }); 
-
+            
             let dist0 = Math.sqrt( Math.pow(this.element.x - this.element.bullet_array[k].x, 2) + Math.pow(this.element.y - this.element.bullet_array[k].y, 2) );
-            if (dist0 < 70){
+
+            if (dist0 < 70 && this.element.bullet_array[k].owner_id != this.socket.id){
                 this.element.bullet_array[k].setVisible(false);  
             }
-            
 
+            if (this.element.bullet_array[k].owner_id == this.socket.id && (this.element.bullet_array[k].x < -10 || this.element.bullet_array[k].x > gameSettings.mapWidth + 10 || this.element.bullet_array[k].y < -10 || this.element.bullet_array[k].y > gameSettings.mapHeight + 10)){
+                this.element.bullet_array[k].destroy();
+                this.element.bullet_array.splice(k, 1);
+            }
 
         }
 
@@ -914,47 +874,46 @@ function update(time) {
         if ((this.input.activePointer.isDown || Phaser.Input.Keyboard.JustDown(this.spacebar)) && (lastShot + 500 < time || (lastShot + 250 < time && this.element.atomicNum == 2))) {
             let bullet = this.element.shootBullet(this);
 
-            //self.element.bullet_array[i] = new Bullet(self, server_bullet_array[i].angle, server_bullet_array[i].x, server_bullet_array[i].y, gameSettings.texture[server_bullet_array[i].atomicNumber - 1]);
-
-
             let bulletAngle = Phaser.Math.Angle.Between(this.element.x, this.element.y, this.input.activePointer.worldX, this.input.activePointer.worldY)
 
             if (gameSettings.group8.includes(this.element.atomicNum)) {
-                group8Bullet(bullet, this.element, this.socket, bulletAngle, bulletAngle);
+                group8Bullet(this, bullet, this.element, this.socket, bulletAngle, bulletAngle);
             }
             else if (gameSettings.group2.includes(this.element.atomicNum)) {
                 let distance = Math.sqrt((bullet.x - this.element.x) * (bullet.x - this.element.x) + (bullet.y - this.element.y) * (bullet.y - this.element.y));
-                group2Bullet(bullet, distance, this.element, this.socket, bulletAngle);
+                group2Bullet(this, bullet, 35, this.element, this.socket, bulletAngle);
             }
             else if (gameSettings.group3.includes(this.element.atomicNum)) {
-                group3Bullet(bullet, this.element, this.socket, bulletAngle);
+                group3Bullet(this, bullet, this.element, this.socket, bulletAngle);
             }
             else if (gameSettings.group4.includes(this.element.atomicNum)) {
-                group4Bullet(bullet, this.element, this.socket, bulletAngle);
+                group4Bullet(this, bullet, this.element, this.socket, bulletAngle);
             }
             else if (gameSettings.group5.includes(this.element.atomicNum)) {
-                group5Bullet(bullet, this.element, this.socket, bulletAngle);
+                group5Bullet(this, bullet, this.element, this.socket, bulletAngle);
             }
             else if (gameSettings.group6.includes(this.element.atomicNum)) {
-                group6Bullet(bullet, this.element, this.socket, bulletAngle);
+                group6Bullet(this, bullet, this.element, this.socket, bulletAngle);
             }
             else if (gameSettings.group7.includes(this.element.atomicNum)) {
-                group7Bullet(bullet, this.element, this.socket, bulletAngle);
+                group7Bullet(this, bullet, this.element, this.socket, bulletAngle);
             }
             else if (gameSettings.transitionmetals.includes(this.element.atomicNum)) {
-                transitionMetalBullet(bullet, this.element, this.socket, bulletAngle);
+                transitionMetalBullet(this, bullet, this.element, this.socket, bulletAngle);
             }
             else if (gameSettings.lanthanides.includes(this.element.atomicNum)) {
-                lanthanideBullet(bullet, this.element, this.socket, bulletAngle);
+                lanthanideBullet(this, bullet, this.element, this.socket, bulletAngle);
             }
             else if (gameSettings.actinides.includes(this.element.atomicNum)) {
-                actinideBullet(bullet, this.element, this.socket, bulletAngle);
+                actinideBullet(this, bullet, this.element, this.socket, bulletAngle);
             }
             else {
                 //damage /= 10, NEED TO CHANGE, ONLY FOR TESTING
-                group1Bullet(bullet, this.element, this.socket, bulletAngle);
+                group1Bullet(this, bullet, this.element, this.socket, bulletAngle);
             }
             lastShot = time;
+
+
         }
 
         if (lastScoreUpdate + 10000 < time) {
@@ -1018,6 +977,7 @@ function update(time) {
         else this.element.x -= 0.000000001;
 
 
+
         //Entity Interpolation
         this.otherElements.getChildren().forEach((otherElement) => {
             //console.log(otherElement.updateArray.length);
@@ -1033,14 +993,6 @@ function update(time) {
                     i++;
                 }
             }
-            if (i != 0) {
-                g += i;
-                counter++;
-            }
-            if (counter%20 == 0) {
-                console.log("avg: " + g/counter);
-            }
-            console.log("i: " + i);
         }); 
 
         upDate = new Date();
@@ -1054,6 +1006,8 @@ function update(time) {
         if (upDate.getTime() > this.element.lastHurtByTransition + 300 && isHit) {
             isHit = false;
         }
+        
+
     }
 }
 

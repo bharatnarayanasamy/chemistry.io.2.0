@@ -1,3 +1,11 @@
+/*
+FIX DIFFERENCE BETWEEN SERVER'S MEASURE OF BULLET DISTANCED TRAVELED AND GAME'S MEASURE
+FIX LONGDISTANCE
+
+
+
+*/
+
 // reads in our .env file and makes those values available as environment variables
 require('dotenv').config();
 
@@ -339,11 +347,8 @@ io.on('connection', (socket) => {
     data.iy = data.y;
     data.time = Date.now();
     data.id = socket.id + c;
+    data.increment = 1;
     c += 1;
-    //CHANGE BEFORE FINAL
-    if (data.atomicNumber == 5) {
-      data.bulletSpeed /= 3;
-    }
     let new_bullet = data;
     bullet_array.push(new_bullet);
     new_bullet_array.push(new_bullet);
@@ -385,6 +390,13 @@ function ServerGameLoop() {
       let speedY = speed * Math.sin(bullet.angle);
       let speedX = speed * Math.cos(bullet.angle);
 
+      if(typeof players[bullet.owner_id] != "undefined" && serverSettings.group5.includes(players[bullet.owner_id].atomicNumServer)){
+        
+        //speedY = (100 * bullet.increment) * Math.sin(bullet.angle);
+        //speedX = (100 * bullet.increment) * Math.cos(bullet.angle);
+        //bullet.increment++;
+      }
+
       bullet.x += speedX / 60; //update bullet position
       bullet.y += speedY / 60;
 
@@ -417,10 +429,6 @@ function ServerGameLoop() {
 
       if (typeof players[bullet.owner_id] != "undefined" && serverSettings.group3.includes(players[bullet.owner_id].atomicNumServer)) {
         longdist = 20000;
-      }
-
-      if (typeof players[bullet.owner_id] != "undefined" && serverSettings.group5.includes(players[bullet.owner_id].atomicNumServer)) {
-        bullet_array[i].bulletSpeed += 20;
       }
 
       if (typeof players[bullet.owner_id] != "undefined" && serverSettings.group7.includes(players[bullet.owner_id].atomicNumServer)) {
