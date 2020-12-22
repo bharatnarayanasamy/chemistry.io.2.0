@@ -165,7 +165,6 @@ var serverSettings = {
   bulletSpeed: 500
 }
 
-var game_array = {};
 var server_seq = 0;
 
 //Initialize function for what happens when connection occurs
@@ -241,42 +240,9 @@ io.on('connection', (socket) => {
     if (typeof players[socket.id] != "undefined") {
       players[socket.id].x += serverSettings.playerSpeed / 60 * movement[1];
       players[socket.id].y += serverSettings.playerSpeed / 60 * movement[0];
-
-      /*
-
-      data.x = players[socket.id].x;
-      data.y = players[socket.id].y;
-      data.rotation = movement[2];
-      data.playerId = socket.id;
-      data.client_num = movementData.i;
-      data.server_num = server_seq;
-      data.server_time = movementData.time;
-      */
-      /*if (typeof playerToServerDelay[socket.id] != "undefined") {
-        playerToServerDelay[socket.id].val += (Date.now() - movementData.time);
-        playerToServerDelay[socket.id].count += 1;
-        if (playerToServerDelay[socket.id].count % 60 == 0) {
-          //console.log(socket.id + " " + playerToServerDelay[socket.id].val / playerToServerDelay[socket.id].count);
-        }
-      }
-      else {
-        playerToServerDelay[socket.id] = { val: Date.now() - movementData.time, count: 1 }
-      }*/
-
-      //server_seq++;
-
-      game_array[socket.id] = {x: players[socket.id].x, y: players[socket.id].y, rotation: movement[2], playerId: socket.id, server_time: movementData.time, client_num: movementData.i}
-      
-      //game_array a dictionary
-      //player id, value = data object
-
-      //game_array.push(data);
+      players[socket.id].rotation = movement[2];
 
     }
-    //add seq number
-
-    //console.log(players[socket.id].x);
-    //console.log(players[socket.id].y);
 
   });
 
@@ -529,7 +495,6 @@ function ServerGameLoop() {
   }
 }
 
-
 // Update the bullets 60 times per frame and send updates
 function UpdateLeaderboard() {
   // Create items array
@@ -556,13 +521,8 @@ function movementHelper() {
   
 }*/
 function Movement() {
-  io.emit('playerMoved', game_array);
-  game_array = {};
+  io.emit('playerMoved', players);
 }
-function test() {
-  io.emit('test', Date.now());
-}
-
 
 function bulletHelper() {
   while (typeof bullet_array[0] != "undefined" && bullet_array[0].time + 100 < Date.now()) {
@@ -588,7 +548,6 @@ setInterval(Movement, 100);
 setInterval(bulletMovement, 50);
 
 setInterval(ServerGameLoop, 16);
-setInterval(test, 100);
 setInterval(UpdateLeaderboard, 100);
 
 

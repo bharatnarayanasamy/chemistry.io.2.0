@@ -1137,7 +1137,5 @@ function update(time) {
             isHit = false;
         }
 
-
-
     }
 }
