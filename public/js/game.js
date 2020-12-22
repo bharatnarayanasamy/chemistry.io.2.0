@@ -15,6 +15,7 @@ var gameSettings = {
     powerUpVel: 50,
     playerRadius: 50,
     obstacleVel: 0,
+    playerHealth: 100,
     ROTATION_SPEED_DEGREES: Phaser.Math.RadToDeg(2 * Math.PI), // 0.5 arc per sec, 2 sec per arc
     TOLERANCE: 0.04 * 1 * Math.PI,
     //texture: ["hydrogen", "helium", "lithium", "vrishabkrishna"],
@@ -74,7 +75,6 @@ var iter;
 //var speedX = 0, speedY = 0;
 
 var count = 0;
-
 
 if (typeof localStorage.getItem("username") != undefined) {
     var username0 = localStorage.getItem("username");
@@ -251,9 +251,13 @@ function create() {
     //updates a player's health 
     this.socket.on('update-health', function (player) {
         if (player.playerId == self.socket.id) {
+            //console.log(player.health);
+            //console.log("iQ- fuck off");
             self.element.hp.set(player.health);
         }
         else {
+            //console.log("iQGGG");
+            //console.log(player.health);
             self.otherElements.getChildren().forEach((otherElement) => {
                 if (player.playerId == otherElement.playerId) {
                     otherElement.hp.set(player.health);
@@ -652,6 +656,7 @@ function create() {
                 last_processed_input = playerInfo[key].client_num;
             }
             else {
+                //console.log(playerInfo[key].rotation);
                 self.otherElements.getChildren().forEach((otherElement) => {
                     if (otherElement.playerId == playerInfo[key].playerId) {
                         //self.physics.moveTo(otherElement, playerInfo[key].x, playerInfo[key].y, 300);
@@ -735,6 +740,7 @@ function create() {
         // +1.75, +3.11 determined by proportion of game width to game height
         if (playerInfo.atomicNumServer < texLen + 1) {
             const otherElement = new Element(self, playerInfo.x + 1.7, playerInfo.y + 2.9, 45, playerInfo.playerId, this.gameSettings.texture[playerInfo.atomicNumServer - 1]);
+            otherElement.hp.destroy();
             self.otherElements.add(otherElement);
             otherElement.setScale(0.4);
             otherElement.body.enable = true;
@@ -742,6 +748,7 @@ function create() {
         }
         else {
             const otherElement = new Element(self, playerInfo.x + 1.7, playerInfo.y + 2.9, 45, playerInfo.playerId, this.gameSettings.texture[this.gameSettings.texture.length - 1]);
+            otherElement.hp.destroy();
             //otherElement.setTint(0x0000ff);
             self.otherElements.add(otherElement);
             otherElement.body.enable = true;
@@ -844,22 +851,22 @@ function create() {
                         otherElement.setPosition(otherElement.updateArray[1].x, otherElement.updateArray[1].y);
                         //otherElement.setPosition(otherElement.updateArray[1].x, otherElement.updateArray[1].y);
                         //self.physics.moveTo(otherElement, otherElement.updateArray[1].x, otherElement.updateArray[1].y, 300)
-                        //otherElement.rotation = otherElement.updateArray[1].rotation;
+                        otherElement.rotation = otherElement.updateArray[1].r;
                         otherElement.updateArray.shift();
                         if (otherElement.updateArray.length < 2) {
                             break;
                         }
-                        console.log(self.physics);
+                        //console.log(self.physics);
                     }
                 }
                 else {
                     //console.log(correcteddx, correcteddy);
                     otherElement.setPosition(otherElement.updateArray[0].x + correcteddx, otherElement.updateArray[0].y + correcteddy);
                     //self.physics.moveTo(otherElement, otherElement.updateArray[0].x + correcteddx, otherElement.updateArray[0].y + correcteddy, 300);
-                    //otherElement.rotation = otherElement.updateArray[0].rotation + deltar;
+                    otherElement.rotation = otherElement.updateArray[0].r + deltar;
                 }
             }
-            console.log(otherElement.x, otherElement.y)
+            //console.log(otherElement.x, otherElement.y)
         });
     }
     setInterval(entityInterpolation, 16)
@@ -949,30 +956,30 @@ function update(time) {
             let speedY = gameSettings.bulletSpeed * Math.sin(this.element.bullet_array[k].angle2);
             let speedX = gameSettings.bulletSpeed * Math.cos(this.element.bullet_array[k].angle2);
 
-            if (gameSettings.group8.includes(this.element.atomicNum)) {
+            // if (gameSettings.group8.includes(this.element.atomicNum)) {
 
-                speedY = (-20 + 60 * this.element.bullet_array[k].increment) * Math.sin(this.element.bullet_array[k].angle2);
-                speedX = (-20 + 60 * this.element.bullet_array[k].increment) * Math.cos(this.element.bullet_array[k].angle2);
+            //     speedY = (-20 + 60 * this.element.bullet_array[k].increment) * Math.sin(this.element.bullet_array[k].angle2);
+            //     speedX = (-20 + 60 * this.element.bullet_array[k].increment) * Math.cos(this.element.bullet_array[k].angle2);
 
-                // speedY = speedY + 20*this.element.bullet_array[k].increment;
-                // speedX = speedX + 20*this.element.bullet_array[k].increment;
-                this.element.bullet_array[k].increment++;
-            }
+            //     // speedY = speedY + 20*this.element.bullet_array[k].increment;
+            //     // speedX = speedX + 20*this.element.bullet_array[k].increment;
+            //     this.element.bullet_array[k].increment++;
+            // }
 
             //let speedY = gameSettings.bulletSpeed * Math.sin(this.element.bullet_array[k].angle2);
             //let speedX = gameSettings.bulletSpeed * Math.cos(this.element.bullet_array[k].angle2);
 
-            if (gameSettings.lanthanides.includes(this.element.atomicNum)) {
-                speedY = gameSettings.bulletSpeed * 2 * Math.sin(this.element.bullet_array[k].angle2);
-                speedX = gameSettings.bulletSpeed * 2 * Math.cos(this.element.bullet_array[k].angle2);
-            }
+            // if (gameSettings.lanthanides.includes(this.element.atomicNum)) {
+            //     speedY = gameSettings.bulletSpeed * 2 * Math.sin(this.element.bullet_array[k].angle2);
+            //     speedX = gameSettings.bulletSpeed * 2 * Math.cos(this.element.bullet_array[k].angle2);
+            // }
 
-            if (gameSettings.group5.includes(this.element.atomicNum)) {
+            // if (gameSettings.group5.includes(this.element.atomicNum)) {
 
-                speedY = (100 * this.element.bullet_array[k].increment) * Math.sin(this.element.bullet_array[k].angle2);
-                speedX = (100 * this.element.bullet_array[k].increment) * Math.cos(this.element.bullet_array[k].angle2);
-                this.element.bullet_array[k].increment++;
-            }
+            //     speedY = (100 * this.element.bullet_array[k].increment) * Math.sin(this.element.bullet_array[k].angle2);
+            //     speedX = (100 * this.element.bullet_array[k].increment) * Math.cos(this.element.bullet_array[k].angle2);
+            //     this.element.bullet_array[k].increment++;
+            // }
 
 
             this.element.bullet_array[k].x += speedX / 60;

@@ -230,10 +230,10 @@ io.on('connection', (socket) => {
   timeDict = {};
   playerToServerDelay = {};
   socket.on('move', (movementData) => {
-    movement = movementData.data
+    movement = movementData.data;
+    //console.log(movement);
     //ORDER =          W/S   A/D
     //W and D are 1, S and A are -1
-
     //var data = {};
 
     //timedif = amount of time we will need to travel between game states
@@ -241,7 +241,7 @@ io.on('connection', (socket) => {
     if (typeof players[socket.id] != "undefined") {
       players[socket.id].x += serverSettings.playerSpeed / 60 * movement[1];
       players[socket.id].y += serverSettings.playerSpeed / 60 * movement[0];
-
+      // players[socket.id].rotation = movement[2];
       /*
 
       data.x = players[socket.id].x;
@@ -391,6 +391,8 @@ function ServerGameLoop() {
 
 
     let bullet = bullet_array[i];
+
+    //console.log("TYPE OF BULLET", typeof(bullet));
     if (typeof bullet != "undefined") {
       let speed = bullet.bulletSpeed;
       let speedY = speed * Math.sin(bullet.angle);
@@ -405,6 +407,7 @@ function ServerGameLoop() {
 
       bullet.x += speedX / 60; //update bullet position
       bullet.y += speedY / 60;
+      //console.log(bullet_array[i]);
 
       if (typeof players[bullet.owner_id] != "undefined" && serverSettings.actinides.includes(players[bullet.owner_id].atomicNumServer)) {
         let dx0 = players[bullet.owner_id].x - bullet.x;
@@ -424,6 +427,9 @@ function ServerGameLoop() {
 
           bullet0.iy = bullet.iy;
           bullet1.iy = bullet.iy;
+
+          // bullet0.damage = bullet.damage;
+          // bullet1.damage = bullet.damage;
 
           bullet_array.push(bullet0);
           bullet_array.push(bullet1);
@@ -466,7 +472,8 @@ function ServerGameLoop() {
         i--;
         delete_set.push(bullet.id);
       }
-
+      //console.log("MP");
+      
       for (let id in players) {
         if (bullet.owner_id != id && typeof players[id] != "undefined") {
           //Your own bullet shouldn't kill you
@@ -474,7 +481,12 @@ function ServerGameLoop() {
           let dy = players[id].y - bullet.y;
           let dist = Math.sqrt(dx * dx + dy * dy);
           let owner = bullet.owner_id;
+          //dist = 0;
           thresh = 70;
+          //console.log(players[id].x);aw
+          //console.log(players[id].y);
+          // console.log(bullet.x);
+          // console.log(bullet.y);
           if (dist < thresh) {
             healthInfo.i = i;
             healthInfo.id = id;
@@ -483,7 +495,12 @@ function ServerGameLoop() {
             healthInfo.speedY = speedY;
             healthInfo.bulletAngle = bullet.angle;
             io.emit('player-hit', healthInfo); // Tell everyone this player got hit
+            //console.log(players[id]);
             players[id].health -= bullet.damage;
+            //console.log("BULLET DAMAGE:", bullet.damage);
+            //console.log(players[id].health);
+            //console.log("players[id].health");
+            //console.log(players[id].health);
             io.emit("update-health", players[id]);
             if (typeof players[bullet.owner_id] != "undefined" && serverSettings.group5.includes(players[bullet.owner_id].atomicNumServer)) {
               let bulletInfo = { x: bullet.x, y: bullet.y }
@@ -576,7 +593,11 @@ function bulletMovement() {
   //bulletMessageArray = [];
 
   io.emit("bullets-update", {new_bullet_array: new_bullet_array, delete_set: delete_set});
-  bullet_array.push(new_bullet_array);
+]  for(let i = 0; i < new_bullet_array.length; i++){
+    bullet_array.push(new_bullet_array[i]);
+  }
+  
+  console.log("bullet array:", bullet_array);
   new_bullet_array = [];
   delete_set = [];
 
