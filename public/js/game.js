@@ -5,9 +5,6 @@ FOR OFTEN USED VARIABLES REQUIRING INDEXING AND/OR PROCESSSING, CREATE A NEW VAR
 //This class is used for defining global letiables that can be accessed by any class
 
 //Dictionary of game settings
-
-
-
 var gameSettings = {
     playerSpeed: 300,
     bulletSpeed: 500,
@@ -121,7 +118,6 @@ var receivedFirstPlayerInfo = false;
 var tempPlayers;
 var tempTime;
 
-
 Math.lerp = function (value1, value2, amount) {
 	amount = amount < 0 ? 0 : amount;
 	amount = amount > 1 ? 1 : amount;
@@ -129,7 +125,6 @@ Math.lerp = function (value1, value2, amount) {
 };
 
 function preload() {
-
     //loading in element images and their bullet images
 
     for (let i = 1; i < 10; i++) { //temporary
@@ -137,7 +132,6 @@ function preload() {
         this.load.image(imageName, "./assets/images/elements/" + imageName + ".png")
         this.load.image(imageName + "bullet", "./assets/images/bullets/" + imageName + "bullet" + ".png")
     }
-
     //this.load.image("vrishabkrishna", "./assets/images/old_images/vrishabkrishna.png");
 
     this.load.image("proton", "./assets/images/proton.png");
@@ -264,18 +258,14 @@ function create() {
         });
     });
 
-
-
     //updates a player's health 
     this.socket.on('update-health', function (player) {
         if (player.playerId == self.socket.id) {
-            //console.log(player.health);
-            //console.log("iQ- fuck off");
+            console.log("iQ");
             self.element.hp.set(player.health);
         }
         else {
-            //console.log("iQGGG");
-            //console.log(player.health);
+            
             self.otherElements.getChildren().forEach((otherElement) => {
                 if (player.playerId == otherElement.playerId) {
                     otherElement.hp.set(player.health);
@@ -288,8 +278,10 @@ function create() {
                     type: 'POST',
                     url: '/logout',
                     success: function () {
-                        window.alert("You died!");
-                        hasDied = true;
+                        if (!hasDied) {
+                            window.alert("You died!");
+                            hasDied = true;
+                        }
                         window.location.href = "index.html";
                     },
                     error: function () {
@@ -312,12 +304,10 @@ function create() {
                 }
             }
         });
-
     });
 
     // Listen for bullet update events 
     this.socket.on('bullets-update', function (server_bullet_array_all) {
-
 
         // If there's client and server bullet arrays have mismatch, fix mismatch
         //console.log(server_bullet_array);
@@ -333,17 +323,17 @@ function create() {
                 console.log("own bullet deleted!");
                 new_bullet_array.splice(i, 1);
             }
-
         }
 
 
         //Adding all new bullest to the array
         for (let i = 0; i < new_bullet_array.length; i++) {
-
             let bullet = new Bullet(self, new_bullet_array[i].angle, new_bullet_array[i].x, new_bullet_array[i].y, gameSettings.texture[new_bullet_array[i].atomicNumber - 1]);
             bullet.id = new_bullet_array[i].id;
             bullet.owner_id = new_bullet_array[i].owner_id;
-
+            if(gameSettings.group8.includes(new_bullet_array[i].atomicNumber)){
+                bullet.isEight = true;
+            }
 
             if (typeof new_bullet_array[i].acc != "undefined") {
                 bullet.acc = new_bullet_array[i].acc;
@@ -352,26 +342,19 @@ function create() {
 
             bullet.setTexture(gameSettings.texture[new_bullet_array[i].atomicNumber - 1] + "bullet");
 
-
             self.element.bullet_array.push(bullet);
             self.element.bullet_array[self.element.bullet_array.length - 1].setVisible(true);
-
-            //self.element.bullet_array.push(bullet);
         }
 
 
 
         for (let i = self.element.bullet_array.length - 1; i >= 0; i--) {
-
             if (delete_set.has(self.element.bullet_array[i].id)) {
                 console.log("ID FOUND!!!");
                 self.element.bullet_array[i].destroy();
                 self.element.bullet_array.splice(i, 1);
             }
-
         }
-
-
     });
 
     //set number of proton/electron/neutron to zero
@@ -592,7 +575,7 @@ function create() {
 
     this.leaderboard = [];
     for (var i = 0; i < 5; i++) {
-        this.leaderboard.push(self.add.text(920, 20 + 20 * i, "").setColor("#00ff00"));
+        this.leaderboard.push(self.add.text(920, 20 + 20 * i, "").setColor("#3D3D3D"));
     }
     this.socket.on('update-leaderboard', function (items) {
         //self.killScoreText = self.add.text(16, 40, 'Kills: ' + (0), { fontSize: '25px', fill: '#00FF00' });
@@ -671,15 +654,14 @@ function create() {
             rotation: self.element.rotation
         };
         self.element.body.enable = true;
-        //self.hp = new HealthBar(self, self.element.x - 50, self.element.y + 70);
 
-        self.killScoreText = self.add.text(16, 40, 'Kills: ' + (0), { fontSize: '25px', fill: '#00FF00' });
-        self.healthLabel = self.add.text(16, 10, "Health: 100", { fontSize: '25px', fill: '#00FF00' });
+        self.killScoreText = self.add.text(16, 40, 'Kills: ' + (0), { fontSize: '25px', fill: '#3D3D3D' });
+        self.healthLabel = self.add.text(16, 10, "Health: 100", { fontSize: '25px', fill: '#3D3D3D'});
 
         playerX = self.element.x;
         playerY = self.element.y;
         //create score text on top left
-        self.scoreText = self.add.text(16, 70, 'Score: ' + (0), { fontSize: '25px', fill: '#00FF00' });
+        self.scoreText = self.add.text(16, 70, 'Score: ' + (0), { fontSize: '25px', fill: '#3D3D3D' });
         self.healthLabel.setScrollFactor(0);
         self.killScoreText.setScrollFactor(0);
         self.scoreText.setScrollFactor(0);
@@ -735,12 +717,12 @@ function create() {
     this.killScore = 15;
 
     //creates scorebars at bottom of screen
-    this.protonBar = new CollectionBar(this, config.width / 2 - 150, config.height - 120, "proton", 0);
-    this.protonBarText = this.add.text(config.width / 2 - 60, config.height - 118, 'Protons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' })
-    this.electronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 80, "electron", 0);
-    this.electronBarText = this.add.text(config.width / 2 - 60, config.height - 78, 'Electrons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' });
-    this.neutronBar = new CollectionBar(this, config.width / 2 - 150, config.height - 40, "neutron", 0);
-    this.neutronBarText = this.add.text(config.width / 2 - 60, config.height - 38, 'Neutrons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' });
+    this.protonBar = new CollectionBar(this, window.innerWidth/8, 10, "proton", 0);
+    this.protonBarText = this.add.text(window.innerWidth/8 + 160, 9.5, 'Protons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' })
+    this.electronBar = new CollectionBar(this, window.innerWidth/8, 40, "electron", 0);
+    this.electronBarText = this.add.text(window.innerWidth/8 + 160, 39.5, 'Electrons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' });
+    this.neutronBar = new CollectionBar(this, window.innerWidth/8, 70, "neutron", 0);
+    this.neutronBarText = this.add.text(window.innerWidth/8 + 160, 69.5, 'Neutrons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' });
     this.atoms = this.add.container(playerX, playerY);
     this.atoms.add(this.protonBarText);
     this.atoms.add(this.electronBarText);
@@ -760,9 +742,6 @@ function create() {
         if (t1 > 0) {
             self.otherElements.getChildren().forEach((otherElement) => {
                 var id = otherElement.playerId;
-                console.log(playerDict);
-                console.log(id);
-                console.log(playerDict[id]);
                 var boogie = playerDict[id];
                 //otherElement.playerId - contains the socket id
                 //rhun a searc through tempPlayers to find the corresponding socket id
@@ -781,19 +760,23 @@ function create() {
                     var ratio = portion / total;
                     // Calculating interpolation x and y in order to set position
                     if(typeof tempPlayers[id] != undefined){
-                        var interpX = Math.lerp(tempPlayers[id].x, boogie.x, ratio);
-                        var interpY = Math.lerp(tempPlayers[id].y, boogie.y, ratio);
-                        console.log(interpX)
-                        console.log(interpY);
-                        // setting other elements position
-                        otherElement.setPosition(interpX, interpY);
-                        otherElement.rotation = boogie.rotation;
+                        if(typeof boogie != undefined){
+
+                            var interpX = Math.lerp(tempPlayers[id].x, boogie.x, ratio);
+                            var interpY = Math.lerp(tempPlayers[id].y, boogie.y, ratio);
+                        
+                        
+                            // setting other elements position
+                            otherElement.setPosition(interpX, interpY);
+                            otherElement.rotation = boogie.rotation;
+                        }
                     }
-                    // chris is not a dumbass
                 } else {
                     // no interpolation at all, just draw the raw position
-                    otherElement.setPosition(boogie.x, boogie.y);
-                    otherElement.rotation = boogie.rotation;
+                    if(typeof boogie != undefined){
+                        otherElement.setPosition(boogie.x, boogie.y);
+                        otherElement.rotation = boogie.rotation;
+                    }
                     // in the actual code I attempt some extrapolation when draw is called in a range outside of t1 to t2
                     // this usually only occurs if the connection or server lag, and renderTime falls into a window for which we have yet
                     // to receive any data
@@ -810,7 +793,6 @@ function create() {
         tempPlayers = playerDict;
     }
     setInterval(entityInterpolation, 16);
-
 }
 
 var d;
@@ -819,9 +801,6 @@ let counter = 0;
 
 function update(time) {
     if (typeof this.element != "undefined") {
-        //this.element.bringToTop();
-
-
         this.cameras.main.startFollow(this.element);
         this.cameras.main.followOffset.set(5, 5);
 
@@ -831,9 +810,7 @@ function update(time) {
         else {
             this.cameras.main.setZoom(1);
         }
-        //Phaser.Math.Clamp
 
-        //dist2 = Math.pow(players[id0].x - players[id].x, 2) + Math.pow(players[id0].y - players[id].y, 2);
         //move this out
         movement_command = this.element.movePlayer(this, gameSettings.playerSpeed, isHit, this.knockbackSpeedX, this.knockbackSpeedY, this.transitionBulletAngle, isOverlappingOther);
         var movementData = {
@@ -846,8 +823,7 @@ function update(time) {
         movementCommands.push(movementData);
         this.socket.emit('move', movementData);
 
-
-        this.healthLabel.text = "Health: " + this.element.hp.value;
+        this.healthLabel.text = "Health: " + Math.round(this.element.hp.value);
 
         //change to only lanthanide group
         if (gameSettings.lanthanides.includes(this.element.atomicNum)) {
@@ -858,7 +834,7 @@ function update(time) {
             this.leaderboardBg.x += 250;
             this.leaderboardBg.y -= 180;
 
-            this.healthLabel.text = "Health: " + this.element.hp.value;
+            this.healthLabel.text = "Health: " + Math.round(element.hp.value);
             this.healthLabel.x -= 260;
             this.healthLabel.y -= 180;
 
@@ -876,7 +852,6 @@ function update(time) {
 
         this.dot.x = this.element.x / 30;
         this.dot.y = this.element.y / 26.5;
-
         count++;
 
         for (let k = 0; k < this.element.bullet_array.length; k++) {
@@ -887,60 +862,31 @@ function update(time) {
 
                 this.element.bullet_array[k].actualX = undefined;
             }
-            // if(this.element.bullet_array[k].owner_id != this.socket.id){
-            //     this.element.bullet_array[k].setVisible(true);
-            // }
-            //console.log(this.element.bullet_array[k].x);
 
 
             let speedY = gameSettings.bulletSpeed * Math.sin(this.element.bullet_array[k].angle2);
             let speedX = gameSettings.bulletSpeed * Math.cos(this.element.bullet_array[k].angle2);
 
-            // if (gameSettings.group8.includes(this.element.atomicNum)) {
-
-            //     speedY = (-20 + 60 * this.element.bullet_array[k].increment) * Math.sin(this.element.bullet_array[k].angle2);
-            //     speedX = (-20 + 60 * this.element.bullet_array[k].increment) * Math.cos(this.element.bullet_array[k].angle2);
-
-            //     // speedY = speedY + 20*this.element.bullet_array[k].increment;
-            //     // speedX = speedX + 20*this.element.bullet_array[k].increment;
-            //     this.element.bullet_array[k].increment++;
-            // }
-
-            //let speedY = gameSettings.bulletSpeed * Math.sin(this.element.bullet_array[k].angle2);
-            //let speedX = gameSettings.bulletSpeed * Math.cos(this.element.bullet_array[k].angle2);
-
-            // if (gameSettings.lanthanides.includes(this.element.atomicNum)) {
-            //     speedY = gameSettings.bulletSpeed * 2 * Math.sin(this.element.bullet_array[k].angle2);
-            //     speedX = gameSettings.bulletSpeed * 2 * Math.cos(this.element.bullet_array[k].angle2);
-            // }
-
-            // if (gameSettings.group5.includes(this.element.atomicNum)) {
-
-            //     speedY = (100 * this.element.bullet_array[k].increment) * Math.sin(this.element.bullet_array[k].angle2);
-            //     speedX = (100 * this.element.bullet_array[k].increment) * Math.cos(this.element.bullet_array[k].angle2);
-            //     this.element.bullet_array[k].increment++;
-            // }
-
-
             this.element.bullet_array[k].x += speedX / 60;
             this.element.bullet_array[k].y += speedY / 60;
 
+            let dist0 = Math.sqrt(Math.pow(this.element.x - this.element.bullet_array[k].x, 2) + Math.pow(this.element.y - this.element.bullet_array[k].y, 2));
 
             this.otherElements.getChildren().forEach((otherElement) => {
-
                 let dist = Math.sqrt(Math.pow(otherElement.x - this.element.bullet_array[k].x, 2) + Math.pow(otherElement.y - this.element.bullet_array[k].y, 2));
+
+                // When opponent gets hit by player's helium bullets
                 if (dist < 70 && !(gameSettings.group8.includes(this.element.atomicNum) || gameSettings.group7.includes(this.element.atomicNum))) {
                     if (this.element.bullet_array[k].owner_id != otherElement.playerId) {
                         this.element.bullet_array[k].setVisible(false);
                     }
-
                 }
 
             });
 
-            let dist0 = Math.sqrt(Math.pow(this.element.x - this.element.bullet_array[k].x, 2) + Math.pow(this.element.y - this.element.bullet_array[k].y, 2));
+            //let dist0 = Math.sqrt(Math.pow(this.element.x - this.element.bullet_array[k].x, 2) + Math.pow(this.element.y - this.element.bullet_array[k].y, 2));
 
-            if (dist0 < 70 && this.element.bullet_array[k].owner_id != this.socket.id ) {
+            if (dist0 < 70 && this.element.bullet_array[k].owner_id != this.socket.id && !this.element.bullet_array[k].isEight) {
                 this.element.bullet_array[k].setVisible(false);
             }
 
@@ -948,14 +894,13 @@ function update(time) {
                 this.element.bullet_array[k].destroy();
                 this.element.bullet_array.splice(k, 1);
             }
-
         }
-
 
         if ((this.input.activePointer.isDown || Phaser.Input.Keyboard.JustDown(this.spacebar)) && (lastShot + 500 < time || (lastShot + 250 < time && this.element.atomicNum == 2))) {
             let bullet = this.element.shootBullet(this);
 
             let bulletAngle = Phaser.Math.Angle.Between(this.element.x, this.element.y, this.input.activePointer.worldX, this.input.activePointer.worldY);
+
 
             if (gameSettings.group8.includes(this.element.atomicNum)) {
                 group8Bullet(this, bullet, this.element, this.socket, bulletAngle, bulletAngle);
@@ -970,7 +915,7 @@ function update(time) {
             else if (gameSettings.group4.includes(this.element.atomicNum)) {
                 group4Bullet(this, bullet, this.element, this.socket, bulletAngle);
             }
-            else if (gameSettings.group5.includes(this.element.atomicNum)) {
+            else if (gameSettings.includes(this.element.atomicNum)) {
                 group5Bullet(this, bullet, this.element, this.socket, bulletAngle);
             }
             else if (gameSettings.group6.includes(this.element.atomicNum)) {
@@ -993,8 +938,6 @@ function update(time) {
                 group1Bullet(this, bullet, this.element, this.socket, bulletAngle);
             }
             lastShot = time;
-
-
         }
 
         if (lastScoreUpdate + 10000 < time) {
@@ -1015,7 +958,6 @@ function update(time) {
                     });
                     currentHighScore = this.score;
                 }
-
                 if (bestKills < this.element.kills) {
                     const data = {
                         email: email,
@@ -1037,8 +979,7 @@ function update(time) {
                         email: email,
                         element: this.element.atomicNum,
                     };
-                    //console.log(this.element.atomicNum);
-                    //console.log(data);
+                    
                     $.ajax({
                         type: 'POST',
                         url: '/submit-element',
@@ -1054,106 +995,21 @@ function update(time) {
             lastScoreUpdate = time;
         }
 
-        if (Math.random() < 0.5) this.element.x += 0.000000001;
-        else this.element.x -= 0.000000001;
-
-
-        /*this.otherElements.getChildren().forEach((otherElement) => {
-            var distance = Phaser.Math.Distance.Between(otherElement.x, otherElement.y, otherElement.destx, otherElement.y);
-            if (otherElement.body.speed > 0) {
-                console.log(distance);
-                //  6 is our distance tolerance, i.e. how close the source can get to the target
-                //  before it is considered as being there. The faster it moves, the more tolerance is required.
-                if (distance < 6) {
-                    otherElement.body.reset(otherElement.destx, otherElement.desty);
-                }
-            }
-        });*/
-
+        if (Math.random() < 0.5) {
+            this.element.x += 0.000000001;
+        }
+        else {
+            this.element.x -= 0.000000001;
+        }
 
         upDate = new Date();
-
         if (time > lastHealed + 1000 && time > lastShot + 3000 && upDate.getTime() > this.element.lastHurt + 3000) {
             this.element.hp.increment(3);
             this.socket.emit('player-heal', { id: this.element.playerId, health: this.element.hp.value });
             lastHealed = time;
         }
-
         if (upDate.getTime() > this.element.lastHurtByTransition + 300 && isHit) {
             isHit = false;
         }
     }
 }
-
-
-
-
-
-
-
-        // TE(MP) TIME = T2 AT THE END OF THE FUNCTION
-        //        var timeDifference;
-        /*
-        if (typeof time == "undefined") {
-            time = Date.now();
-            iter = 0;
-        }
-        else {
-            if (timeDifference < 50) {
-                console.log(avg/iter);
-            }
-            timeDifference = Date.now() - time;
-            avg += timeDifference;
-            time = Date.now();
-            iter++;
-            //console.log("iteration ", iter - 1, " to ", iter, ": ", timeDifference);
-            timeArray.push(timeDifference);
-        }
-        
-        var rotation = self.element.rotation;
-        var position = { x: self.element.x, y: self.element.y };
-        var last_processed_input;
-
-        
-        Object.keys(playerInfo).forEach(function (key) {
-            //console.log(key + " " + playerInfo[key]);
-
-            if (playerInfo[key].playerId == self.socket.id) {
-                rotation = playerInfo[key].rotation;
-                position = { x: playerInfo[key].x, y: playerInfo[key].y };
-                last_processed_input = playerInfo[key].client_num;
-            }
-            else {
-                //console.log(playerInfo[key].rotation);
-                self.otherElements.getChildren().forEach((otherElement) => {
-                    if (otherElement.playerId == playerInfo[key].playerId) {
-                        //self.physics.moveTo(otherElement, playerInfo[key].x, playerInfo[key].y, 300);
-                        //otherElement.destx = playerInfo[key].x;
-                        //otherElement.desty = playerInfo[key].y;
-                        otherElement.updateArray.push({ x: playerInfo[key].x, y: playerInfo[key].y, r: playerInfo[key].rotation, time: Date.now() });
-                    }
-                });
-            }
-        });
-
-
-        for (let i = 0; i < playerInfo.length; i++) {
-            if (playerInfo[i].playerId == self.socket.id) {
-                rotation = playerInfo[i].rotation;
-                position = { x: playerInfo[i].x, y: playerInfo[i].y };
-                last_processed_input = playerInfo[i].client_num;
-            }
-            else {
-                self.otherElements.getChildren().forEach((otherElement) => {
-                    if (otherElement.playerId == playerInfo[i].playerId) {
-                        otherElement.updateArray.push({ x: playerInfo[i].x, y: playerInfo[i].y, r: playerInfo[i].rotation, time:Date.now()});
-                    }
-                });
-            }
-        }
-        
-        if (timeArray.length > 1) {
-            timeArray.shift();
-        }
-        */
-

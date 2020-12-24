@@ -1,4 +1,3 @@
-
 function group1Bullet(gamejs, bullet, element, socket, bulletAngle) {
 
 
@@ -304,7 +303,7 @@ function group8Bullet(gamejs, bullet, element, socket, bulletAngle, rotationAngl
 
     socket.emit('shoot-bullet', {
         x: bullet.x, y: bullet.y, angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed,
-        damage: bullet.damage / 20, atomicNumber: element.atomicNum, rotAngle: rotationAngle - 1.571, acc: true
+        damage: bullet.damage / 20, atomicNumber: element.atomicNum, rotAngle: rotationAngle - 1.571
     });
 }
 

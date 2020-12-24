@@ -1,10 +1,4 @@
-/*
-FIX DIFFERENCE BETWEEN SERVER'S MEASURE OF BULLET DISTANCED TRAVELED AND GAME'S MEASURE
-FIX LONGDISTANCE
 
-
-
-*/
 
 // reads in our .env file and makes those values available as environment variables
 require('dotenv').config();
@@ -171,6 +165,7 @@ var server_seq = 0;
 io.on('connection', (socket) => {
   socketID = socket.id;
   console.log('a user connected');
+  console.log("Bharat simps for sj");
   // create a new player and add it to our players object
   players[socket.id] = {
     x: Math.floor(Math.random() * gameWidth - 100) + 50, //initialize positions
@@ -365,10 +360,10 @@ function ServerGameLoop() {
       let speedX = speed * Math.cos(bullet.angle);
 
       if(typeof players[bullet.owner_id] != "undefined" && serverSettings.group5.includes(players[bullet.owner_id].atomicNumServer)){
-        
-        //speedY = (100 * bullet.increment) * Math.sin(bullet.angle);
-        //speedX = (100 * bullet.increment) * Math.cos(bullet.angle);
-        //bullet.increment++;
+        console.log("SHOOOOOOT");
+        speedY = (100 * bullet.increment) * Math.sin(bullet.angle);
+        speedX = (100 * bullet.increment) * Math.cos(bullet.angle);
+        bullet.increment++;
       }
 
       bullet.x += speedX / 60; //update bullet position
@@ -512,6 +507,8 @@ function ServerGameLoop() {
   }
 }
 
+
+
 // Update the bullets 60 times per frame and send updates
 function UpdateLeaderboard() {
   // Create items array
@@ -570,7 +567,5 @@ setInterval(bulletMovement, 50);
 
 setInterval(ServerGameLoop, 16);
 setInterval(UpdateLeaderboard, 100);
-
-
 
 

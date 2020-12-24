@@ -14,6 +14,7 @@ class HealthBar {
         scene.physics.world.enableBody(this);
     }
 
+
     move(scene, x, y) {
         this.x = x;
         this.y = y;
@@ -51,27 +52,27 @@ class HealthBar {
     {
         this.bar.clear();
 
-        //  BG
-        this.bar.fillStyle(0x000000);
-        this.bar.fillRect(this.x, this.y, 80, 16);
+        //  BG (Not in use anymore for new healthbar)
+        //this.bar.fillStyle(0x454545);
+        //this.bar.fillRect(this.x - 27, this.y - 28, 80, 8);
 
         //  Health
 
-        this.bar.fillStyle(0xffffff);
-        this.bar.fillRect(this.x + 2, this.y + 2, 76, 12);
+        this.bar.fillStyle(0xC4C4C4);
+        this.bar.fillRect(this.x - 25, this.y -26 , 76, 4);
 
         if (this.value < 30)
         {
-            this.bar.fillStyle(0xff0000);
+            this.bar.fillStyle(0xFF8686);
         }
         else
         {
-            this.bar.fillStyle(0x00ff00);
+            this.bar.fillStyle(0x58FF8B);
         }
 
         let d = Math.floor(this.p * this.value);
 
-        this.bar.fillRect(this.x + 2, this.y + 2, d, 12);
+        this.bar.fillRect(this.x -25 , this.y - 26, d, 4);
     }
 
     destroy() {

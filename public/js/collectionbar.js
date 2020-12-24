@@ -7,10 +7,10 @@ class CollectionBar {
         this.x = x;
         this.y = y;
         this.value = value;
-        this.p = 3;
+        this.p = 1.48;
         this.type = type;
-        this.width = 300;
-        this.height = 20;
+        this.width = 150;
+        this.height = 15;
 
         this.draw();
 
@@ -33,16 +33,16 @@ class CollectionBar {
     {
         this.type = type;
         this.value+=value;
-        this.x = 448;
+        this.x = window.innerWidth/8; 
 
         if (this.type == "proton") {
-            this.y = 680;
+            this.y = 10; 
         }
         else if (this.type == "electron") {
-            this.y = 720;
+            this.y = 40; 
         }
         else {
-            this.y = 760;
+            this.y = 70; 
         }
         if (this.value > 100)
         {
@@ -57,26 +57,26 @@ class CollectionBar {
     {
         this.bar.clear();
 
-        //  BG
-        this.bar.fillStyle(0x000000);
-        this.bar.fillRect(this.x, this.y, 304, 24);
+        //  outline
+        this.bar.fillStyle(0xbdbdbd);
+        this.bar.fillRect(this.x, this.y, this.width, this.height);
 
-        //  Health
+        //  fill
 
         this.bar.fillStyle(0xffffff);
-        this.bar.fillRect(this.x + 2, this.y + 2, 300, 20);
+        this.bar.fillRect(this.x + 1, this.y +1, this.width-2, this.height-2);
         if (this.type == "proton") {
-            this.bar.fillStyle(0xff0000);
+            this.bar.fillStyle(0xff5d5d);
         }
         else if (this.type == "electron") {
-            this.bar.fillStyle(0xffc0cb);      
+            this.bar.fillStyle(0x6fc8ff);      
         }
         else {
             this.bar.fillStyle(0x808080);
         }
         var d = Math.floor(this.p * this.value);
 
-        this.bar.fillRect(this.x + 2, this.y + 2, d, 20);
+        this.bar.fillRect(this.x + 1, this.y + 1, d, this.height-2);
     }
 
     destroy() {

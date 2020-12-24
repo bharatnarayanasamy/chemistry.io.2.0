@@ -19,3 +19,4 @@ function getValue(id) {
       return false;
   }
 }
+//let dist0 = Math.sqrt(Math.pow(this.element.x - this.element.bullet_array[k].x, 2) + Math.pow(this.element.y - this.element.bullet_array[k].y, 2));

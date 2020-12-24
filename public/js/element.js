@@ -54,6 +54,7 @@ class Element extends Phaser.GameObjects.Sprite {
         scene.add.existing(this);
         scene.physics.world.enableBody(this);
 
+
         //this.body.setCollideWorldBounds(true);
 
         this.hp = new HealthBar(scene, x - 50, y + 70);
