@@ -940,7 +940,7 @@ function update(time) {
 
             let dist0 = Math.sqrt(Math.pow(this.element.x - this.element.bullet_array[k].x, 2) + Math.pow(this.element.y - this.element.bullet_array[k].y, 2));
 
-            if (dist0 < 70 && this.element.bullet_array[k].owner_id != this.socket.id && !(gameSettings.group8.includes(this.element.atomicNum) || gameSettings.group7.includes(this.element.atomicNum))) {
+            if (dist0 < 70 && this.element.bullet_array[k].owner_id != this.socket.id ) {
                 this.element.bullet_array[k].setVisible(false);
             }
 
