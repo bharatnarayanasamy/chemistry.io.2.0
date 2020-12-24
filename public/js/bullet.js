@@ -14,8 +14,6 @@ class Bullet extends Phaser.Physics.Arcade.Sprite {
     {
       var x = x + 20 * Math.cos(angle);
       var y = y + 20 * Math.sin(angle);
-      
-    
     }
     else{
       var x = x - 18 * Math.cos(angle);
@@ -73,12 +71,7 @@ class Bullet extends Phaser.Physics.Arcade.Sprite {
   inactive(){
     this.disableBody(true, true);
   }
-
   active(){
     this.enableBody(true, true);
   }
-
-  
-
-
 }

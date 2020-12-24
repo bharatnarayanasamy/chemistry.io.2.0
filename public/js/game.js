@@ -6,6 +6,8 @@ FOR OFTEN USED VARIABLES REQUIRING INDEXING AND/OR PROCESSSING, CREATE A NEW VAR
 
 //Dictionary of game settings
 
+
+
 var gameSettings = {
     playerSpeed: 300,
     bulletSpeed: 500,
@@ -15,6 +17,7 @@ var gameSettings = {
     powerUpVel: 50,
     playerRadius: 50,
     obstacleVel: 0,
+    playerHealth: 100,
     ROTATION_SPEED_DEGREES: Phaser.Math.RadToDeg(2 * Math.PI), // 0.5 arc per sec, 2 sec per arc
     TOLERANCE: 0.04 * 1 * Math.PI,
     //texture: ["hydrogen", "helium", "lithium", "vrishabkrishna"],
@@ -75,7 +78,6 @@ var iter;
 
 var count = 0;
 
-
 if (typeof localStorage.getItem("username") != undefined) {
     var username0 = localStorage.getItem("username");
 }
@@ -110,6 +112,13 @@ var messageIndex = 0;
 var elements = JSON.parse(localStorage.getItem("elements"));
 let s = 0;
 let z = 0;
+
+Math.lerp = function (value1, value2, amount) {
+	amount = amount < 0 ? 0 : amount;
+	amount = amount > 1 ? 1 : amount;
+	return value1 + (value2 - value1) * amount;
+};
+
 function preload() {
 
     //loading in element images and their bullet images
@@ -251,9 +260,13 @@ function create() {
     //updates a player's health 
     this.socket.on('update-health', function (player) {
         if (player.playerId == self.socket.id) {
+            //console.log(player.health);
+            //console.log("iQ- fuck off");
             self.element.hp.set(player.health);
         }
         else {
+            //console.log("iQGGG");
+            //console.log(player.health);
             self.otherElements.getChildren().forEach((otherElement) => {
                 if (player.playerId == otherElement.playerId) {
                     otherElement.hp.set(player.health);
@@ -619,73 +632,79 @@ function create() {
     var timeArray = [];
     var avg = 0;
 
-    //displays other players' movement on screen
+    var t1 = 0;
+    //displays other players' movement on screenloc
     this.socket.on('playerMoved', function (playerInfo) {
-        //        var timeDifference;
-        if (typeof time == "undefined") {
-            time = Date.now();
-            iter = 0;
+        tickRate = 20;
+        // actual code
+        var past = 1000 / tickRate;
+
+        playerDict = playerInfo.playersKey;
+
+        if (t1 > 0) {
+
+            self.otherElements.getChildren().forEach((otherElement) => {
+
+                var id = otherElement.playerId;
+                var boogie = playerDict[id];
+
+                //otherElement.playerId - contains the socket id
+                //rhun a searc through tempPlayers to find the corresponding socket id
+                //if search returns -1, then we just
+
+
+                var now = Date.now();
+                var renderTime = now - past; // the exact time (in the past) for which we will create a position, in this case this is ~1 tick ago
+
+                // timestamp of a previous position (presumably one tick older than t2)
+                t1 = tempTime;
+                // timestamp of most recent position update form server
+                var t2 = playerInfo.time;
+
+
+                // if we have positional data within this time range
+                if (renderTime <= t2 && renderTime >= t1) {
+                    // total time from t1 to t2
+                    var total = t2 - t1;
+                    // how far between t1 and t2 this entity is as of 'renderTime'
+                    var portion = renderTime - t1;
+
+                    // fractional distance between t1 and t2
+                    var ratio = portion / total;
+                    //
+
+                    // Calculating interpolation x and y in order to set position
+
+                    var interpX = Math.lerp(tempPlayers[id].x, boogie.x, ratio);
+                    var interpY = Math.lerp(tempPlayers[id].y, boogie.y, ratio);
+                    console.log(id);
+                    console.log(interpX)
+                    console.log(interpY);
+                    // setting other elements position
+                    otherElement.setPosition(interpX, interpY);
+                    // chris a dumbass
+                } else {
+                    // no interpolation at all, just draw the raw position
+                    console.log("I LOVE JESUS");
+                    otherElement.setPosition(boogie.x, boogie.y);
+                    // in the actual code I attempt some extrapolation when draw is called in a range outside of t1 to t2
+                    // this usually only occurs if the connection or server lag, and renderTime falls into a window for which we have yet
+                    // to receive any data
+                    // tuning the variable 'past' can minimize
+                }
+
+            });
         }
-        else {
-            /*if (timeDifference < 50) {
-                console.log(avg/iter);
-            }*/
-            timeDifference = Date.now() - time;
-            avg += timeDifference;
-            time = Date.now();
-            iter++;
-            //console.log("iteration ", iter - 1, " to ", iter, ": ", timeDifference);
-            timeArray.push(timeDifference);
+        else{
+            t1 = 1;
+            var t2 = playerInfo.time;
         }
 
-        var rotation = self.element.rotation;
-        var position = { x: self.element.x, y: self.element.y };
-        var last_processed_input;
+        tempTime = t2;
+        tempPlayers = playerDict;
 
 
-        Object.keys(playerInfo).forEach(function (key) {
-            //console.log(key + " " + playerInfo[key]);
-
-            if (playerInfo[key].playerId == self.socket.id) {
-                rotation = playerInfo[key].rotation;
-                position = { x: playerInfo[key].x, y: playerInfo[key].y };
-                last_processed_input = playerInfo[key].client_num;
-            }
-            else {
-                self.otherElements.getChildren().forEach((otherElement) => {
-                    if (otherElement.playerId == playerInfo[key].playerId) {
-                        //self.physics.moveTo(otherElement, playerInfo[key].x, playerInfo[key].y, 300);
-                        //otherElement.destx = playerInfo[key].x;
-                        //otherElement.desty = playerInfo[key].y;
-                        otherElement.updateArray.push({ x: playerInfo[key].x, y: playerInfo[key].y, r: playerInfo[key].rotation, time: Date.now() });
-                    }
-                });
-            }
-        });
-
-
-        /*for (let i = 0; i < playerInfo.length; i++) {
-            if (playerInfo[i].playerId == self.socket.id) {
-                rotation = playerInfo[i].rotation;
-                position = { x: playerInfo[i].x, y: playerInfo[i].y };
-                last_processed_input = playerInfo[i].client_num;
-            }
-            else {
-                self.otherElements.getChildren().forEach((otherElement) => {
-                    if (otherElement.playerId == playerInfo[i].playerId) {
-                        otherElement.updateArray.push({ x: playerInfo[i].x, y: playerInfo[i].y, r: playerInfo[i].rotation, time:Date.now()});
-                    }
-                });
-            }
-        }*/
-
-
-        if (timeArray.length > 1) {
-            timeArray.shift();
-        }
-
-
-        var j = 0;
+        let j = 0;
         if (typeof last_processed_input != "undefined") {
             while (j < movementCommands.length) {
                 var input = movementCommands[j];
@@ -701,8 +720,7 @@ function create() {
             }
         }
 
-        self.element.setRotation(rotation);
-        self.element.setPosition(position.x, position.y);
+
     });
 
     //add this player onto the screen
@@ -735,6 +753,7 @@ function create() {
         // +1.75, +3.11 determined by proportion of game width to game height
         if (playerInfo.atomicNumServer < texLen + 1) {
             const otherElement = new Element(self, playerInfo.x + 1.7, playerInfo.y + 2.9, 45, playerInfo.playerId, this.gameSettings.texture[playerInfo.atomicNumServer - 1]);
+            otherElement.hp.destroy();
             self.otherElements.add(otherElement);
             otherElement.setScale(0.4);
             otherElement.body.enable = true;
@@ -742,6 +761,7 @@ function create() {
         }
         else {
             const otherElement = new Element(self, playerInfo.x + 1.7, playerInfo.y + 2.9, 45, playerInfo.playerId, this.gameSettings.texture[this.gameSettings.texture.length - 1]);
+            otherElement.hp.destroy();
             //otherElement.setTint(0x0000ff);
             self.otherElements.add(otherElement);
             otherElement.body.enable = true;
@@ -793,7 +813,7 @@ function create() {
     this.neutronBar.bar.setScrollFactor(0);
 
 
-    function entityInterpolation() {
+    /*function entityInterpolation() {
         //console.log(Date.now()-date);
         //date = Date.now();
 
@@ -844,25 +864,25 @@ function create() {
                         otherElement.setPosition(otherElement.updateArray[1].x, otherElement.updateArray[1].y);
                         //otherElement.setPosition(otherElement.updateArray[1].x, otherElement.updateArray[1].y);
                         //self.physics.moveTo(otherElement, otherElement.updateArray[1].x, otherElement.updateArray[1].y, 300)
-                        //otherElement.rotation = otherElement.updateArray[1].rotation;
+                        otherElement.rotation = otherElement.updateArray[1].r;
                         otherElement.updateArray.shift();
                         if (otherElement.updateArray.length < 2) {
                             break;
                         }
-                        console.log(self.physics);
+                        //console.log(self.physics);
                     }
                 }
                 else {
                     //console.log(correcteddx, correcteddy);
                     otherElement.setPosition(otherElement.updateArray[0].x + correcteddx, otherElement.updateArray[0].y + correcteddy);
                     //self.physics.moveTo(otherElement, otherElement.updateArray[0].x + correcteddx, otherElement.updateArray[0].y + correcteddy, 300);
-                    //otherElement.rotation = otherElement.updateArray[0].rotation + deltar;
+                    otherElement.rotation = otherElement.updateArray[0].r + deltar;
                 }
             }
-            console.log(otherElement.x, otherElement.y)
+            //console.log(otherElement.x, otherElement.y)
         });
     }
-    setInterval(entityInterpolation, 16)
+    setInterval(entityInterpolation, 16)*/
 
 }
 
@@ -949,30 +969,30 @@ function update(time) {
             let speedY = gameSettings.bulletSpeed * Math.sin(this.element.bullet_array[k].angle2);
             let speedX = gameSettings.bulletSpeed * Math.cos(this.element.bullet_array[k].angle2);
 
-            if (gameSettings.group8.includes(this.element.atomicNum)) {
+            // if (gameSettings.group8.includes(this.element.atomicNum)) {
 
-                speedY = (-20 + 60 * this.element.bullet_array[k].increment) * Math.sin(this.element.bullet_array[k].angle2);
-                speedX = (-20 + 60 * this.element.bullet_array[k].increment) * Math.cos(this.element.bullet_array[k].angle2);
+            //     speedY = (-20 + 60 * this.element.bullet_array[k].increment) * Math.sin(this.element.bullet_array[k].angle2);
+            //     speedX = (-20 + 60 * this.element.bullet_array[k].increment) * Math.cos(this.element.bullet_array[k].angle2);
 
-                // speedY = speedY + 20*this.element.bullet_array[k].increment;
-                // speedX = speedX + 20*this.element.bullet_array[k].increment;
-                this.element.bullet_array[k].increment++;
-            }
+            //     // speedY = speedY + 20*this.element.bullet_array[k].increment;
+            //     // speedX = speedX + 20*this.element.bullet_array[k].increment;
+            //     this.element.bullet_array[k].increment++;
+            // }
 
             //let speedY = gameSettings.bulletSpeed * Math.sin(this.element.bullet_array[k].angle2);
             //let speedX = gameSettings.bulletSpeed * Math.cos(this.element.bullet_array[k].angle2);
 
-            if (gameSettings.lanthanides.includes(this.element.atomicNum)) {
-                speedY = gameSettings.bulletSpeed * 2 * Math.sin(this.element.bullet_array[k].angle2);
-                speedX = gameSettings.bulletSpeed * 2 * Math.cos(this.element.bullet_array[k].angle2);
-            }
+            // if (gameSettings.lanthanides.includes(this.element.atomicNum)) {
+            //     speedY = gameSettings.bulletSpeed * 2 * Math.sin(this.element.bullet_array[k].angle2);
+            //     speedX = gameSettings.bulletSpeed * 2 * Math.cos(this.element.bullet_array[k].angle2);
+            // }
 
-            if (gameSettings.group5.includes(this.element.atomicNum)) {
+            // if (gameSettings.group5.includes(this.element.atomicNum)) {
 
-                speedY = (100 * this.element.bullet_array[k].increment) * Math.sin(this.element.bullet_array[k].angle2);
-                speedX = (100 * this.element.bullet_array[k].increment) * Math.cos(this.element.bullet_array[k].angle2);
-                this.element.bullet_array[k].increment++;
-            }
+            //     speedY = (100 * this.element.bullet_array[k].increment) * Math.sin(this.element.bullet_array[k].angle2);
+            //     speedX = (100 * this.element.bullet_array[k].increment) * Math.cos(this.element.bullet_array[k].angle2);
+            //     this.element.bullet_array[k].increment++;
+            // }
 
 
             this.element.bullet_array[k].x += speedX / 60;
@@ -1043,7 +1063,6 @@ function update(time) {
             }
             else {
                 //damage /= 10, NEED TO CHANGE, ONLY FOR TESTING
-                console.log("MF + PK");
                 group1Bullet(this, bullet, this.element, this.socket, bulletAngle);
             }
             lastShot = time;
@@ -1136,6 +1155,78 @@ function update(time) {
         if (upDate.getTime() > this.element.lastHurtByTransition + 300 && isHit) {
             isHit = false;
         }
-
     }
 }
+
+
+
+
+
+
+
+        // TE(MP) TIME = T2 AT THE END OF THE FUNCTION
+        //        var timeDifference;
+        /*
+        if (typeof time == "undefined") {
+            time = Date.now();
+            iter = 0;
+        }
+        else {
+            if (timeDifference < 50) {
+                console.log(avg/iter);
+            }
+            timeDifference = Date.now() - time;
+            avg += timeDifference;
+            time = Date.now();
+            iter++;
+            //console.log("iteration ", iter - 1, " to ", iter, ": ", timeDifference);
+            timeArray.push(timeDifference);
+        }
+        
+        var rotation = self.element.rotation;
+        var position = { x: self.element.x, y: self.element.y };
+        var last_processed_input;
+
+        
+        Object.keys(playerInfo).forEach(function (key) {
+            //console.log(key + " " + playerInfo[key]);
+
+            if (playerInfo[key].playerId == self.socket.id) {
+                rotation = playerInfo[key].rotation;
+                position = { x: playerInfo[key].x, y: playerInfo[key].y };
+                last_processed_input = playerInfo[key].client_num;
+            }
+            else {
+                //console.log(playerInfo[key].rotation);
+                self.otherElements.getChildren().forEach((otherElement) => {
+                    if (otherElement.playerId == playerInfo[key].playerId) {
+                        //self.physics.moveTo(otherElement, playerInfo[key].x, playerInfo[key].y, 300);
+                        //otherElement.destx = playerInfo[key].x;
+                        //otherElement.desty = playerInfo[key].y;
+                        otherElement.updateArray.push({ x: playerInfo[key].x, y: playerInfo[key].y, r: playerInfo[key].rotation, time: Date.now() });
+                    }
+                });
+            }
+        });
+
+
+        for (let i = 0; i < playerInfo.length; i++) {
+            if (playerInfo[i].playerId == self.socket.id) {
+                rotation = playerInfo[i].rotation;
+                position = { x: playerInfo[i].x, y: playerInfo[i].y };
+                last_processed_input = playerInfo[i].client_num;
+            }
+            else {
+                self.otherElements.getChildren().forEach((otherElement) => {
+                    if (otherElement.playerId == playerInfo[i].playerId) {
+                        otherElement.updateArray.push({ x: playerInfo[i].x, y: playerInfo[i].y, r: playerInfo[i].rotation, time:Date.now()});
+                    }
+                });
+            }
+        }
+        
+        if (timeArray.length > 1) {
+            timeArray.shift();
+        }
+        */
+
