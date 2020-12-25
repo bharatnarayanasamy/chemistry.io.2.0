@@ -4,7 +4,7 @@ class Bullet extends Phaser.Physics.Arcade.Sprite {
   //scene = scene2, where everything is happening.
   //taking in a scene allows us to access all the information in that scene
   //angle helps determine the direction bullet will travel in
-  constructor(scene, angle, x, y, btexture) {
+  constructor(scene, angle, x, y, btexture, speed2) {
 
     //starting location of the bullet. angles help determine whether bullet will start to the left of the 
     //player if gun is pointed leftwards, or right of the player if gun is pointed rightwards
@@ -36,11 +36,15 @@ class Bullet extends Phaser.Physics.Arcade.Sprite {
     //add this (the bullet object) into the projectiles group
     scene.projectiles.add(this);
 
+    this.increment = 1;
     //set velocity to be some scalar times the vector of OP, where O is the player's coords and P is the pointer's coords
     this.setScale(0.4);
+
+    this.speed = speed2;
   
-    this.body.velocity.x = Math.cos(angle) * gameSettings.bulletSpeed;
-    this.body.velocity.y = Math.sin(angle) * gameSettings.bulletSpeed;
+    this.body.velocity.x = Math.cos(angle) * speed2;
+    this.body.velocity.y = Math.sin(angle) * speed2;
+    console.log(this.body.velocity.x);
     
     this.angle2 = angle;
 

@@ -1,7 +1,7 @@
 function group1Bullet(gamejs, bullet, element, socket, bulletAngle) {
 
 
-    let pushbullet = new Bullet(gamejs, bulletAngle, element.x, element.y, gameSettings.texture[element.atomicNum - 1]);
+    let pushbullet = new Bullet(gamejs, bulletAngle, element.x, element.y, gameSettings.texture[element.atomicNum - 1], gameSettings.bulletSpeed);
     pushbullet.owner_id = socket.id;
     pushbullet.actualX = pushbullet.x;
     pushbullet.actualY = pushbullet.y;
@@ -30,8 +30,8 @@ function group2Bullet(gamejs, bullet, distance, element, socket, bulletAngle) {
     let y2 = Math.sin(tempangle2) * distance;
 
 
-    let pushbullet0 = new Bullet(gamejs, bulletAngle, element.x + x1, element.y + y1, gameSettings.texture[element.atomicNum - 1]);
-    let pushbullet1 = new Bullet(gamejs, bulletAngle, element.x + x2, element.y + y2, gameSettings.texture[element.atomicNum - 1]);
+    let pushbullet0 = new Bullet(gamejs, bulletAngle, element.x + x1, element.y + y1, gameSettings.texture[element.atomicNum - 1], gameSettings.bulletSpeed);
+    let pushbullet1 = new Bullet(gamejs, bulletAngle, element.x + x2, element.y + y2, gameSettings.texture[element.atomicNum - 1], gameSettings.bulletSpeed);
 
     pushbullet0.owner_id = socket.id;
     pushbullet0.actualX = pushbullet0.x;
@@ -59,42 +59,42 @@ function group2Bullet(gamejs, bullet, distance, element, socket, bulletAngle) {
 function group3Bullet(gamejs, bullet, element, socket, bulletAngle) {
 
 
-    let pushbullet1 = new Bullet(gamejs, bulletAngle, element.x, element.y, gameSettings.texture[element.atomicNum - 1]);
+    let pushbullet1 = new Bullet(gamejs, bulletAngle, element.x, element.y, gameSettings.texture[element.atomicNum - 1], gameSettings.bulletSpeed);
     pushbullet1.owner_id = socket.id;
     pushbullet1.actualX = pushbullet1.x;
     pushbullet1.actualY = pushbullet1.y;
 
-    let pushbullet2 = new Bullet(gamejs, bulletAngle + 1.5708, element.x, element.y, gameSettings.texture[element.atomicNum - 1]);
+    let pushbullet2 = new Bullet(gamejs, bulletAngle + 1.5708, element.x, element.y, gameSettings.texture[element.atomicNum - 1], gameSettings.bulletSpeed);
     pushbullet2.owner_id = socket.id;
     pushbullet2.actualX = pushbullet2.x;
     pushbullet2.actualY = pushbullet2.y;
 
-    let pushbullet3 = new Bullet(gamejs, bulletAngle - 1.5708, element.x, element.y, gameSettings.texture[element.atomicNum - 1]);
+    let pushbullet3 = new Bullet(gamejs, bulletAngle - 1.5708, element.x, element.y, gameSettings.texture[element.atomicNum - 1], gameSettings.bulletSpeed);
     pushbullet3.owner_id = socket.id;
     pushbullet3.actualX = pushbullet3.x;
     pushbullet3.actualY = pushbullet3.y;
 
-    let pushbullet4 = new Bullet(gamejs, bulletAngle + 3.1416, element.x, element.y, gameSettings.texture[element.atomicNum - 1]);
+    let pushbullet4 = new Bullet(gamejs, bulletAngle + 3.1416, element.x, element.y, gameSettings.texture[element.atomicNum - 1], gameSettings.bulletSpeed);
     pushbullet4.owner_id = socket.id;
     pushbullet4.actualX = pushbullet4.x;
     pushbullet4.actualY = pushbullet4.y;
 
-    let pushbullet5 = new Bullet(gamejs, bulletAngle + 0.7854, element.x, element.y, gameSettings.texture[element.atomicNum - 1]);
+    let pushbullet5 = new Bullet(gamejs, bulletAngle + 0.7854, element.x, element.y, gameSettings.texture[element.atomicNum - 1], gameSettings.bulletSpeed);
     pushbullet5.owner_id = socket.id;
     pushbullet5.actualX = pushbullet5.x;
     pushbullet5.actualY = pushbullet5.y;
 
-    let pushbullet6 = new Bullet(gamejs, bulletAngle + 2.3562, element.x, element.y, gameSettings.texture[element.atomicNum - 1]);
+    let pushbullet6 = new Bullet(gamejs, bulletAngle + 2.3562, element.x, element.y, gameSettings.texture[element.atomicNum - 1], gameSettings.bulletSpeed);
     pushbullet6.owner_id = socket.id;
     pushbullet6.actualX = pushbullet6.x;
     pushbullet6.actualY = pushbullet6.y;
 
-    let pushbullet7 = new Bullet(gamejs, bulletAngle - 0.7854, element.x, element.y, gameSettings.texture[element.atomicNum - 1]);
+    let pushbullet7 = new Bullet(gamejs, bulletAngle - 0.7854, element.x, element.y, gameSettings.texture[element.atomicNum - 1], gameSettings.bulletSpeed);
     pushbullet7.owner_id = socket.id;
     pushbullet7.actualX = pushbullet7.x;
     pushbullet7.actualY = pushbullet7.y;
 
-    let pushbullet8 = new Bullet(gamejs, bulletAngle - 2.3562, element.x, element.y, gameSettings.texture[element.atomicNum - 1]);
+    let pushbullet8 = new Bullet(gamejs, bulletAngle - 2.3562, element.x, element.y, gameSettings.texture[element.atomicNum - 1], gameSettings.bulletSpeed);
     pushbullet8.owner_id = socket.id;
     pushbullet8.actualX = pushbullet8.x;
     pushbullet8.actualY = pushbullet8.y;
@@ -153,25 +153,25 @@ function group3Bullet(gamejs, bullet, element, socket, bulletAngle) {
 function group4Bullet(gamejs, bullet, element, socket, bulletAngle) {
 
 
-    let pushbullet0 = new Bullet(gamejs, bulletAngle, element.x, element.y, gameSettings.texture[element.atomicNum - 1]);
+    let pushbullet0 = new Bullet(gamejs, bulletAngle, element.x, element.y, gameSettings.texture[element.atomicNum - 1], gameSettings.bulletSpeed);
     pushbullet0.owner_id = socket.id;
     pushbullet0.actualX = pushbullet0.x;
     pushbullet0.actualY = pushbullet0.y;
 
 
-    let pushbullet1 = new Bullet(gamejs, bulletAngle + 1.571, element.x, element.y, gameSettings.texture[element.atomicNum - 1]);
+    let pushbullet1 = new Bullet(gamejs, bulletAngle + 1.571, element.x, element.y, gameSettings.texture[element.atomicNum - 1], gameSettings.bulletSpeed);
     pushbullet1.owner_id = socket.id;
     pushbullet1.actualX = pushbullet1.x;
     pushbullet1.actualY = pushbullet1.y;
 
 
-    let pushbullet2= new Bullet(gamejs, bulletAngle - 1.571, element.x, element.y, gameSettings.texture[element.atomicNum - 1]);
+    let pushbullet2= new Bullet(gamejs, bulletAngle - 1.571, element.x, element.y, gameSettings.texture[element.atomicNum - 1], gameSettings.bulletSpeed);
     pushbullet2.owner_id = socket.id;
     pushbullet2.actualX = pushbullet2.x;
     pushbullet2.actualY = pushbullet2.y;
 
     
-    let pushbullet3 = new Bullet(gamejs, bulletAngle + 3.14, element.x, element.y, gameSettings.texture[element.atomicNum - 1]);
+    let pushbullet3 = new Bullet(gamejs, bulletAngle + 3.14, element.x, element.y, gameSettings.texture[element.atomicNum - 1], gameSettings.bulletSpeed);
     pushbullet3.owner_id = socket.id;
     pushbullet3.actualX = pushbullet3.x;
     pushbullet3.actualY = pushbullet3.y;
@@ -204,10 +204,12 @@ function group4Bullet(gamejs, bullet, element, socket, bulletAngle) {
 
 function group5Bullet(gamejs, bullet, element, socket, bulletAngle) {
 
-    let pushbullet = new Bullet(gamejs, bulletAngle, element.x, element.y, gameSettings.texture[element.atomicNum - 1]);
+    let pushbullet = new Bullet(gamejs, bulletAngle, element.x, element.y, gameSettings.texture[element.atomicNum - 1], gameSettings.bulletSpeed);
     pushbullet.owner_id = socket.id;
     pushbullet.actualX = pushbullet.x;
     pushbullet.actualY = pushbullet.y;
+
+    pushbullet.isFive = true;
 
     element.bullet_array.push(pushbullet);
     
@@ -221,17 +223,17 @@ function group5Bullet(gamejs, bullet, element, socket, bulletAngle) {
 function group6Bullet(gamejs, bullet, element, socket, bulletAngle) {
 
 
-    let pushbullet1 = new Bullet(gamejs, bulletAngle, element.x, element.y, gameSettings.texture[element.atomicNum - 1]);
+    let pushbullet1 = new Bullet(gamejs, bulletAngle, element.x, element.y, gameSettings.texture[element.atomicNum - 1], gameSettings.bulletSpeed);
     pushbullet1.owner_id = socket.id;
     pushbullet1.actualX = pushbullet1.x;
     pushbullet1.actualY = pushbullet1.y;
 
-    let pushbullet2 = new Bullet(gamejs, bulletAngle + 0.2, element.x, element.y, gameSettings.texture[element.atomicNum - 1]);
+    let pushbullet2 = new Bullet(gamejs, bulletAngle + 0.2, element.x, element.y, gameSettings.texture[element.atomicNum - 1], gameSettings.bulletSpeed);
     pushbullet2.owner_id = socket.id;
     pushbullet2.actualX = pushbullet2.x;
     pushbullet2.actualY = pushbullet2.y;
 
-    let pushbullet3 = new Bullet(gamejs, bulletAngle - 0.2, element.x, element.y, gameSettings.texture[element.atomicNum - 1]);
+    let pushbullet3 = new Bullet(gamejs, bulletAngle - 0.2, element.x, element.y, gameSettings.texture[element.atomicNum - 1], gameSettings.bulletSpeed);
     pushbullet3.owner_id = socket.id;
     pushbullet3.actualX = pushbullet3.x;
     pushbullet3.actualY = pushbullet3.y;
@@ -257,17 +259,17 @@ function group6Bullet(gamejs, bullet, element, socket, bulletAngle) {
 
 function group7Bullet(gamejs, bullet, element, socket, bulletAngle) {
 
-    let pushbullet1 = new Bullet(gamejs, bulletAngle, element.x, element.y, gameSettings.texture[element.atomicNum - 1]);
+    let pushbullet1 = new Bullet(gamejs, bulletAngle, element.x, element.y, gameSettings.texture[element.atomicNum - 1], gameSettings.bulletSpeed);
     pushbullet1.owner_id = socket.id;
     pushbullet1.actualX = pushbullet1.x;
     pushbullet1.actualY = pushbullet1.y;
 
-    let pushbullet2 = new Bullet(gamejs, bulletAngle + 0.2, element.x, element.y, gameSettings.texture[element.atomicNum - 1]);
+    let pushbullet2 = new Bullet(gamejs, bulletAngle + 0.2, element.x, element.y, gameSettings.texture[element.atomicNum - 1], gameSettings.bulletSpeed);
     pushbullet2.owner_id = socket.id;
     pushbullet2.actualX = pushbullet2.x;
     pushbullet2.actualY = pushbullet2.y;
 
-    let pushbullet3 = new Bullet(gamejs, bulletAngle - 0.2, element.x, element.y, gameSettings.texture[element.atomicNum - 1]);
+    let pushbullet3 = new Bullet(gamejs, bulletAngle - 0.2, element.x, element.y, gameSettings.texture[element.atomicNum - 1], gameSettings.bulletSpeed);
     pushbullet3.owner_id = socket.id;
     pushbullet3.actualX = pushbullet3.x;
     pushbullet3.actualY = pushbullet3.y;
@@ -293,13 +295,15 @@ function group7Bullet(gamejs, bullet, element, socket, bulletAngle) {
 
 function group8Bullet(gamejs, bullet, element, socket, bulletAngle, rotationAngle) {
 
-    let pushbullet = new Bullet(gamejs, bulletAngle, element.x, element.y, gameSettings.texture[element.atomicNum - 1]);
+    let pushbullet = new Bullet(gamejs, bulletAngle, element.x, element.y, gameSettings.texture[element.atomicNum - 1], gameSettings.bulletSpeed);
     pushbullet.owner_id = socket.id;
     pushbullet.actualX = pushbullet.x;
     pushbullet.actualY = pushbullet.y;
 
-    element.bullet_array.push(pushbullet);
+    //pushbullet.isEight = true;
 
+    element.bullet_array.push(pushbullet);
+    //console.log(element.bullet_array[bullet_array.length - 1].increment);
 
     socket.emit('shoot-bullet', {
         x: bullet.x, y: bullet.y, angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed,
@@ -310,7 +314,7 @@ function group8Bullet(gamejs, bullet, element, socket, bulletAngle, rotationAngl
 function transitionMetalBullet(gamejs, bullet, element, socket, bulletAngle) {
 
 
-    let pushbullet = new Bullet(gamejs, bulletAngle, element.x, element.y, gameSettings.texture[element.atomicNum - 1]);
+    let pushbullet = new Bullet(gamejs, bulletAngle, element.x, element.y, gameSettings.texture[element.atomicNum - 1], gameSettings.bulletSpeed);
     pushbullet.owner_id = socket.id;
     pushbullet.actualX = pushbullet.x;
     pushbullet.actualY = pushbullet.y;

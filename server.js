@@ -165,7 +165,7 @@ var server_seq = 0;
 io.on('connection', (socket) => {
   socketID = socket.id;
   console.log('a user connected');
-  console.log("Bharat simps for sj");
+  console.log("Sid simps for lj");
   // create a new player and add it to our players object
   players[socket.id] = {
     x: Math.floor(Math.random() * gameWidth - 100) + 50, //initialize positions
@@ -349,8 +349,6 @@ io.on('connection', (socket) => {
 // Update the bullets 60 times per frame and send updates
 function ServerGameLoop() {
   for (let i = 0; i < bullet_array.length; i++) {
-
-
     let bullet = bullet_array[i];
 
     //console.log("TYPE OF BULLET", typeof(bullet));
@@ -360,7 +358,6 @@ function ServerGameLoop() {
       let speedX = speed * Math.cos(bullet.angle);
 
       if(typeof players[bullet.owner_id] != "undefined" && serverSettings.group5.includes(players[bullet.owner_id].atomicNumServer)){
-        console.log("SHOOOOOOT");
         speedY = (100 * bullet.increment) * Math.sin(bullet.angle);
         speedX = (100 * bullet.increment) * Math.cos(bullet.angle);
         bullet.increment++;
@@ -398,6 +395,7 @@ function ServerGameLoop() {
         }
       }
 
+      // longdist actually 1000; saves time to use its square
       let longdist = 1000000;
 
       if (typeof players[bullet.owner_id] != "undefined" && serverSettings.group3.includes(players[bullet.owner_id].atomicNumServer)) {
@@ -433,7 +431,6 @@ function ServerGameLoop() {
         i--;
         delete_set.push(bullet.id);
       }
-      //console.log("MP");
       
       for (let id in players) {
         if (bullet.owner_id != id && typeof players[id] != "undefined") {
