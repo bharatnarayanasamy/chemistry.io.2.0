@@ -1,12 +1,9 @@
-/*TO DO:
-FOR OFTEN USED VARIABLES REQUIRING INDEXING AND/OR PROCESSSING, CREATE A NEW VARIABLE TO STORE THAT VALUE
-*/
 
 //This class is used for defining global letiables that can be accessed by any class
 
 //Dictionary of game settings
 var gameSettings = {
-    playerSpeed: 300,
+    playerSpeed: 600, //change back to 300
     bulletSpeed: 500,
     speedScale: 6,
     maxPowerups: 14,
@@ -63,89 +60,126 @@ let config = {
     }
 };
 
+// TODO: Fontconfig for each scenario
+// let fontConfig = {fontFamily: 'defaultFont', color: "#FFFFFF", fontSize:30}
+
 var game = new Phaser.Game(config);
-var c = 0;
 
-//initializing some global vars
+/*
+---------------------------
+Cooldown Variables
+---------------------------
+*/
+
+//Handles cooldown in between shots
+//By default, player can immediately shoot when they spawn
 var lastShot = 0;
+//Handles cooldown in between healing
+//By default, player's hp can immediately increase when they spawn 
 var lastHealed = 0;
+//Handles how frequently updates about high scores for logged in users are sent to MongoDB
 var lastScoreUpdate = 0;
-var groupCreated = true;
+//Checks if an element is overlapping with another
 var isOverlappingOther = false;
-var currentSpeed = 0;
-var iter;
-//var speedX = 0, speedY = 0;
 
-var count = 0;
+/*
+---------------------------
+Player Info Variables
+---------------------------
+*/
 
+//Obtain the username of the player
+//If player is not logged in, obtain username from local storage
 if (typeof localStorage.getItem("username") != undefined) {
-    var username0 = localStorage.getItem("username");
+    var username = localStorage.getItem("username");
 }
+//If logged in, create variable username so that username can be stored when data retrieved from MongoDB about logged in user
 else {
-    var username0;
+    var username;
 }
+//Get player email
 var email = localStorage.getItem("email");
-var currentHighScore;
-var bestKills;
-
-var bestElement;
-
-let users;
-
+//Store the player's current high score
+//variable to be updated if player has an account
+var currentHighScore = 0;
+//Store the player's current career high in kills
+//variable to be updated if player has an account
+var bestKills = 0;
+//Store the player's current career best element
+//variable to be updated if player has an account
+var bestElement = 0;
+//Store player coordinates
 var playerX;
 var playerY;
-var gameWidth = 3840;
-var gameHeight = 2160
-
+//Player Life Satus
 var hasDied = false;
-
-var lastScoreUpdate;
-
+//has player been hit by another bullet
 var isHit = false;
-var isMoving = false;
-
-var texLen = gameSettings.texture.length;
-
+//Store player's movement in a single update loop
 var movementCommands = [];
+
+/*
+---------------------------
+Generale Game Information Variables
+---------------------------
+*/
+//Current Total Dimensions of Game
+var gameWidth = 3840;
+var gameHeight = 2160;
+//Number of elements in game
+var texLen = gameSettings.texLen;
+//Dictionary of all the elements and their corresponding atomic numbers
+var elements = JSON.parse(localStorage.getItem("elements"));
+//Number of movement comamnds send
 var messageIndex = 0;
 
-var elements = JSON.parse(localStorage.getItem("elements"));
-let s = 0;
-let z = 0;
-
-// entity interpolation variables
+/*
+---------------------------
+Entity Interpolation Variables
+---------------------------
+*/
+//Stores information for player movement
 var playerDict;
+//Sets initial time of entity interpolation to 0
 var t1 = 0;
+//Second time variable for entity interpolaiton
 var t2;
+//Checks if we have received information on the payers
 var receivedFirstPlayerInfo = false;
+//Temporary Storage Variables for players
 var tempPlayers;
+//Temporary variables to store time
 var tempTime;
-
+//Linear Extrapolation Function
 Math.lerp = function (value1, value2, amount) {
-	amount = amount < 0 ? 0 : amount;
-	amount = amount > 1 ? 1 : amount;
-	return value1 + (value2 - value1) * amount;
+    amount = amount < 0 ? 0 : amount;
+    amount = amount > 1 ? 1 : amount;
+    return value1 + (value2 - value1) * amount;
 };
 
+//Loads in necessary assets
 function preload() {
     //loading in element images and their bullet images
-
-    for (let i = 1; i < 10; i++) { //temporary
+    for (let i = 1; i < texLen + 1; i++) { //temporary
         var imageName = elements[i].toLowerCase();
         this.load.image(imageName, "./assets/images/elements/" + imageName + ".png")
         this.load.image(imageName + "bullet", "./assets/images/bullets/" + imageName + "bullet" + ".png")
     }
-    //this.load.image("vrishabkrishna", "./assets/images/old_images/vrishabkrishna.png");
 
+    //Loading in subatomic particles
     this.load.image("proton", "./assets/images/proton.png");
     this.load.image("electron", "./assets/images/electron.png");
     this.load.image("neutron", "./assets/images/neutron.png");
+
+    //background image
     this.load.image("bg", "./assets/images/background.png");
 
+    //loads animation for explosions
     this.load.spritesheet("explosion", "assets/spritesheets/explosion.png", {
         frameWidth: 16,
         frameHeight: 16
     });
+    loadFont("defaultFont", "./assets/fonts/Quicksand-Regular.ttf");
 
     //Setting the maximum number of mouse pointers that can be used on the screen to one
     this.input.maxPointers = 1;
@@ -161,7 +195,7 @@ function create() {
             data,
             success: function (data) {
                 data = data[0];
-                username0 = data.name;
+                username = data.name;
                 currentHighScore = data.highScore;
                 email = data.email;
                 bestKills = data.kills;
@@ -181,13 +215,12 @@ function create() {
     this.add.image(gameWidth / 2, 0, 'bg').setOrigin(0).setFlipX(true);
     this.add.image(0, gameHeight / 2, 'bg').setOrigin(0).setFlipY(true);
     this.add.image(gameWidth / 2, gameHeight / 2, 'bg').setOrigin(0).setFlipX(true).setFlipY(true);
-
     var g2 = this.add.grid(0, 0, 2 * gameWidth, 2 * gameHeight, 20, 20, 0xffffff, 1, 0xf8f8f8);
 
     //Enabling collisions when an object hits the boundary
     //this.physics.world.setBoundsCollision();
 
-    //creating PEN arrays
+    //creating Proton, eelctron and neutron arrays that stores the objects
     this.proton_array = [];
     for (let i = 0; i < 15; i++) {
         var bb = this.physics.add.image(-1, -1, 'proton');
@@ -209,6 +242,7 @@ function create() {
         this.neutron_array.push(bb3);
     }
 
+    //Create animation for explosion
     this.anims.create({
         key: "explode",
         frames: this.anims.generateFrameNumbers("explosion"),
@@ -221,6 +255,8 @@ function create() {
     let self = this;
     this.socket = io();
     this.otherElements = this.physics.add.group();
+
+    //Creates all players already existing in the game
     this.socket.on('currentPlayers', function (players) {
         //add time delay
         Object.keys(players).forEach((id) => {
@@ -232,21 +268,24 @@ function create() {
         });
     });
 
+    //Add new players that just joined the game ot the screen
     this.socket.on('newPlayer', function (playerInfo) {
         //add time delay
         addOtherPlayers(self, playerInfo);
     });
 
+    //Disconnect player who left
     this.socket.on('disconnect', function (playerId) {
         //add time delay  
+        console.log("player disconnected");
         self.otherElements.getChildren().forEach((otherElement) => {
-            console.log("player disconnected")
             if (playerId == otherElement.playerId) {
                 otherElement.hp.destroy()
                 otherElement.destroy();
                 console.log("player destroyed")
             }
         });
+
     });
 
     //removes dead players from the screen
@@ -254,7 +293,6 @@ function create() {
         self.otherElements.getChildren().forEach((otherElement) => {
             console.log("player disconnected")
             if (playerId == otherElement.playerId) {
-                otherElement.hp.destroy();
                 otherElement.destroy();
                 console.log("player destroyed");
             }
@@ -267,7 +305,6 @@ function create() {
             self.element.hp.set(player.health);
         }
         else {
-            
             self.otherElements.getChildren().forEach((otherElement) => {
                 if (player.playerId == otherElement.playerId) {
                     otherElement.hp.set(player.health);
@@ -291,6 +328,7 @@ function create() {
                         window.location.href = "index.html";
                     }
                 });
+                self.element.destroy();
             }
         }
     });
@@ -334,14 +372,16 @@ function create() {
             let bullet = new Bullet(self, new_bullet_array[i].angle, new_bullet_array[i].x, new_bullet_array[i].y, gameSettings.texture[new_bullet_array[i].atomicNumber - 1], new_bullet_array[i].bulletSpeed);
             bullet.id = new_bullet_array[i].id;
             bullet.owner_id = new_bullet_array[i].owner_id;
-            
-            if(gameSettings.group8.includes(new_bullet_array[i].atomicNumber)){
-                console.log("OK OK");
+
+            if (gameSettings.group8.includes(new_bullet_array[i].atomicNumber)) {
                 bullet.isEight = true;
             }
-            if(gameSettings.group5.includes(new_bullet_array[i].atomicNumber)){
-                console.log("BRUH");
+            if (gameSettings.group5.includes(new_bullet_array[i].atomicNumber)) {
                 bullet.isFive = true;
+            }
+            if (gameSettings.group7.includes(new_bullet_array[i].atomicNumber)) {
+                bullet.isSeven = true;
+                bullet.count = 0;
             }
 
 
@@ -585,28 +625,31 @@ function create() {
     });
 
     this.leaderboard = [];
-    var leaderboardText = self.add.text(950, 5, "Leaderboard").setColor("#FFFFFF").setFontSize(30).setScrollFactor(0);
-    for (var i = 0; i < 5; i++) {
+    var leaderboardText = self.add.text(950, 5, "Leaderboard", {fontFamily: 'defaultFont', color: "#FFFFFF", fontSize:30}).setScrollFactor(0);
+    for (var i = 0; i < 100; i++) {
         this.leaderboard.push(self.add.text(920, 40 + 20 * i, "").setColor("#FFFFFF"));
     }
     this.socket.on('update-leaderboard', function (items) {
         leaderboardText.destroy();
-        leaderboardText = self.add.text(950, 5, "Leaderboard").setColor("#FFFFFF").setFontSize(30).setScrollFactor(0);
-        for (let i = 0; i < 5; i++) {
-            if (i < items.length) {
+        leaderboardText = self.add.text(950, 5, "Leaderboard", { fontFamily: 'defaultFont', color: "#FFFFFF", fontSize: 30 }).setScrollFactor(0);
+        for (let i = 0; i < items.length; i++) {
+            if (i < 10) {
                 self.leaderboard[i].destroy()
                 if (items[i][1].localeCompare(self.socket.id) == 0) {
-                    var lbplace = (i+1).toString() + ". " + String(items[i][0]) + ': ' + String(items[i][2]);
-                    self.leaderboard[i] = self.add.text(920, 40 + 20*i, lbplace).setColor("#FF0000");
+                    var lbplace = (i + 1).toString() + ". " + String(items[i][0]) + ': ' + String(items[i][2]);
+                    self.leaderboard[i] = self.add.text(920, 40 + 20 * i, lbplace, {fontFamily: 'defaultFont', color: "#FF0000"}).setColor("#FF0000");
                 }
                 else {
-                    var lbplace = (i+1).toString() + ". " + String(items[i][0]) + ': ' + String(items[i][2]);
-                    self.leaderboard[i] = self.add.text(920, 40 + 20*i, lbplace).setColor("#FFFFFF");
+                    var lbplace = (i + 1).toString() + ". " + String(items[i][0]) + ': ' + String(items[i][2]);
+                    self.leaderboard[i] = self.add.text(920, 40 + 20 * i, lbplace, {fontFamily: 'defaultFont', color: "#FFFFFF"});
                 }
             }
             else {
                 self.leaderboard[i].destroy()
-                self.leaderboard[i] = self.add.text(920, 40 + 20*i, "").setColor("#FFFFFF");
+                if (items[i][1].localeCompare(self.socket.id) == 0) {
+                    var lbplace = (i + 1).toString() + ". " + String(items[i][0]) + ': ' + String(items[i][2]);
+                    self.leaderboard[i] = self.add.text(920, 40 + 20 * i, lbplace,{color: "#FF0000"});
+                }
             }
             self.leaderboard[i].setScrollFactor(0);
         }
@@ -616,7 +659,7 @@ function create() {
     //RENAME TO SOMETHING LIKE SENDUSERNAMEINFO 
     this.socket.on('updateTheLeaderboard', function () {
         usernameInfo = {
-            username: username0,
+            username: username,
             id: self.socket.id
         }
         self.socket.emit('usernameInfo', usernameInfo);
@@ -676,25 +719,30 @@ function create() {
         };
         self.element.body.enable = true;
 
-        self.killScoreText = self.add.text(16, 40, 'Kills: ' + (0), { fontSize: '25px', fill: '#3D3D3D' });
-        self.healthLabel = self.add.text(16, 10, "Health: 100", { fontSize: '25px', fill: '#3D3D3D'});
+        self.killScoreText = self.add.text(16, 40, 'Kills: ' + (0), { fontFamily: 'defaultFont', fontSize: '25px', fill: '#3D3D3D' });
+        self.healthLabel = self.add.text(16, 10, "Health: 100", { fontFamily: 'defaultFont',fontSize: '25px', fill: '#3D3D3D' });
 
         playerX = self.element.x;
         playerY = self.element.y;
         //create score text on top left
-        self.scoreText = self.add.text(16, 70, 'Score: ' + (0), { fontSize: '25px', fill: '#3D3D3D' });
+        self.scoreText = self.add.text(16, 70, 'Score: ' + (0), { fontFamily: 'defaultFont',fontSize: '25px', fill: '#3D3D3D' });
         self.healthLabel.setScrollFactor(0);
         self.killScoreText.setScrollFactor(0);
         self.scoreText.setScrollFactor(0);
 
         //Labels for Groups
-        self.alkalinesLabel = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY, "Alkalines", { fontSize: '25px', fill: '#575757' })
-        self.alkalineEarthMetalsLabel = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + gameSettings.labelSpacing, "Alkaline Earth Metals", { fontSize: '25px', fill: '#575757' })
-        self.group3Label = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + 2 * gameSettings.labelSpacing, "Group 3", { fontSize: '25px', fill: '#575757' })
-        self.group4Label = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + 3 * gameSettings.labelSpacing, "Group 4", { fontSize: '25px', fill: '#575757' })
-        self.group5Label = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + 4 * gameSettings.labelSpacing, "Group 5", { fontSize: '25px', fill: '#575757' })
-        self.group6Label = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + 5 * gameSettings.labelSpacing, "Group 6", { fontSize: '25px', fill: '#575757' })
-        self.halogensLabel = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + 6 * gameSettings.labelSpacing, "Halogens", { fontSize: '25px', fill: '#575757' })
+        self.alkalinesLabel = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY, "Alkalines", { fontFamily: 'defaultFont',fontSize: '25px', fill: '#575757' });
+        self.alkalineEarthMetalsLabel = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + gameSettings.labelSpacing, "Alkaline Earth Metals", { fontFamily: 'defaultFont',fontSize: '25px', fill: '#575757' });
+        self.group3Label = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + 2 * gameSettings.labelSpacing, "Group 3", { fontFamily: 'defaultFont',fontSize: '25px', fill: '#575757' });
+        self.group4Label = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + 3 * gameSettings.labelSpacing, "Group 4", { fontFamily: 'defaultFont',fontSize: '25px', fill: '#575757' });
+        self.group5Label = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + 4 * gameSettings.labelSpacing, "Group 5", { fontFamily: 'defaultFont',fontSize: '25px', fill: '#575757' });
+        self.group6Label = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + 5 * gameSettings.labelSpacing, "Group 6", { fontFamily: 'defaultFont',fontSize: '25px', fill: '#575757' });
+        self.halogensLabel = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + 6 * gameSettings.labelSpacing, "Halogens", { fontFamily: 'defaultFont',fontSize: '25px', fill: '#575757' });
+        self.nobleGasLabel = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + 7 * gameSettings.labelSpacing, "Noble Gasses", { fontFamily: 'defaultFont',fontSize: '25px', fill: '#575757' });
+
+        self.transitionMetalsLabel = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + 8 * gameSettings.labelSpacing, "Transition Metals", { fontFamily: 'defaultFont',fontSize: '25px', fill: '#575757' });
+        self.lanthanidesLabel = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + 9 * gameSettings.labelSpacing, "Lanthanides", { fontFamily: 'defaultFont',fontSize: '25px', fill: '#575757' });
+        self.actinidesLabel = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + 10 * gameSettings.labelSpacing, "Actinides", { fontFamily: 'defaultFont',fontSize: '25px', fill: '#575757' });
 
 
         //Setting scroll factors of group label text
@@ -705,6 +753,10 @@ function create() {
         self.group5Label.setScrollFactor(0);
         self.group6Label.setScrollFactor(0);
         self.halogensLabel.setScrollFactor(0);
+        self.nobleGasLabel.setScrollFactor(0);
+        self.transitionMetalsLabel.setScrollFactor(0);
+        self.lanthanidesLabel.setScrollFactor(0);
+        self.actinidesLabel.setScrollFactor(0);
     }
 
     //add other players onto the screen
@@ -757,12 +809,12 @@ function create() {
     this.killScore = 15;
 
     //creates scorebars at bottom of screen
-    this.protonBar = new CollectionBar(this, window.innerWidth/8, 10, "proton", 0);
-    this.protonBarText = this.add.text(window.innerWidth/8 + 160, 9.5, 'Protons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' })
-    this.electronBar = new CollectionBar(this, window.innerWidth/8, 40, "electron", 0);
-    this.electronBarText = this.add.text(window.innerWidth/8 + 160, 39.5, 'Electrons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' });
-    this.neutronBar = new CollectionBar(this, window.innerWidth/8, 70, "neutron", 0);
-    this.neutronBarText = this.add.text(window.innerWidth/8 + 160, 69.5, 'Neutrons: 0/' + gameSettings.upgradePEN, { fontSize: '16px', fill: '#000000' });
+    this.protonBar = new CollectionBar(this, window.innerWidth / 8, 10, "proton", 0);
+    this.protonBarText = this.add.text(window.innerWidth / 8 + 160, 9.5, 'Protons: 0/' + gameSettings.upgradePEN, { fontFamily: 'defaultFont',fontSize: '16px', fill: '#000000' })
+    this.electronBar = new CollectionBar(this, window.innerWidth / 8, 40, "electron", 0);
+    this.electronBarText = this.add.text(window.innerWidth / 8 + 160, 39.5, 'Electrons: 0/' + gameSettings.upgradePEN, { fontFamily: 'defaultFont',fontSize: '16px', fill: '#000000' });
+    this.neutronBar = new CollectionBar(this, window.innerWidth / 8, 70, "neutron", 0);
+    this.neutronBarText = this.add.text(window.innerWidth / 8 + 160, 69.5, 'Neutrons: 0/' + gameSettings.upgradePEN, { fontFamily: 'defaultFont',fontSize: '16px', fill: '#000000' });
     this.atoms = this.add.container(playerX, playerY);
     this.atoms.add(this.protonBarText);
     this.atoms.add(this.electronBarText);
@@ -799,13 +851,13 @@ function create() {
                     // fractional distance between t1 and t2
                     var ratio = portion / total;
                     // Calculating interpolation x and y in order to set position
-                    if(typeof tempPlayers[id] != undefined){
-                        if(typeof boogie != undefined){
+                    if (typeof tempPlayers != undefined && typeof tempPlayers[id] != undefined) {
+                        if (typeof boogie != undefined) {
 
                             var interpX = Math.lerp(tempPlayers[id].x, boogie.x, ratio);
                             var interpY = Math.lerp(tempPlayers[id].y, boogie.y, ratio);
-                        
-                        
+
+
                             // setting other elements position
                             otherElement.setPosition(interpX, interpY);
                             otherElement.rotation = boogie.rotation;
@@ -813,7 +865,7 @@ function create() {
                     }
                 } else {
                     // no interpolation at all, just draw the raw position
-                    if(typeof boogie != undefined){
+                    if (typeof boogie != undefined) {
                         otherElement.setPosition(boogie.x, boogie.y);
                         otherElement.rotation = boogie.rotation;
                     }
@@ -825,14 +877,14 @@ function create() {
             });
         }
         else {
-            if(receivedFirstPlayerInfo){
+            if (receivedFirstPlayerInfo) {
                 t1 = 1;
             }
         }
         tempTime = t2;
         tempPlayers = playerDict;
     }
-    
+
     setInterval(entityInterpolation, 16);
 }
 
@@ -853,6 +905,52 @@ function update(time) {
             this.cameras.main.setZoom(1);
         }
 
+
+
+        //Bolding Labels
+        if (gameSettings.group1.includes(this.element.atomicNum)) {
+            //unboldAll();
+            console.log("chilling");
+            //boldText(this.alkalinesLabel, this.add, gameSettings.initialLabelX, gameSettings.initialLabelY, "Alkalines");
+            console.log("what is this error smh");
+            //unboldText(this.alkalinesLabel, this.add, gameSettings.initialLabelX, gameSettings.initialLabelY, "Alkalines");
+
+        }
+        if (gameSettings.group2.includes(this.element.atomicNum)) {
+            //unboldAll(this.alkalinesLabel, this.add);
+            //boldText(this.alkalineEarthMetalsLabel, this.add, gameSettings.initialLabelX, gameSettings.initialLabelY + gameSettings.labelSpacing, "Alkaline Earth Metals");
+        }
+        if (gameSettings.group3.includes(this.element.atomicNum)) {
+            //unboldAll();
+            //boldText(this.group3Label, this.add, gameSettings.initialLabelX, gameSettings.initialLabelY + 2 * gameSettings.labelSpacing, "Group 3");
+        }
+        if (gameSettings.group4.includes(this.element.atomicNum)) {
+            //unboldAll();
+            //boldText(this.group4Label, this.add, gameSettings.initialLabelX, gameSettings.initialLabelY + 3 * gameSettings.labelSpacing, "Group 4");
+        }
+        if (gameSettings.group5.includes(this.element.atomicNum)) {
+            //unboldAll();
+            //boldText(this.group5Label, this.add, gameSettings.initialLabelX, gameSettings.initialLabelY + 4 * gameSettings.labelSpacing, "Group 5");
+        }
+        if (gameSettings.group6.includes(this.element.atomicNum)) {
+            //unboldAll();
+            //boldText(this.group6Label, this.add, gameSettings.initialLabelX, gameSettings.initialLabelY + 5 * gameSettings.labelSpacing, "Group 6");
+        }
+        if (gameSettings.group7.includes(this.element.atomicNum)) {
+            //unboldAll();
+            //boldText(this.halogensLabel, this.add, gameSettings.initialLabelX, gameSettings.initialLabelY + 6 * gameSettings.labelSpacing, "Halogens");
+        }
+        if (gameSettings.group8.includes(this.element.atomicNum)) {
+            //unboldAll();
+            console.log("TYPE", typeof (this.alkalinesLabel));
+            //unboldAll(this.alkalinesLabel, this.add);
+            console.log("TYPE 2", typeof (this.alkalinesLabel));
+            //boldText(this.nobleGasLabel, this.add, gameSettings.initialLabelX, gameSettings.initialLabelY + 7 * gameSettings.labelSpacing, "Noble Gases");
+        }
+
+
+
+
         //move this out
         movement_command = this.element.movePlayer(this, gameSettings.playerSpeed, isHit, this.knockbackSpeedX, this.knockbackSpeedY, this.transitionBulletAngle, isOverlappingOther);
         var movementData = {
@@ -866,11 +964,6 @@ function update(time) {
         this.socket.emit('move', movementData);
 
         this.healthLabel.text = "Health: " + Math.round(this.element.hp.value);
-
-        //boldText(this.alkalinesLabel, this.add);
-
-
-      
 
         //change to only lanthanide group
         if (gameSettings.lanthanides.includes(this.element.atomicNum)) {
@@ -899,7 +992,6 @@ function update(time) {
 
         this.dot.x = this.element.x / 30;
         this.dot.y = this.element.y / 26.5;
-        count++;
 
         for (let k = 0; k < this.element.bullet_array.length; k++) {
             if (typeof this.element.bullet_array[k].actualX != "undefined") {
@@ -913,13 +1005,35 @@ function update(time) {
             // Non Acceleration Bullets
             let speedY = this.element.bullet_array[k].speed * Math.sin(this.element.bullet_array[k].angle2);
             let speedX = this.element.bullet_array[k].speed * Math.cos(this.element.bullet_array[k].angle2);
-            
-            if(this.element.bullet_array[k].isFive) {
-                console.log("I SHUD BE HERE");
+
+            if (this.element.bullet_array[k].isFive) {
                 speedY = /*this.element.bullet_array[k].speed*/  this.element.bullet_array[k].increment * 100 * Math.sin(this.element.bullet_array[k].angle2);
                 speedX = /*this.element.bullet_array[k].speed */  this.element.bullet_array[k].increment * 100 * Math.cos(this.element.bullet_array[k].angle2);
                 console.log(this.element.bullet_array[k].increment);
                 this.element.bullet_array[k].increment += 5;
+            }
+
+            //iosevka
+
+            if (this.element.bullet_array[k].isSeven) {
+                //console.log("PRANAV WISHES HE WAS BACK IN MF'S ROOM");
+
+                if (this.element.bullet_array[k].count < 10) {
+                    this.element.bullet_array[k].count++;
+                    this.element.bullet_array[k].scale += 0.02;
+                    //console.log("iosevka AND PRANAV SUCKS HIS OWN DICK");
+                    this.element.bullet_array[k].setScale(this.element.bullet_array[k].scale);
+                }
+                else if (this.element.bullet_array[k].count < 20) {
+                    speedX -= 100;
+                    speedY -= 100;
+                    this.element.bullet_array[k].count++;
+                }
+                else if (this.element.bullet_array[k].count < 50) {
+                    speedX = 0;
+                    speedY = 0;
+                    this.element.bullet_array[k].count++;
+                }
             }
 
             this.element.bullet_array[k].x += speedX / 60;
@@ -944,7 +1058,6 @@ function update(time) {
             if (dist0 < 70 && this.element.bullet_array[k].owner_id != this.socket.id && !this.element.bullet_array[k].isEight) {
                 this.element.bullet_array[k].setVisible(false);
             }
-s
             if (this.element.bullet_array[k].owner_id == this.socket.id && (this.element.bullet_array[k].x < -10 || this.element.bullet_array[k].x > gameSettings.mapWidth + 10 || this.element.bullet_array[k].y < -10 || this.element.bullet_array[k].y > gameSettings.mapHeight + 10)) {
                 this.element.bullet_array[k].destroy();
                 this.element.bullet_array.splice(k, 1);
@@ -1033,7 +1146,7 @@ s
                         email: email,
                         element: this.element.atomicNum,
                     };
-                    
+
                     $.ajax({
                         type: 'POST',
                         url: '/submit-element',
@@ -1063,19 +1176,37 @@ s
 
 
 //Helper Fuctions to Make Text Bold
-function boldText(label, add, x, y, name)
-{
-    label.text = ""
+function boldText(label, add, x, y, name) {
+    label.text = "";
     label = add.text(x, y, name, { fontSize: 'bold 25px', fill: '#575757' });
     label.setScrollFactor(0);
 }
 
-function unboldText(label, add, x, y, name)
-{
-    label.text = ""
+function unboldText(label, add, x, y, name) {
+    label.text = "";
     label = add.text(x, y, name, { fontSize: '25px', fill: '#575757' });
     label.setScrollFactor(0);
 }
 
+function unboldAll(alkalinesLabel, add) {
+    unboldText(alkalinesLabel, add, gameSettings.initialLabelX, gameSettings.initialLabelY, "Alkalines");
 
+    /* unboldText(this.alkalineEarthMetalsLabel, this.add, gameSettings.initialLabelX, gameSettings.initialLabelY + gameSettings.labelSpacing, "Alkaline Earth Metals");
+     unboldText(this.group3Label, this.add, gameSettings.initialLabelX, gameSettings.initialLabelY + 2 * gameSettings.labelSpacing, "Group 3");
+     unboldText(this.group4Label, this.add, gameSettings.initialLabelX, gameSettings.initialLabelY + 3 * gameSettings.labelSpacing, "Group 4");
+     unboldText(this.group5Label, this.add, gameSettings.initialLabelX, gameSettings.initialLabelY + 4 * gameSettings.labelSpacing, "Group 5");
+     unboldText(this.group6Label, this.add, gameSettings.initialLabelX, gameSettings.initialLabelY + 5 * gameSettings.labelSpacing, "Group 6");
+     unboldText(this.halogensLabel, this.add, gameSettings.initialLabelX, gameSettings.initialLabelY + 6 * gameSettings.labelSpacing, "Halogens");
+     unboldText(this.nobleGasLabel, this.add, gameSettings.initialLabelX, gameSettings.initialLabelY + 7 * gameSettings.labelSpacing, "Noble Gasses");
+ */
+}
 
+//Function to Load Fonts
+function loadFont(name, url) {
+    var newFont = new FontFace(name, `url(${url})`);
+    newFont.load().then(function (loaded) {
+        document.fonts.add(loaded);
+    }).catch(function (error) {
+        return error;
+    });
+}

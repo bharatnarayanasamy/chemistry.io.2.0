@@ -274,23 +274,32 @@ function group7Bullet(gamejs, bullet, element, socket, bulletAngle) {
     pushbullet3.actualX = pushbullet3.x;
     pushbullet3.actualY = pushbullet3.y;
 
+    pushbullet1.isSeven = true;
+    //pushbullet2.isSeven = true;
+    //pushbullet3.isSeven = true;
+
+    pushbullet1.count = 0;
+    //pushbullet2.count = 0;
+    //pushbullet3.count = 0;
+
+
     element.bullet_array.push(pushbullet1);
-    element.bullet_array.push(pushbullet2);
-    element.bullet_array.push(pushbullet3);
+    //element.bullet_array.push(pushbullet2);
+    //element.bullet_array.push(pushbullet3);
     
     //DAMAGE DRAMATICALLY LOWERED FOR TESTING
     socket.emit('shoot-bullet', {
         x: bullet.x, y: bullet.y, angle: bulletAngle, bulletSpeed: gameSettings.bulletSpeed,
         damage: bullet.damage / 20, atomicNumber: element.atomicNum, rotAngle: 0
     });
-    socket.emit('shoot-bullet', {
-        x: bullet.x, y: bullet.y, angle: bulletAngle + 0.2, bulletSpeed: gameSettings.bulletSpeed,
-        damage: bullet.damage / 20, atomicNumber: element.atomicNum, rotAngle: 0
-    });
-    socket.emit('shoot-bullet', {
-        x: bullet.x, y: bullet.y, angle: bulletAngle - 0.2, bulletSpeed: gameSettings.bulletSpeed,
-        damage: bullet.damage / 20, atomicNumber: element.atomicNum, rotAngle: 0
-    });
+    // socket.emit('shoot-bullet', {
+    //     x: bullet.x, y: bullet.y, angle: bulletAngle + 0.2, bulletSpeed: gameSettings.bulletSpeed,
+    //     damage: bullet.damage / 20, atomicNumber: element.atomicNum, rotAngle: 0
+    // });
+    // socket.emit('shoot-bullet', {
+    //     x: bullet.x, y: bullet.y, angle: bulletAngle - 0.2, bulletSpeed: gameSettings.bulletSpeed,
+    //     damage: bullet.damage / 20, atomicNumber: element.atomicNum, rotAngle: 0
+    // });
 }
 
 function group8Bullet(gamejs, bullet, element, socket, bulletAngle, rotationAngle) {

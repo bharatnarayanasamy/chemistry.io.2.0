@@ -165,7 +165,7 @@ var server_seq = 0;
 io.on('connection', (socket) => {
   socketID = socket.id;
   console.log('a user connected');
-  console.log("Sid simps for lj");
+  console.log("Pranav simps for mf");
   // create a new player and add it to our players object
   players[socket.id] = {
     x: Math.floor(Math.random() * gameWidth - 100) + 50, //initialize positions
@@ -215,7 +215,9 @@ io.on('connection', (socket) => {
     delete score_array[socket.id];
 
     delete player_scores[socket.id];
+    console.log(leaderboardArray);
     delete leaderboardArray[socket.id];
+    console.log(leaderboardArray);
 
     // emit a message to all players to remove this player from their client
     io.emit('disconnect', socket.id);
@@ -357,7 +359,7 @@ function ServerGameLoop() {
       let speedY = speed * Math.sin(bullet.angle);
       let speedX = speed * Math.cos(bullet.angle);
 
-      if(typeof players[bullet.owner_id] != "undefined" && serverSettings.group5.includes(players[bullet.owner_id].atomicNumServer)){
+      if (typeof players[bullet.owner_id] != "undefined" && serverSettings.group5.includes(players[bullet.owner_id].atomicNumServer)) {
         speedY = (100 * bullet.increment) * Math.sin(bullet.angle);
         speedX = (100 * bullet.increment) * Math.cos(bullet.angle);
         bullet.increment++;
@@ -431,7 +433,7 @@ function ServerGameLoop() {
         i--;
         delete_set.push(bullet.id);
       }
-      
+
       for (let id in players) {
         if (bullet.owner_id != id && typeof players[id] != "undefined") {
           //Your own bullet shouldn't kill you
@@ -475,9 +477,9 @@ function ServerGameLoop() {
             }
 
             if (typeof players[owner] != "undefined" && !(serverSettings.group8.includes(players[owner].atomicNumServer) || serverSettings.group7.includes(players[owner].atomicNumServer))) {
-               bullet_array.splice(i, 1);
-               i--;
-               delete_set.push(bullet.id);
+              bullet_array.splice(i, 1);
+              i--;
+              delete_set.push(bullet.id);
             }
           }
           if (players[id].health <= 0) {
@@ -532,7 +534,7 @@ function movementHelper() {
   
 }*/
 function Movement() {
-  io.emit('playerMoved', {time : Date.now(), playersKey: players});
+  io.emit('playerMoved', { time: Date.now(), playersKey: players });
 }
 
 function bulletHelper() {
@@ -546,11 +548,11 @@ function bulletMovement() {
   //io.emit("bullets-update", bulletMessageArray);
   //bulletMessageArray = [];
 
-  io.emit("bullets-update", {new_bullet_array: new_bullet_array, delete_set: delete_set});
-  for(let i = 0; i < new_bullet_array.length; i++){
+  io.emit("bullets-update", { new_bullet_array: new_bullet_array, delete_set: delete_set });
+  for (let i = 0; i < new_bullet_array.length; i++) {
     bullet_array.push(new_bullet_array[i]);
   }
-  
+
   //console.log("bullet array:", bullet_array);
   new_bullet_array = [];
   delete_set = [];

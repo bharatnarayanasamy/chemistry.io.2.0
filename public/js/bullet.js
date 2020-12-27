@@ -38,7 +38,8 @@ class Bullet extends Phaser.Physics.Arcade.Sprite {
 
     this.increment = 1;
     //set velocity to be some scalar times the vector of OP, where O is the player's coords and P is the pointer's coords
-    this.setScale(0.4);
+    this.scale = 0.4;
+    this.setScale(this.scale);
 
     this.speed = speed2;
   

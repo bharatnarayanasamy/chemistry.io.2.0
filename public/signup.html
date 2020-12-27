@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 
@@ -25,7 +26,7 @@
     <label for="name" class="sr-only">Name</label>
     <input type="text" id="name" class="form-control" placeholder="Name" required>
     <a class="btn btn-lg btn-primary btn-block" onClick="signUp()">Sign up</a>
-    <a href="/index.html">Already have an account? Login here.</a>
+    <a href="/login.html">Already have an account? Login here.</a>
   </form>
   <script>
     function signUp() {
@@ -40,7 +41,7 @@
         data,
         success: function (data) {
           window.alert('user created successfully');
-          window.location.replace('/index.html');
+          window.location.replace('/loggedin.html');
         },
         error: function (xhr) {
           window.alert(JSON.stringify(xhr));
