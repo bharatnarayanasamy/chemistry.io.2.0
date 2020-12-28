@@ -3,7 +3,7 @@
 
 //Dictionary of game settings
 var gameSettings = {
-    playerSpeed: 600, //change back to 300
+    playerSpeed: 300, //change back to 300
     bulletSpeed: 500,
     speedScale: 6,
     maxPowerups: 14,
