@@ -138,18 +138,6 @@ var messageIndex = 0;
 Entity Interpolation Variables
 ---------------------------
 */
-//Stores information for player movement
-var playerDict;
-//Sets initial time of entity interpolation to 0
-var t1 = 0;
-//Second time variable for entity interpolaiton
-var t2;
-//Checks if we have received information on the payers
-var receivedFirstPlayerInfo = false;
-//Temporary Storage Variables for players
-var tempPlayers;
-//Temporary variables to store time
-var tempTime;
 //Linear Extrapolation Function
 Math.lerp = function (value1, value2, amount) {
     amount = amount < 0 ? 0 : amount;
@@ -685,11 +673,80 @@ function create() {
     });
 
     //displays other players' movement on screenloc
+    var time;
+    var timeDifference;
+    var timeArray = [];
+    var avg = 0;
+
+    var t1 = 0;
+    //displays other players' movement on screenloc
     this.socket.on('playerMoved', function (playerInfo) {
-        receivedFirstPlayerInfo = true;
+        tickRate = 20;
+        // actual code
+        var past = 1000 / tickRate;
+
         playerDict = playerInfo.playersKey;
-        // timestamp of most recent position update form server
-        t2 = playerInfo.time;
+
+        if (t1 > 0) {
+
+            self.otherElements.getChildren().forEach((otherElement) => {
+
+                var id = otherElement.playerId;
+                var boogie = playerDict[id];
+
+                //otherElement.playerId - contains the socket id
+                //rhun a searc through tempPlayers to find the corresponding socket id
+                //if search returns -1, then we just
+
+
+                var now = Date.now();
+                var renderTime = now - past; // the exact time (in the past) for which we will create a position, in this case this is ~1 tick ago
+
+                // timestamp of a previous position (presumably one tick older than t2)
+                t1 = tempTime;
+                // timestamp of most recent position update form server
+                var t2 = playerInfo.time;
+
+
+                // if we have positional data within this time range
+                if (renderTime <= t2 && renderTime >= t1) {
+                    // total time from t1 to t2
+                    var total = t2 - t1;
+                    // how far between t1 and t2 this entity is as of 'renderTime'
+                    var portion = renderTime - t1;
+
+                    // fractional distance between t1 and t2
+                    var ratio = portion / total;
+                    //
+
+                    // Calculating interpolation x and y in order to set position
+
+                    var interpX = Math.lerp(tempPlayers[id].x, boogie.x, ratio);
+                    var interpY = Math.lerp(tempPlayers[id].y, boogie.y, ratio);
+                    // setting other elements position
+                    otherElement.setPosition(interpX, interpY);
+                    otherElement.rotation = boogie.rotation;
+                    // chris a dumbass
+                } else {
+                    // no interpolation at all, just draw the raw position
+                    otherElement.setPosition(boogie.x, boogie.y);
+                    otherElement.rotation = boogie.rotation;
+                    // in the actual code I attempt some extrapolation when draw is called in a range outside of t1 to t2
+                    // this usually only occurs if the connection or server lag, and renderTime falls into a window for which we have yet
+                    // to receive any data
+                    // tuning the variable 'past' can minimize
+                }
+
+            });
+        }
+        else{
+            t1 = 1;
+            var t2 = playerInfo.time;
+        }
+
+        tempTime = t2;
+        tempPlayers = playerDict;
+
 
         let j = 0;
         if (typeof last_processed_input != "undefined") {
@@ -825,67 +882,6 @@ function create() {
     this.neutronBar.bar.setScrollFactor(0);
 
 
-    function entityInterpolation() {
-        //entity interpolation
-        tickRate = 20;
-        // actual code
-        var past = 1000 / tickRate;
-
-        if (t1 > 0) {
-            self.otherElements.getChildren().forEach((otherElement) => {
-                var id = otherElement.playerId;
-                var boogie = playerDict[id];
-                //otherElement.playerId - contains the socket id
-                //rhun a searc through tempPlayers to find the corresponding socket id
-                //if search returns -1, then we just
-                var now = Date.now();
-                var renderTime = now - past; // the exact time (in the past) for which we will create a position, in this case this is ~1 tick ago
-                // timestamp of a previous position (presumably one tick older than t2)
-                t1 = tempTime;
-                // if we have positional data within this time range
-                if (renderTime <= t2 && renderTime >= t1) {
-                    // total time from t1 to t2
-                    var total = t2 - t1;
-                    // how far between t1 and t2 this entity is as of 'renderTime'
-                    var portion = renderTime - t1;
-                    // fractional distance between t1 and t2
-                    var ratio = portion / total;
-                    // Calculating interpolation x and y in order to set position
-                    if (typeof tempPlayers != undefined && typeof tempPlayers[id] != undefined) {
-                        if (typeof boogie != undefined) {
-
-                            var interpX = Math.lerp(tempPlayers[id].x, boogie.x, ratio);
-                            var interpY = Math.lerp(tempPlayers[id].y, boogie.y, ratio);
-
-
-                            // setting other elements position
-                            otherElement.setPosition(interpX, interpY);
-                            otherElement.rotation = boogie.rotation;
-                        }
-                    }
-                } else {
-                    // no interpolation at all, just draw the raw position
-                    if (typeof boogie != undefined) {
-                        otherElement.setPosition(boogie.x, boogie.y);
-                        otherElement.rotation = boogie.rotation;
-                    }
-                    // in the actual code I attempt some extrapolation when draw is called in a range outside of t1 to t2
-                    // this usually only occurs if the connection or server lag, and renderTime falls into a window for which we have yet
-                    // to receive any data
-                    // tuning the variable 'past' can minimize
-                }
-            });
-        }
-        else {
-            if (receivedFirstPlayerInfo) {
-                t1 = 1;
-            }
-        }
-        tempTime = t2;
-        tempPlayers = playerDict;
-    }
-
-    setInterval(entityInterpolation, 16);
 }
 
 var d;
@@ -1010,7 +1006,7 @@ function update(time) {
                 speedY = /*this.element.bullet_array[k].speed*/  this.element.bullet_array[k].increment * 100 * Math.sin(this.element.bullet_array[k].angle2);
                 speedX = /*this.element.bullet_array[k].speed */  this.element.bullet_array[k].increment * 100 * Math.cos(this.element.bullet_array[k].angle2);
                 console.log(this.element.bullet_array[k].increment);
-                this.element.bullet_array[k].increment += 5;
+                this.element.bullet_array[k].increment++;
             }
 
             //iosevka
