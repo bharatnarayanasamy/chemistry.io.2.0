@@ -681,7 +681,7 @@ function create() {
     var t1 = 0;
     //displays other players' movement on screenloc
     this.socket.on('playerMoved', function (playerInfo) {
-        tickRate = 20;
+        tickRate = 60;
         // actual code
         var past = 1000 / tickRate;
 
@@ -725,6 +725,7 @@ function create() {
                     var interpY = Math.lerp(tempPlayers[id].y, boogie.y, ratio);
                     // setting other elements position
                     otherElement.setPosition(interpX, interpY);
+                    //otherElement.rotation = tempPlayers[id].rotation + ratio * (boogie.rotation - tempPlayers[id].rotation);
                     otherElement.rotation = boogie.rotation;
                     // chris a dumbass
                 } else {
@@ -1010,7 +1011,7 @@ function update(time) {
             }
 
             //iosevka
-
+            
             if (this.element.bullet_array[k].isSeven) {
                 //console.log("PRANAV WISHES HE WAS BACK IN MF'S ROOM");
 
