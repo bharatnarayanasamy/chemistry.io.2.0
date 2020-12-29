@@ -692,7 +692,6 @@ function create() {
 
             self.otherElements.getChildren().forEach((otherElement) => {
 
-                printf("pushtest");
 
                 var id = otherElement.playerId;
                 var boogie = playerDict[id];
