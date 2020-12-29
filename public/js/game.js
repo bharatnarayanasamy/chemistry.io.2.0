@@ -681,7 +681,7 @@ function create() {
     var t1 = 0;
     //displays other players' movement on screenloc
     this.socket.on('playerMoved', function (playerInfo) {
-        tickRate = 30;
+        tickRate = 60;
         // actual code
         var past = 1000 / tickRate;
 
@@ -726,12 +726,12 @@ function create() {
                     // setting other elements position
                     otherElement.setPosition(interpX, interpY);
                     //otherElement.rotation = tempPlayers[id].rotation + ratio * (boogie.rotation - tempPlayers[id].rotation);
-                    otherElement.rotation = boogie.rotation;
+                    //otherElement.rotation = boogie.rotation;
                     // chris a dumbass
                 } else {
                     // no interpolation at all, just draw the raw position
                     otherElement.setPosition(boogie.x, boogie.y);
-                    otherElement.rotation = boogie.rotation;
+                    //otherElement.rotation = boogie.rotation;
                     // in the actual code I attempt some extrapolation when draw is called in a range outside of t1 to t2
                     // this usually only occurs if the connection or server lag, and renderTime falls into a window for which we have yet
                     // to receive any data
