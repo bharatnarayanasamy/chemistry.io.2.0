@@ -677,11 +677,12 @@ function create() {
     var timeDifference;
     var timeArray = [];
     var avg = 0;
+    
 
     var t1 = 0;
     //displays other players' movement on screenloc
     this.socket.on('playerMoved', function (playerInfo) {
-        tickRate = 20;
+        tickRate = 30;
         // actual code
         var past = 1000 / tickRate;
 
@@ -690,6 +691,8 @@ function create() {
         if (t1 > 0) {
 
             self.otherElements.getChildren().forEach((otherElement) => {
+
+                printf("pushtest");
 
                 var id = otherElement.playerId;
                 var boogie = playerDict[id];
