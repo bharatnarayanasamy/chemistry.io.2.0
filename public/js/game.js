@@ -682,7 +682,7 @@ function create() {
     var t1 = 0;
     //displays other players' movement on screenloc
     this.socket.on('playerMoved', function (playerInfo) {
-        tickRate = 30;
+        tickRate = 60;
         // actual code
         var past = 1000 / tickRate;
 

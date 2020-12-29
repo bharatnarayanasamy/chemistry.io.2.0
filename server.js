@@ -560,7 +560,7 @@ function bulletMovement() {
 }
 
 //setInterval(movementHelper, 1);
-setInterval(Movement, 33);
+setInterval(Movement, 16);
 //setInterval(bulletHelper, 1);
 setInterval(bulletMovement, 50);
 
