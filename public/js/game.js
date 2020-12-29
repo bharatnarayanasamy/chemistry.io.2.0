@@ -691,7 +691,7 @@ function create() {
 
             self.otherElements.getChildren().forEach((otherElement) => {
 
-                var id = othsderElement.playerId;
+                var id = otherElement.playerId;
                 var boogie = playerDict[id];
 
                 //otherElement.playerId - contains the socket id
