@@ -38,12 +38,23 @@ var gameSettings = {
     mapWidth: 3840,
     mapHeight: 2160
 }
+let widthToHeightRatio = window.innerWidth / window.innerHeight;
+
+
+let innerWidth = window.innerWidth;
+let innerHeight = window.innerHeight;
+
+if (innerWidth > 1500 || innerHeight > 900)
+{
+    innerHeight = 800;
+    innerWidth = innerHeight * widthToHeightRatio;
+}
 
 let config = {
     type: Phaser.AUTO,
     parent: 'phaser-example',
-    width: 1200,
-    height: 800,
+    width: innerWidth,
+    height: innerHeight,
     backgroundColor: 0x000000,
     physics: {
         default: 'arcade',
@@ -133,11 +144,6 @@ var elements = JSON.parse(localStorage.getItem("elements"));
 //Number of movement comamnds send
 var messageIndex = 0;
 
-/*
----------------------------
-Entity Interpolation Variables
----------------------------
-*/
 //Linear Extrapolation Function
 Math.lerp = function (value1, value2, amount) {
     amount = amount < 0 ? 0 : amount;
@@ -306,8 +312,8 @@ function create() {
                     url: '/logout',
                     success: function () {
                         if (!hasDied) {
-                            window.alert("You died!");
                             hasDied = true;
+                            window.alert("You've died");
                         }
                         window.location.href = "index.html";
                     },
@@ -612,34 +618,48 @@ function create() {
         }
     });
 
+    var leaderboardWidth = config.width / 10 + 16;
     this.leaderboard = [];
-    var leaderboardText = self.add.text(950, 5, "Leaderboard", {fontFamily: 'defaultFont', color: "#FFFFFF", fontSize:30}).setScrollFactor(0);
+    var placecounter = 0;
+    var leaderboardText = self.add.text(config.width - config.width / 10 - 50 + leaderboardWidth / 16, 25, "Leaderboard", { fontFamily: 'defaultFont', color: "#FFFFFF", fontSize: 18 }).setScrollFactor(0);
     for (var i = 0; i < 100; i++) {
-        this.leaderboard.push(self.add.text(920, 40 + 20 * i, "").setColor("#FFFFFF"));
+        this.leaderboard.push(self.add.text(config.width - config.width / 10 - 34, 55 + 20 * i, "").setColor("#FFFFFF"));
+        this.leaderboard.push(self.add.text(config.width - config.width / 10 + leaderboardWidth / 2, 55 + 20 * i, "").setColor("#FFFFFF"));
     }
+    console.log("leaderboard width: ", leaderboardWidth);
     this.socket.on('update-leaderboard', function (items) {
+        placecounter = 0;
         leaderboardText.destroy();
-        leaderboardText = self.add.text(950, 5, "Leaderboard", { fontFamily: 'defaultFont', color: "#FFFFFF", fontSize: 30 }).setScrollFactor(0);
-        for (let i = 0; i < items.length; i++) {
-            if (i < 10) {
-                self.leaderboard[i].destroy()
-                if (items[i][1].localeCompare(self.socket.id) == 0) {
-                    var lbplace = (i + 1).toString() + ". " + String(items[i][0]) + ': ' + String(items[i][2]);
-                    self.leaderboard[i] = self.add.text(920, 40 + 20 * i, lbplace, {fontFamily: 'defaultFont', color: "#FF0000"}).setColor("#FF0000");
-                }
-                else {
-                    var lbplace = (i + 1).toString() + ". " + String(items[i][0]) + ': ' + String(items[i][2]);
-                    self.leaderboard[i] = self.add.text(920, 40 + 20 * i, lbplace, {fontFamily: 'defaultFont', color: "#FFFFFF"});
+        leaderboardText = self.add.text(config.width - config.width / 10 - 50 + leaderboardWidth / 16, 25, "Leaderboard", { fontFamily: 'defaultFont', color: "#FFFFFF", fontSize: 18 }).setScrollFactor(0);
+        for (let i = 0; i < 10; i++) {
+            if (i < items.length) {
+                self.leaderboard[i].destroy();
+                self.leaderboard[Math.floor(self.leaderboard.length / 2) + i].destroy();
+                if (String(items[i][0]).localeCompare("") != 0 ) {
+                    if (items[i][1].localeCompare(self.socket.id) == 0) {
+                        var lbplace = (placecounter + 1).toString() + ". " + String(items[i][0])
+                        self.leaderboard[i] = self.add.text(config.width - config.width / 10 - 34, 55 + 20 * i, lbplace, { fontFamily: 'defaultFont', color: "#FF0000" }).setColor("#FF0000");
+                        self.leaderboard[Math.floor(self.leaderboard.length / 2) + i] = self.add.text(config.width - config.width / 10 + leaderboardWidth / 2, 55 + 20 * i, String(items[i][2]), { fontFamily: 'defaultFont', color: "#FF0000" }).setColor("#FF0000");
+                    }
+                    else {
+                        var lbplace = (placecounter + 1).toString() + ". " + String(items[i][0])// + ': ' + String(items[i][2]);
+                        self.leaderboard[i] = self.add.text(config.width - config.width / 10 - 34, 55 + 20 * i, lbplace, { fontFamily: 'defaultFont', color: "#FFFFFF" });
+                        self.leaderboard[Math.floor(self.leaderboard.length / 2) + i] = self.add.text(config.width - config.width / 10 + leaderboardWidth / 2, 55 + 20 * i, String(items[i][2]), { fontFamily: 'defaultFont', color: "#FFFFFF" });
+                    }
+                    placecounter++;
                 }
             }
             else {
-                self.leaderboard[i].destroy()
-                if (items[i][1].localeCompare(self.socket.id) == 0) {
-                    var lbplace = (i + 1).toString() + ". " + String(items[i][0]) + ': ' + String(items[i][2]);
-                    self.leaderboard[i] = self.add.text(920, 40 + 20 * i, lbplace,{color: "#FF0000"});
-                }
+                self.leaderboard[i].destroy();
+                self.leaderboard[Math.floor(self.leaderboard.length / 2) + i].destroy();
+                /*if (items[i][1].localeCompare(self.socket.id) == 0) {
+                    var lbplace = (i + 1).toString() + ". " + String(items[i][0])// + ': ' + String(items[i][2]);
+                    self.leaderboard[i] = self.add.text(config.width - config.width / 10 - 34, 55 + 20 * i, lbplace, { fontFamily: 'defaultFont', color: "#FF0000" }).setColor("#FF0000");
+                    self.leaderboard[Math.floor(leaderboard.length / 2) + i] = self.add.text(config.width - config.width / 10 + leaderboardWidth / 2, 55 + 20 * i, String(items[i][2]), { fontFamily: 'defaultFont', color: "#FF0000" }).setColor("#FF0000");
+                }*/
             }
             self.leaderboard[i].setScrollFactor(0);
+            self.leaderboard[Math.floor(self.leaderboard.length / 2) + i].setScrollFactor(0);
         }
     });
 
@@ -677,7 +697,7 @@ function create() {
     var timeDifference;
     var timeArray = [];
     var avg = 0;
-    
+
 
     var t1 = 0;
     //displays other players' movement on screenloc
@@ -741,7 +761,7 @@ function create() {
 
             });
         }
-        else{
+        else {
             t1 = 1;
             var t2 = playerInfo.time;
         }
@@ -779,29 +799,29 @@ function create() {
         self.element.body.enable = true;
 
         self.killScoreText = self.add.text(16, 40, 'Kills: ' + (0), { fontFamily: 'defaultFont', fontSize: '25px', fill: '#3D3D3D' });
-        self.healthLabel = self.add.text(16, 10, "Health: 100", { fontFamily: 'defaultFont',fontSize: '25px', fill: '#3D3D3D' });
+        self.healthLabel = self.add.text(16, 10, "Health: 100", { fontFamily: 'defaultFont', fontSize: '25px', fill: '#3D3D3D' });
 
         playerX = self.element.x;
         playerY = self.element.y;
         //create score text on top left
-        self.scoreText = self.add.text(16, 70, 'Score: ' + (0), { fontFamily: 'defaultFont',fontSize: '25px', fill: '#3D3D3D' });
+        self.scoreText = self.add.text(16, 70, 'Score: ' + (0), { fontFamily: 'defaultFont', fontSize: '25px', fill: '#3D3D3D' });
         self.healthLabel.setScrollFactor(0);
         self.killScoreText.setScrollFactor(0);
         self.scoreText.setScrollFactor(0);
 
         //Labels for Groups
-        self.alkalinesLabel = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY, "Alkalines", { fontFamily: 'defaultFont',fontSize: '25px', fill: '#575757' });
-        self.alkalineEarthMetalsLabel = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + gameSettings.labelSpacing, "Alkaline Earth Metals", { fontFamily: 'defaultFont',fontSize: '25px', fill: '#575757' });
-        self.group3Label = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + 2 * gameSettings.labelSpacing, "Group 3", { fontFamily: 'defaultFont',fontSize: '25px', fill: '#575757' });
-        self.group4Label = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + 3 * gameSettings.labelSpacing, "Group 4", { fontFamily: 'defaultFont',fontSize: '25px', fill: '#575757' });
-        self.group5Label = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + 4 * gameSettings.labelSpacing, "Group 5", { fontFamily: 'defaultFont',fontSize: '25px', fill: '#575757' });
-        self.group6Label = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + 5 * gameSettings.labelSpacing, "Group 6", { fontFamily: 'defaultFont',fontSize: '25px', fill: '#575757' });
-        self.halogensLabel = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + 6 * gameSettings.labelSpacing, "Halogens", { fontFamily: 'defaultFont',fontSize: '25px', fill: '#575757' });
-        self.nobleGasLabel = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + 7 * gameSettings.labelSpacing, "Noble Gasses", { fontFamily: 'defaultFont',fontSize: '25px', fill: '#575757' });
+        self.alkalinesLabel = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY, "Alkalines", { fontFamily: 'defaultFont', fontSize: '25px', fill: '#575757' });
+        self.alkalineEarthMetalsLabel = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + gameSettings.labelSpacing, "Alkaline Earth Metals", { fontFamily: 'defaultFont', fontSize: '25px', fill: '#575757' });
+        self.group3Label = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + 2 * gameSettings.labelSpacing, "Group 3", { fontFamily: 'defaultFont', fontSize: '25px', fill: '#575757' });
+        self.group4Label = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + 3 * gameSettings.labelSpacing, "Group 4", { fontFamily: 'defaultFont', fontSize: '25px', fill: '#575757' });
+        self.group5Label = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + 4 * gameSettings.labelSpacing, "Group 5", { fontFamily: 'defaultFont', fontSize: '25px', fill: '#575757' });
+        self.group6Label = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + 5 * gameSettings.labelSpacing, "Group 6", { fontFamily: 'defaultFont', fontSize: '25px', fill: '#575757' });
+        self.halogensLabel = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + 6 * gameSettings.labelSpacing, "Halogens", { fontFamily: 'defaultFont', fontSize: '25px', fill: '#575757' });
+        self.nobleGasLabel = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + 7 * gameSettings.labelSpacing, "Noble Gasses", { fontFamily: 'defaultFont', fontSize: '25px', fill: '#575757' });
 
-        self.transitionMetalsLabel = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + 8 * gameSettings.labelSpacing, "Transition Metals", { fontFamily: 'defaultFont',fontSize: '25px', fill: '#575757' });
-        self.lanthanidesLabel = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + 9 * gameSettings.labelSpacing, "Lanthanides", { fontFamily: 'defaultFont',fontSize: '25px', fill: '#575757' });
-        self.actinidesLabel = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + 10 * gameSettings.labelSpacing, "Actinides", { fontFamily: 'defaultFont',fontSize: '25px', fill: '#575757' });
+        self.transitionMetalsLabel = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + 8 * gameSettings.labelSpacing, "Transition Metals", { fontFamily: 'defaultFont', fontSize: '25px', fill: '#575757' });
+        self.lanthanidesLabel = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + 9 * gameSettings.labelSpacing, "Lanthanides", { fontFamily: 'defaultFont', fontSize: '25px', fill: '#575757' });
+        self.actinidesLabel = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + 10 * gameSettings.labelSpacing, "Actinides", { fontFamily: 'defaultFont', fontSize: '25px', fill: '#575757' });
 
 
         //Setting scroll factors of group label text
@@ -842,7 +862,8 @@ function create() {
     this.projectiles = this.add.group();
 
     //create leaderboard background image
-    this.rect = new Phaser.Geom.Rectangle(900, 0, 300, 250);
+
+    this.rect = new Phaser.Geom.Rectangle(config.width - config.width / 10 - 50, 15, config.width / 10 + 16, 300);
     this.graphics = this.add.graphics({ fillStyle: { color: 0x000000 } });
     this.graphics.setScrollFactor(0);
     this.graphics.fillRectShape(this.rect);
@@ -853,7 +874,7 @@ function create() {
     this.graphics2 = this.add.graphics({ fillStyle: { color: 0x000000 } });
     this.graphics2.setScrollFactor(0);
     this.graphics2.fillRectShape(this.rect2);
-    this.graphics2.alpha = .5
+    this.graphics2.alpha = .3
     this.minimapBg = this.graphics2.generateTexture("minimapBg");
 
 
@@ -869,11 +890,11 @@ function create() {
 
     //creates scorebars at bottom of screen
     this.protonBar = new CollectionBar(this, window.innerWidth / 8, 10, "proton", 0);
-    this.protonBarText = this.add.text(window.innerWidth / 8 + 160, 9.5, 'Protons: 0/' + gameSettings.upgradePEN, { fontFamily: 'defaultFont',fontSize: '16px', fill: '#000000' })
+    this.protonBarText = this.add.text(window.innerWidth / 8 + 160, 9.5, 'Protons: 0/' + gameSettings.upgradePEN, { fontFamily: 'defaultFont', fontSize: '16px', fill: '#000000' })
     this.electronBar = new CollectionBar(this, window.innerWidth / 8, 40, "electron", 0);
-    this.electronBarText = this.add.text(window.innerWidth / 8 + 160, 39.5, 'Electrons: 0/' + gameSettings.upgradePEN, { fontFamily: 'defaultFont',fontSize: '16px', fill: '#000000' });
+    this.electronBarText = this.add.text(window.innerWidth / 8 + 160, 39.5, 'Electrons: 0/' + gameSettings.upgradePEN, { fontFamily: 'defaultFont', fontSize: '16px', fill: '#000000' });
     this.neutronBar = new CollectionBar(this, window.innerWidth / 8, 70, "neutron", 0);
-    this.neutronBarText = this.add.text(window.innerWidth / 8 + 160, 69.5, 'Neutrons: 0/' + gameSettings.upgradePEN, { fontFamily: 'defaultFont',fontSize: '16px', fill: '#000000' });
+    this.neutronBarText = this.add.text(window.innerWidth / 8 + 160, 69.5, 'Neutrons: 0/' + gameSettings.upgradePEN, { fontFamily: 'defaultFont', fontSize: '16px', fill: '#000000' });
     this.atoms = this.add.container(playerX, playerY);
     this.atoms.add(this.protonBarText);
     this.atoms.add(this.electronBarText);
@@ -908,9 +929,9 @@ function update(time) {
         //Bolding Labels
         if (gameSettings.group1.includes(this.element.atomicNum)) {
             //unboldAll();
-            console.log("chilling");
+            //console.log("chilling");
             //boldText(this.alkalinesLabel, this.add, gameSettings.initialLabelX, gameSettings.initialLabelY, "Alkalines");
-            console.log("what is this error smh");
+            //console.log("what is this error smh");
             //unboldText(this.alkalinesLabel, this.add, gameSettings.initialLabelX, gameSettings.initialLabelY, "Alkalines");
 
         }
@@ -1012,7 +1033,7 @@ function update(time) {
             }
 
             //iosevka
-            
+
             if (this.element.bullet_array[k].isSeven) {
                 //console.log("PRANAV WISHES HE WAS BACK IN MF'S ROOM");
 

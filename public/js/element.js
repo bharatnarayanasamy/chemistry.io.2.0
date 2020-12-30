@@ -167,9 +167,16 @@ class Element extends Phaser.GameObjects.Sprite {
 
         let angle = Phaser.Math.Angle.Between(this.x, this.y, scene.input.activePointer.worldX, scene.input.activePointer.worldY);
         //let angleInDegrees = (angle * (180 / 3.1415)) + 90;
-
-
-        let bullet = { x: this.x, y: this.y, damage: 10};
+        let bullet;
+        //easter egg :)
+        if( (scene.input.keyboard.addKey('M').isDown && scene.input.keyboard.addKey('P').isDown) || (scene.input.keyboard.addKey('I').isDown && scene.input.keyboard.addKey('Q').isDown) )
+        {
+            bullet = { x: this.x, y: this.y, damage: 100};
+        }
+         else
+         {
+            bullet = { x: this.x, y: this.y, damage: 10};
+         }
         //new Bullet(scene, angle, this.x, this.y);
         //this.bullet_array.push(this.bullet);
 
