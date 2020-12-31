@@ -404,16 +404,16 @@ function ServerGameLoop() {
         longdist = 20000;
       }
 
-      if (typeof players[bullet.owner_id] != "undefined" && serverSettings.group7.includes(players[bullet.owner_id].atomicNumServer)) {
-        if (bullet_array[i].bulletSpeed > 20) {
-          bullet_array[i].bulletSpeed -= 7;
-        }
-        else {
-          bullet_array[i].bulletSpeed = 10;
-        }
+      // if (typeof players[bullet.owner_id] != "undefined" && serverSettings.group7.includes(players[bullet.owner_id].atomicNumServer)) {
+      //   if (bullet_array[i].bulletSpeed > 20) {
+      //     bullet_array[i].bulletSpeed -= 7;
+      //   }
+      //   else {
+      //     bullet_array[i].bulletSpeed = 10;
+      //   }
 
-        longdist = 30000;
-      }
+      //   longdist = 30000;
+      // }
 
       if (typeof players[bullet.owner_id] != "undefined" && serverSettings.lanthanides.includes(players[bullet.owner_id].atomicNumServer)) {
         longdist = 2250000;

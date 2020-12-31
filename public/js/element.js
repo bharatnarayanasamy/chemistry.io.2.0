@@ -58,7 +58,6 @@ class Element extends Phaser.GameObjects.Sprite {
         //this.body.setCollideWorldBounds(true);
 
         this.hp = new HealthBar(scene, x - 50, y + 70);
-
         this.lastHurt = 0;
         this.updateArray = [];
         this.destx = x;
@@ -93,6 +92,7 @@ class Element extends Phaser.GameObjects.Sprite {
         let currentSpeedY0 = 0;
         var bool = false;
         this.body.setVelocity(0);
+        this.hp.body.setVelocity(0);
         //this.hp.body.setVelocity(0);
         //move right or left
         
@@ -126,12 +126,10 @@ class Element extends Phaser.GameObjects.Sprite {
                 // currentSpeedY0 = speed;
                 command_arr[0] = 1;
             }
-            //"fuck me" - Chris to MP July 31, 2020
-            this.hp.move(scene, this.body.x + 40, this.body.y + 120);
-            
             
             this.x += gameSettings.playerSpeed / 60 * command_arr[1];
             this.y += gameSettings.playerSpeed / 60 * command_arr[0];
+            this.hp.move(scene, this.body.x + 40, this.body.y + 120);
         }
         else {
             //knockback
@@ -145,24 +143,10 @@ class Element extends Phaser.GameObjects.Sprite {
         let angleDelta = Phaser.Math.Angle.Wrap(angleToPointer - this.rotation);
         this.rotation = angleToPointer;
 
-        //some fancy math stuff I got from online
-        /*if (Phaser.Math.Within(angleDelta, 0, gameSettings.TOLERANCE)) {
-            
-            this.body.setAngularVelocity(0);
-        } 
-        else {
-            this.body.setAngularVelocity(Math.sign(angleDelta) * gameSettings.ROTATION_SPEED_DEGREES);
-        }*/
         command_arr[2] = angleToPointer;
-        //var data = {
-            //currentSpeedX: currentSpeedX0, 
-            //currentSpeedY: currentSpeedY0,
-             
-        //}
         return command_arr;
-
-        
     }
+    
     shootBullet(scene) {
 
         let angle = Phaser.Math.Angle.Between(this.x, this.y, scene.input.activePointer.worldX, scene.input.activePointer.worldY);

@@ -1,3 +1,4 @@
+
 class HealthBar {
 
     constructor (scene, x, y)

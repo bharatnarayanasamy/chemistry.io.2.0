@@ -638,12 +638,12 @@ function create() {
                 if (String(items[i][0]).localeCompare("") != 0 ) {
                     if (items[i][1].localeCompare(self.socket.id) == 0) {
                         var lbplace = (placecounter + 1).toString() + ". " + String(items[i][0])
-                        self.leaderboard[i] = self.add.text(config.width - config.width / 10 - 34, 55 + 20 * i, lbplace, { fontFamily: 'defaultFont', color: "#FF0000" }).setColor("#FF0000");
+                        self.leaderboard[i] = self.add.text(config.width - config.width / 10 - 34, 55 + 20 * placecounter, lbplace, { fontFamily: 'defaultFont', color: "#FF0000" }).setColor("#FF0000");
                         self.leaderboard[Math.floor(self.leaderboard.length / 2) + i] = self.add.text(config.width - config.width / 10 + leaderboardWidth / 2, 55 + 20 * i, String(items[i][2]), { fontFamily: 'defaultFont', color: "#FF0000" }).setColor("#FF0000");
                     }
                     else {
                         var lbplace = (placecounter + 1).toString() + ". " + String(items[i][0])// + ': ' + String(items[i][2]);
-                        self.leaderboard[i] = self.add.text(config.width - config.width / 10 - 34, 55 + 20 * i, lbplace, { fontFamily: 'defaultFont', color: "#FFFFFF" });
+                        self.leaderboard[i] = self.add.text(config.width - config.width / 10 - 34, 55 + 20 * placecounter, lbplace, { fontFamily: 'defaultFont', color: "#FFFFFF" });
                         self.leaderboard[Math.floor(self.leaderboard.length / 2) + i] = self.add.text(config.width - config.width / 10 + leaderboardWidth / 2, 55 + 20 * i, String(items[i][2]), { fontFamily: 'defaultFont', color: "#FFFFFF" });
                     }
                     placecounter++;
@@ -797,6 +797,10 @@ function create() {
             rotation: self.element.rotation
         };
         self.element.body.enable = true;
+        console.log(self.element.hp.x);
+        console.log(self.element.hp.y);
+        //self.element.hp.startFollow(self.element);
+        self.element.depth = 2;
 
         self.killScoreText = self.add.text(16, 40, 'Kills: ' + (0), { fontFamily: 'defaultFont', fontSize: '25px', fill: '#3D3D3D' });
         self.healthLabel = self.add.text(16, 10, "Health: 100", { fontFamily: 'defaultFont', fontSize: '25px', fill: '#3D3D3D' });
@@ -808,6 +812,7 @@ function create() {
         self.healthLabel.setScrollFactor(0);
         self.killScoreText.setScrollFactor(0);
         self.scoreText.setScrollFactor(0);
+        //self.element.hp.setScrollFactor(0);
 
         //Labels for Groups
         self.alkalinesLabel = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY, "Alkalines", { fontFamily: 'defaultFont', fontSize: '25px', fill: '#575757' });
@@ -849,6 +854,7 @@ function create() {
             otherElement.setScale(0.4);
             otherElement.body.enable = true;
             otherElement.timeUpdate = 0;
+            otherElement.depth = 2;
         }
         else {
             const otherElement = new Element(self, playerInfo.x + 1.7, playerInfo.y + 2.9, 45, playerInfo.playerId, this.gameSettings.texture[this.gameSettings.texture.length - 1]);
@@ -857,6 +863,7 @@ function create() {
             self.otherElements.add(otherElement);
             otherElement.body.enable = true;
             otherElement.timeUpdate = 0;
+            otherElement.depth = 2;
         }
     }
     this.projectiles = this.add.group();
@@ -903,7 +910,6 @@ function create() {
     this.protonBar.bar.setScrollFactor(0);
     this.electronBar.bar.setScrollFactor(0);
     this.neutronBar.bar.setScrollFactor(0);
-
 
 }
 
@@ -1035,20 +1041,23 @@ function update(time) {
             //iosevka
 
             if (this.element.bullet_array[k].isSeven) {
-                //console.log("PRANAV WISHES HE WAS BACK IN MF'S ROOM");
 
-                if (this.element.bullet_array[k].count < 10) {
+                if(this.element.bullet_array[k].count == 0){
+                    this.element.bullet_array[k].scale = 0.7 * this.element.bullet_array[k].scale;
                     this.element.bullet_array[k].count++;
-                    this.element.bullet_array[k].scale += 0.02;
-                    //console.log("iosevka AND PRANAV SUCKS HIS OWN DICK");
                     this.element.bullet_array[k].setScale(this.element.bullet_array[k].scale);
                 }
-                else if (this.element.bullet_array[k].count < 20) {
+                else if (this.element.bullet_array[k].count < 35) {
+                    this.element.bullet_array[k].count++;
+                    this.element.bullet_array[k].scale += 0.02;
+                    this.element.bullet_array[k].setScale(this.element.bullet_array[k].scale);
+                }
+                else if (this.element.bullet_array[k].count < 70) {
                     speedX -= 100;
                     speedY -= 100;
                     this.element.bullet_array[k].count++;
                 }
-                else if (this.element.bullet_array[k].count < 50) {
+                else if (this.element.bullet_array[k].count < 100) {
                     speedX = 0;
                     speedY = 0;
                     this.element.bullet_array[k].count++;
@@ -1065,7 +1074,7 @@ function update(time) {
 
                 // When opponent gets hit by player's helium bullets
                 if (dist < 70 && !(gameSettings.group8.includes(this.element.atomicNum) || gameSettings.group7.includes(this.element.atomicNum))) {
-                    if (this.element.bullet_array[k].owner_id != otherElement.playerId && !this.element.bullet_array[k].isEight) {
+                    if (this.element.bullet_array[k].owner_id != otherElement.playerId && !this.element.bullet_array[k].isEight  && !this.element.bullet_array[k].isSeven) {
                         this.element.bullet_array[k].setVisible(false);
                     }
                 }
@@ -1074,19 +1083,25 @@ function update(time) {
 
             //let dist0 = Math.sqrt(Math.pow(this.element.x - this.element.bullet_array[k].x, 2) + Math.pow(this.element.y - this.element.bullet_array[k].y, 2));
 
-            if (dist0 < 70 && this.element.bullet_array[k].owner_id != this.socket.id && !this.element.bullet_array[k].isEight) {
+            if (dist0 < 70 && this.element.bullet_array[k].owner_id != this.socket.id && (!this.element.bullet_array[k].isEight && !this.element.bullet_array[k].isSeven )) {
                 this.element.bullet_array[k].setVisible(false);
             }
             if (this.element.bullet_array[k].owner_id == this.socket.id && (this.element.bullet_array[k].x < -10 || this.element.bullet_array[k].x > gameSettings.mapWidth + 10 || this.element.bullet_array[k].y < -10 || this.element.bullet_array[k].y > gameSettings.mapHeight + 10)) {
                 this.element.bullet_array[k].destroy();
                 this.element.bullet_array.splice(k, 1);
+                
+
             }
         }
 
         if ((this.input.activePointer.isDown || Phaser.Input.Keyboard.JustDown(this.spacebar)) && (lastShot + 500 < time || (lastShot + 250 < time && this.element.atomicNum == 2))) {
+            this.scene.bringToTop(this.element)
+
             let bullet = this.element.shootBullet(this);
 
             let bulletAngle = Phaser.Math.Angle.Between(this.element.x, this.element.y, this.input.activePointer.worldX, this.input.activePointer.worldY);
+            this.scene.bringToTop(this.element)
+
 
             if (gameSettings.group8.includes(this.element.atomicNum)) {
                 group8Bullet(this, bullet, this.element, this.socket, bulletAngle, bulletAngle);
