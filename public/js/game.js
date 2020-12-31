@@ -863,6 +863,7 @@ function create() {
             self.otherElements.add(otherElement);
             otherElement.body.enable = true;
             otherElement.timeUpdate = 0;
+            
             otherElement.depth = 2;
         }
     }
