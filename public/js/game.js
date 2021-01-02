@@ -247,12 +247,16 @@ function create() {
         repeat: 0,
         hideOnComplete: true
     });
-
-    acid_array = [];
+/*
+    var acid_array = [-1,-1,-1,-1,-1];
     for(let i = 0; i < 5; i++){
-        acid_array.push(self.physics.add.image(Math.floor(Math.random() * config.width),Math.floor(Math.random() * config.height,"acid"))
+        let x = Math.floor(Math.random() * config.width);
+        let y = Math.floor(Math.random() * config.height)
+        let q = this.physics.add.image(1,1,"acid");
+        //this.acid_array[i] = this.physics.add.image(1,1,"acid");//Math.floor(Math.random() * config.width), Math.floor(Math.random() * config.height),"acid");
+        //self.proton_array[i] = self.physics.add.image(server_proton_array[i].x, server_proton_array[i].y, 'proton');
     }
-
+*/
     //self.add.physics.overlap()
 
     //creates instance of socket.io
