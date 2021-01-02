@@ -61,7 +61,6 @@ class Element extends Phaser.GameObjects.Sprite {
 
         this.hp = new HealthBar(scene, x - 50, y + 70);
         this.username = username;
-        this.usernameLabel = new UsernameLabel(scene, x-50, y+70, username);
         this.lastHurt = 0;
         this.updateArray = [];
         this.destx = x;
@@ -92,7 +91,7 @@ class Element extends Phaser.GameObjects.Sprite {
     */
     updateUsername(scene, username) {
         this.username = username;
-        this.usernameLabel = scene.add.text(this.x + 40, this.y + 30, this.username).setColor("#000000");
+        //this.usernameLabel = scene.add.text(this.x + 40, this.y + 30, this.username).setColor("#000000");
     }
     movePlayer(scene, speed, isHitByTransitionBullet, speedX, speedY, bulletAngle) {
         //reset player velocity
@@ -103,19 +102,19 @@ class Element extends Phaser.GameObjects.Sprite {
         this.hp.body.setVelocity(0);
         //this.hp.body.setVelocity(0);
         //move right or left
-
+        
         //ORDER =          W/s   a/D
         //w and d are 1, s and a are -1
-        let command_arr = [0, 0, 0];
+        let command_arr = [0, 0, 0]; 
 
         if (!isHitByTransitionBullet) {
             //no knockback
-            if (scene.input.keyboard.addKey('A').isDown && this.x > 50) {
+            if (scene.input.keyboard.addKey('A').isDown && this.x > 50 ) {
                 /*this.body.setVelocityX(-speed);
                 bool = true;*/
                 command_arr[1] = -1;
-
-            }
+                
+            } 
             else if (scene.input.keyboard.addKey('D').isDown && this.x < gameSettings.mapWidth - 50) {
                 /*this.body.setVelocityX(speed);*/
                 command_arr[1] = 1;
@@ -134,17 +133,16 @@ class Element extends Phaser.GameObjects.Sprite {
                 // currentSpeedY0 = speed;
                 command_arr[0] = 1;
             }
-
+            
             this.x += gameSettings.playerSpeed / 60 * command_arr[1];
             this.y += gameSettings.playerSpeed / 60 * command_arr[0];
-            this.hp.move(this.body.x + 40, this.body.y + 120);
-
-            
+            this.hp.move(scene, this.body.x + 40, this.body.y + 120);
+            console.log(this.usernameLabel);
         }
         else {
             //knockback
-            this.body.setVelocityX(speedX * 2);
-            this.body.setVelocityY(speedY * 2);
+            this.body.setVelocityX(speedX*2);
+            this.body.setVelocityY(speedY*2);
             this.hp.move(scene, this.body.x + 40, this.body.y + 120);
         }
 
@@ -155,24 +153,21 @@ class Element extends Phaser.GameObjects.Sprite {
         command_arr[2] = angleToPointer;
         return command_arr;
     }
-
+    
     shootBullet(scene) {
 
         let angle = Phaser.Math.Angle.Between(this.x, this.y, scene.input.activePointer.worldX, scene.input.activePointer.worldY);
         //let angleInDegrees = (angle * (180 / 3.1415)) + 90;
         let bullet;
-
-
         //easter egg :)
-
-        if ((scene.input.keyboard.addKey('M').isDown && scene.input.keyboard.addKey('P').isDown) || (scene.input.keyboard.addKey('I').isDown && scene.input.keyboard.addKey('Q').isDown)) {
-            bullet = { x: this.x, y: this.y, damage: 100 };
+        if( (scene.input.keyboard.addKey('M').isDown && scene.input.keyboard.addKey('P').isDown) || (scene.input.keyboard.addKey('I').isDown && scene.input.keyboard.addKey('Q').isDown) )
+        {
+            bullet = { x: this.x, y: this.y, damage: 100};
         }
-        else {
-            bullet = { x: this.x, y: this.y, damage: 10 };
-        }
-
-
+         else
+         {
+            bullet = { x: this.x, y: this.y, damage: 10};
+         }
         //new Bullet(scene, angle, this.x, this.y);
         //this.bullet_array.push(this.bullet);
 
