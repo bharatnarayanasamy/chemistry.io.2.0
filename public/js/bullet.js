@@ -9,7 +9,6 @@ class Bullet extends Phaser.Physics.Arcade.Sprite {
     //starting location of the bullet. angles help determine whether bullet will start to the left of the 
     //player if gun is pointed leftwards, or right of the player if gun is pointed rightwards
 
-    console.log(scene);
     if (!(gameSettings.group3.includes(scene.element.atomicNum)) && !(gameSettings.group4.includes(scene.element.atomicNum)))
     {
       var x = x + 20 * Math.cos(angle);
@@ -37,6 +36,7 @@ class Bullet extends Phaser.Physics.Arcade.Sprite {
     scene.projectiles.add(this);
 
     this.increment = 1;
+    this.decrement = gameSettings.bulletSpeed;
     //set velocity to be some scalar times the vector of OP, where O is the player's coords and P is the pointer's coords
     this.scale = 0.4;
     this.setScale(this.scale);
@@ -45,7 +45,7 @@ class Bullet extends Phaser.Physics.Arcade.Sprite {
   
     this.body.velocity.x = Math.cos(angle) * speed2;
     this.body.velocity.y = Math.sin(angle) * speed2;
-    console.log(this.body.velocity.x);
+    //console.log(this.body.velocity.x);
     
     this.angle2 = angle;
 

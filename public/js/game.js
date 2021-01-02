@@ -44,8 +44,7 @@ let widthToHeightRatio = window.innerWidth / window.innerHeight;
 let innerWidth = window.innerWidth;
 let innerHeight = window.innerHeight;
 
-if (innerWidth > 1500 || innerHeight > 900)
-{
+if (innerWidth > 1500 || innerHeight > 900) {
     innerHeight = 800;
     innerWidth = innerHeight * widthToHeightRatio;
 }
@@ -128,6 +127,8 @@ var hasDied = false;
 var isHit = false;
 //Store player's movement in a single update loop
 var movementCommands = [];
+//Dictionary with socket id as key and username as value
+var idUsername = {};
 
 /*
 ---------------------------
@@ -200,6 +201,7 @@ function create() {
         });
     }
 
+
     //  Set the camera and physics bounds to be the size of 4x4 bg images
     this.cameras.main.setBounds(0, 0, 1920 * 2, 1080 * 2);
     this.physics.world.setBounds(0, 0, 1920 * 2, 1080 * 2);
@@ -248,6 +250,10 @@ function create() {
     //creates instance of socket.io
     let self = this;
     this.socket = io();
+
+
+
+
     this.otherElements = this.physics.add.group();
 
     //Creates all players already existing in the game
@@ -274,7 +280,8 @@ function create() {
         console.log("player disconnected");
         self.otherElements.getChildren().forEach((otherElement) => {
             if (playerId == otherElement.playerId) {
-                otherElement.hp.destroy()
+                otherElement.hp.destroy();
+                otherElement.username.destroy();
                 otherElement.destroy();
                 console.log("player destroyed")
             }
@@ -287,6 +294,7 @@ function create() {
         self.otherElements.getChildren().forEach((otherElement) => {
             console.log("player disconnected")
             if (playerId == otherElement.playerId) {
+                otherElement.username.destroy();
                 otherElement.destroy();
                 console.log("player destroyed");
             }
@@ -344,14 +352,13 @@ function create() {
     this.socket.on('bullets-update', function (server_bullet_array_all) {
 
         // If there's client and server bullet arrays have mismatch, fix mismatch
-        //console.log(server_bullet_array);
         let test = server_bullet_array_all.delete_set;
         let new_bullet_array = server_bullet_array_all.new_bullet_array;
         let delete_set = new Set(test);
 
         //Deleting out own bullets from the array
         for (let i = new_bullet_array.length - 1; i >= 0; i--) {
-            console.log(new_bullet_array[i].x);
+            //console.log(new_bullet_array[i].x);
 
             if (new_bullet_array[i].owner_id == self.socket.id) {
                 console.log("own bullet deleted!");
@@ -362,7 +369,7 @@ function create() {
 
         //Adding all new bullest to the array
         for (let i = 0; i < new_bullet_array.length; i++) {
-            console.log(new_bullet_array[i].bulletSpeed);
+            //console.log(new_bullet_array[i].bulletSpeed);
             let bullet = new Bullet(self, new_bullet_array[i].angle, new_bullet_array[i].x, new_bullet_array[i].y, gameSettings.texture[new_bullet_array[i].atomicNumber - 1], new_bullet_array[i].bulletSpeed);
             bullet.id = new_bullet_array[i].id;
             bullet.owner_id = new_bullet_array[i].owner_id;
@@ -384,7 +391,10 @@ function create() {
             //     bullet.increment = 1
             // }
             bullet.increment = 1;
-
+            bullet.decrement = gameSettings.bulletSpeed;
+            console.log("Setting decrement");
+            console.log(bullet.decrement);
+            
 
             bullet.setTexture(gameSettings.texture[new_bullet_array[i].atomicNumber - 1] + "bullet");
 
@@ -626,8 +636,10 @@ function create() {
         this.leaderboard.push(self.add.text(config.width - config.width / 10 - 34, 55 + 20 * i, "").setColor("#FFFFFF"));
         this.leaderboard.push(self.add.text(config.width - config.width / 10 + leaderboardWidth / 2, 55 + 20 * i, "").setColor("#FFFFFF"));
     }
-    console.log("leaderboard width: ", leaderboardWidth);
+    //console.log("leaderboard width: ", leaderboardWidth);
     this.socket.on('update-leaderboard', function (items) {
+
+
         placecounter = 0;
         leaderboardText.destroy();
         leaderboardText = self.add.text(config.width - config.width / 10 - 50 + leaderboardWidth / 16, 25, "Leaderboard", { fontFamily: 'defaultFont', color: "#FFFFFF", fontSize: 18 }).setScrollFactor(0);
@@ -635,7 +647,7 @@ function create() {
             if (i < items.length) {
                 self.leaderboard[i].destroy();
                 self.leaderboard[Math.floor(self.leaderboard.length / 2) + i].destroy();
-                if (String(items[i][0]).localeCompare("") != 0 ) {
+                if (String(items[i][0]).localeCompare("") != 0) {
                     if (items[i][1].localeCompare(self.socket.id) == 0) {
                         var lbplace = (placecounter + 1).toString() + ". " + String(items[i][0])
                         self.leaderboard[i] = self.add.text(config.width - config.width / 10 - 34, 55 + 20 * placecounter, lbplace, { fontFamily: 'defaultFont', color: "#FF0000" }).setColor("#FF0000");
@@ -647,6 +659,7 @@ function create() {
                         self.leaderboard[Math.floor(self.leaderboard.length / 2) + i] = self.add.text(config.width - config.width / 10 + leaderboardWidth / 2, 55 + 20 * i, String(items[i][2]), { fontFamily: 'defaultFont', color: "#FFFFFF" });
                     }
                     placecounter++;
+                    idUsername[items[i][1]] = items[i][0];
                 }
             }
             else {
@@ -678,6 +691,7 @@ function create() {
         if (self.socket.id == healthInfo.id) {
             date_obj = new Date();
             self.element.lastHurt = date_obj.getTime();
+            self.element.alpha = 0.5;
             if (gameSettings.transitionmetals.includes(healthInfo.atomicNumber)) {
                 isHit = true;
                 self.element.lastHurtByTransition = date_obj.getTime();
@@ -702,6 +716,7 @@ function create() {
     var t1 = 0;
     //displays other players' movement on screenloc
     this.socket.on('playerMoved', function (playerInfo) {
+        //console.log(self.element);
         tickRate = 60;
         // actual code
         var past = 1000 / tickRate;
@@ -711,8 +726,6 @@ function create() {
         if (t1 > 0) {
 
             self.otherElements.getChildren().forEach((otherElement) => {
-
-
                 var id = otherElement.playerId;
                 var boogie = playerDict[id];
 
@@ -797,8 +810,8 @@ function create() {
             rotation: self.element.rotation
         };
         self.element.body.enable = true;
-        console.log(self.element.hp.x);
-        console.log(self.element.hp.y);
+        //console.log(self.element.hp.x);
+        //console.log(self.element.hp.y);
         //self.element.hp.startFollow(self.element);
         self.element.depth = 2;
 
@@ -845,7 +858,8 @@ function create() {
 
     //add other players onto the screen
     function addOtherPlayers(self, playerInfo) {
-
+        //socketid = playerInfo.playerId
+        console.log(playerInfo);
         // +1.75, +3.11 determined by proportion of game width to game height
         if (playerInfo.atomicNumServer < texLen + 1) {
             const otherElement = new Element(self, playerInfo.x + 1.7, playerInfo.y + 2.9, 45, playerInfo.playerId, this.gameSettings.texture[playerInfo.atomicNumServer - 1]);
@@ -863,7 +877,6 @@ function create() {
             self.otherElements.add(otherElement);
             otherElement.body.enable = true;
             otherElement.timeUpdate = 0;
-            
             otherElement.depth = 2;
         }
     }
@@ -931,14 +944,13 @@ function update(time) {
             this.cameras.main.setZoom(1);
         }
 
-
+        //this.socket.emit("username", username);    
+        //self.element.alpha = 1;
 
         //Bolding Labels
         if (gameSettings.group1.includes(this.element.atomicNum)) {
             //unboldAll();
-            //console.log("chilling");
             //boldText(this.alkalinesLabel, this.add, gameSettings.initialLabelX, gameSettings.initialLabelY, "Alkalines");
-            //console.log("what is this error smh");
             //unboldText(this.alkalinesLabel, this.add, gameSettings.initialLabelX, gameSettings.initialLabelY, "Alkalines");
 
         }
@@ -968,9 +980,9 @@ function update(time) {
         }
         if (gameSettings.group8.includes(this.element.atomicNum)) {
             //unboldAll();
-            console.log("TYPE", typeof (this.alkalinesLabel));
+            //("TYPE", typeof (this.alkalinesLabel));
             //unboldAll(this.alkalinesLabel, this.add);
-            console.log("TYPE 2", typeof (this.alkalinesLabel));
+            //console.log("TYPE 2", typeof (this.alkalinesLabel));
             //boldText(this.nobleGasLabel, this.add, gameSettings.initialLabelX, gameSettings.initialLabelY + 7 * gameSettings.labelSpacing, "Noble Gases");
         }
 
@@ -1029,41 +1041,56 @@ function update(time) {
             }
 
             // Non Acceleration Bullets
+
+
             let speedY = this.element.bullet_array[k].speed * Math.sin(this.element.bullet_array[k].angle2);
             let speedX = this.element.bullet_array[k].speed * Math.cos(this.element.bullet_array[k].angle2);
 
             if (this.element.bullet_array[k].isFive) {
                 speedY = /*this.element.bullet_array[k].speed*/  this.element.bullet_array[k].increment * 100 * Math.sin(this.element.bullet_array[k].angle2);
                 speedX = /*this.element.bullet_array[k].speed */  this.element.bullet_array[k].increment * 100 * Math.cos(this.element.bullet_array[k].angle2);
-                console.log(this.element.bullet_array[k].increment);
+                //console.log(this.element.bullet_array[k].increment);
                 this.element.bullet_array[k].increment++;
             }
-
-            //iosevka
-
             if (this.element.bullet_array[k].isSeven) {
-
-                if(this.element.bullet_array[k].count == 0){
+                if (this.element.bullet_array[k].count == 0) {
+                    console.log("setting scale");
                     this.element.bullet_array[k].scale = 0.7 * this.element.bullet_array[k].scale;
                     this.element.bullet_array[k].count++;
                     this.element.bullet_array[k].setScale(this.element.bullet_array[k].scale);
                 }
                 else if (this.element.bullet_array[k].count < 35) {
+                    console.log("increasing scale");
                     this.element.bullet_array[k].count++;
                     this.element.bullet_array[k].scale += 0.02;
                     this.element.bullet_array[k].setScale(this.element.bullet_array[k].scale);
+                    //this.element.bullet_array[k].speed -= 100;
                 }
-                else if (this.element.bullet_array[k].count < 70) {
-                    speedX -= 100;
-                    speedY -= 100;
-                    this.element.bullet_array[k].count++;
+
+
+
+                console.log("Speed Y", speedY);
+                console.log("Speed X", speedX);
+                
+                //console.log(this.element.bullet_array[k].increment);
+                if (this.element.bullet_array[k].decrement <= 0) {
+                    console.log("setting zero speed");
+                    this.element.bullet_array[k].decrement = 0;
+                    speedY = this.element.bullet_array[k].decrement * Math.sin(this.element.bullet_array[k].angle2);
+                    speedX = this.element.bullet_array[k].decrement * Math.cos(this.element.bullet_array[k].angle2);
                 }
-                else if (this.element.bullet_array[k].count < 100) {
-                    speedX = 0;
-                    speedY = 0;
-                    this.element.bullet_array[k].count++;
+                else {
+                   
+                    this.element.bullet_array[k].decrement = this.element.bullet_array[k].decrement - 10;
+                    console.log("decreasing speed ");
+                    console.log(this.element.bullet_array[k].decrement);
+
+                    speedY = this.element.bullet_array[k].decrement * Math.sin(this.element.bullet_array[k].angle2);
+                    speedX = this.element.bullet_array[k].decrement * Math.cos(this.element.bullet_array[k].angle2);
                 }
             }
+
+
 
             this.element.bullet_array[k].x += speedX / 60;
             this.element.bullet_array[k].y += speedY / 60;
@@ -1075,7 +1102,7 @@ function update(time) {
 
                 // When opponent gets hit by player's helium bullets
                 if (dist < 70 && !(gameSettings.group8.includes(this.element.atomicNum) || gameSettings.group7.includes(this.element.atomicNum))) {
-                    if (this.element.bullet_array[k].owner_id != otherElement.playerId && !this.element.bullet_array[k].isEight  && !this.element.bullet_array[k].isSeven) {
+                    if (this.element.bullet_array[k].owner_id != otherElement.playerId && !this.element.bullet_array[k].isEight && !this.element.bullet_array[k].isSeven) {
                         this.element.bullet_array[k].setVisible(false);
                     }
                 }
@@ -1084,13 +1111,13 @@ function update(time) {
 
             //let dist0 = Math.sqrt(Math.pow(this.element.x - this.element.bullet_array[k].x, 2) + Math.pow(this.element.y - this.element.bullet_array[k].y, 2));
 
-            if (dist0 < 70 && this.element.bullet_array[k].owner_id != this.socket.id && (!this.element.bullet_array[k].isEight && !this.element.bullet_array[k].isSeven )) {
+            if (dist0 < 70 && this.element.bullet_array[k].owner_id != this.socket.id && (!this.element.bullet_array[k].isEight && !this.element.bullet_array[k].isSeven)) {
                 this.element.bullet_array[k].setVisible(false);
             }
             if (this.element.bullet_array[k].owner_id == this.socket.id && (this.element.bullet_array[k].x < -10 || this.element.bullet_array[k].x > gameSettings.mapWidth + 10 || this.element.bullet_array[k].y < -10 || this.element.bullet_array[k].y > gameSettings.mapHeight + 10)) {
                 this.element.bullet_array[k].destroy();
                 this.element.bullet_array.splice(k, 1);
-                
+
 
             }
         }
@@ -1101,8 +1128,6 @@ function update(time) {
             let bullet = this.element.shootBullet(this);
 
             let bulletAngle = Phaser.Math.Angle.Between(this.element.x, this.element.y, this.input.activePointer.worldX, this.input.activePointer.worldY);
-            this.scene.bringToTop(this.element)
-
 
             if (gameSettings.group8.includes(this.element.atomicNum)) {
                 group8Bullet(this, bullet, this.element, this.socket, bulletAngle, bulletAngle);
@@ -1129,7 +1154,7 @@ function update(time) {
             else if (gameSettings.transitionmetals.includes(this.element.atomicNum)) {
                 transitionMetalBullet(this, bullet, this.element, this.socket, bulletAngle);
             }
-            else if (gameSettings.lanthanides.includes(this.element.atomicNum)) {
+            else if (gameSettings.lanthanides.includes(this.element.atomicNum)) {wa
                 lanthanideBullet(this, bullet, this.element, this.socket, bulletAngle);
             }
             else if (gameSettings.actinides.includes(this.element.atomicNum)) {
@@ -1205,6 +1230,9 @@ function update(time) {
         }
         if (upDate.getTime() > this.element.lastHurtByTransition + 300 && isHit) {
             isHit = false;
+        }
+        if (upDate.getTime() > this.element.lastHurt + 500){
+            this.element.alpha = 1;
         }
     }
 }

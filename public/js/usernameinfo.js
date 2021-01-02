@@ -2,7 +2,7 @@
 function getValue(id) {
   username = document.getElementById(id).value.trim(); //value of the text input
   if (username == "") {
-      window.alert("Please enter a username: MP sucks Chris's Dick")
+      window.alert("Please enter a username: ")
   }
   else {
       localStorage.setItem("username", username);

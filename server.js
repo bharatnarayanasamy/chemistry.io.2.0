@@ -176,7 +176,8 @@ io.on('connection', (socket) => {
     playerId: socket.id, //assign player id
     health: 100, //default health = 100
     kills: 0,
-    atomicNumServer: 1 //player level
+    atomicNumServer: 1, //player level
+    username: "",
   };
 
   player_scores[socket.id] = 0;
@@ -207,6 +208,8 @@ io.on('connection', (socket) => {
 
   //Inform all clients that a new player joined
   socket.broadcast.emit('newPlayer', players[socket.id]);
+
+  
 
   // when a player disconnects, remove them from our players object
   socket.on('disconnect', () => {
@@ -254,6 +257,14 @@ io.on('connection', (socket) => {
       socket.broadcast.emit('playerMoved', players[socket.id]);
     }
   });**/
+
+  socket.on('username', (username) => {
+    console.log(username);
+    players[socket.id].username = username;
+    if (players[socket.id].username == "") {
+      console.log(players[socket.id].username);
+    }
+  });
 
   //when protons get collected, this resets its position and increases the score in the entire score array
   socket.on('protonCollected', function (i) {
@@ -317,6 +328,7 @@ io.on('connection', (socket) => {
     data.time = Date.now();
     data.id = socket.id + c;
     data.increment = 1;
+    data.decrement = serverSettings.bulletSpeed;
     c += 1;
     let new_bullet = data;
     //bullet_array.push(new_bullet);
@@ -363,6 +375,18 @@ function ServerGameLoop() {
         speedY = (100 * bullet.increment) * Math.sin(bullet.angle);
         speedX = (100 * bullet.increment) * Math.cos(bullet.angle);
         bullet.increment++;
+      }
+
+      if (typeof players[bullet.owner_id] != "undefined" && serverSettings.group7.includes(players[bullet.owner_id].atomicNumServer)) {
+        if(bullet.decrement > 0){
+          speedY = bullet.decrement * Math.sin(bullet.angle);
+          speedX = bullet.decrement * Math.cos(bullet.angle);
+          bullet.decrement -= 10;
+        }
+        else {
+          speedX = 0;
+          speedY = 0;
+        }
       }
 
       bullet.x += speedX / 60; //update bullet position

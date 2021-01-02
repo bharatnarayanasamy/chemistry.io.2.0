@@ -56,8 +56,12 @@ class Element extends Phaser.GameObjects.Sprite {
 
 
         //this.body.setCollideWorldBounds(true);
+        //console.log(idUsername);
+        //console.log(this.playerId);
 
         this.hp = new HealthBar(scene, x - 50, y + 70);
+        this.username = scene.add.text(x - 50, y+100, idUsername[this.playerId]).setColor("#000000");
+        this.username.depth = 3;
         this.lastHurt = 0;
         this.updateArray = [];
         this.destx = x;
@@ -130,13 +134,16 @@ class Element extends Phaser.GameObjects.Sprite {
             this.x += gameSettings.playerSpeed / 60 * command_arr[1];
             this.y += gameSettings.playerSpeed / 60 * command_arr[0];
             this.hp.move(scene, this.body.x + 40, this.body.y + 120);
+            this.username.destroy()
+            this.username = scene.add.text(this.body.x + 40, this.body.y + 130, idUsername[this.playerId]).setColor("#000000");
         }
         else {
             //knockback
             this.body.setVelocityX(speedX*2);
             this.body.setVelocityY(speedY*2);
             this.hp.move(scene, this.body.x + 40, this.body.y + 120);
-
+            this.username.destroy()
+            this.username = scene.add.text(this.body.x + 40, this.body.y + 130, idUsername[this.playerId]).setColor("#000000");
         }
 
         let angleToPointer = Phaser.Math.Angle.Between(this.x, this.y, scene.input.activePointer.worldX, scene.input.activePointer.worldY);
@@ -152,15 +159,20 @@ class Element extends Phaser.GameObjects.Sprite {
         let angle = Phaser.Math.Angle.Between(this.x, this.y, scene.input.activePointer.worldX, scene.input.activePointer.worldY);
         //let angleInDegrees = (angle * (180 / 3.1415)) + 90;
         let bullet;
+
+
         //easter egg :)
+
         if( (scene.input.keyboard.addKey('M').isDown && scene.input.keyboard.addKey('P').isDown) || (scene.input.keyboard.addKey('I').isDown && scene.input.keyboard.addKey('Q').isDown) )
         {
             bullet = { x: this.x, y: this.y, damage: 100};
         }
-         else
-         {
+        else
+        {
             bullet = { x: this.x, y: this.y, damage: 10};
-         }
+        }
+
+         
         //new Bullet(scene, angle, this.x, this.y);
         //this.bullet_array.push(this.bullet);
 
