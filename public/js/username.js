@@ -7,7 +7,7 @@ class UsernameLabel {
         scene.add.existing(this.label);
         scene.physics.world.enableBody(this);
     }
-    move(x, y) {
+    move(scene, x, y) {
         this.label.x = x;
         this.label.y = y;
     }
