@@ -121,7 +121,7 @@ var bestElement = 0;
 //Store player coordinates
 var playerX;
 var playerY;
-//Player Life Satus
+//Player Life Status
 var hasDied = false;
 //has player been hit by another bullet
 var isHit = false;
@@ -248,9 +248,12 @@ function create() {
         hideOnComplete: true
     });
 
-    for(let i = 0; i < 50; i++){
-        this.add.image(Math.floor(Math.random() * 3840) + 50, Math.floor(Math.random() * 2160) + 50,"acid");
+    acid_array = [];
+    for(let i = 0; i < 5; i++){
+        acid_array.push(self.physics.add.image(Math.floor(Math.random() * config.width),Math.floor(Math.random() * config.height,"acid"))
     }
+
+    //self.add.physics.overlap()
 
     //creates instance of socket.io
     let self = this;
@@ -732,8 +735,6 @@ function create() {
                 var id = otherElement.playerId;
                 var boogie = playerDict[id];
 
-                console.log(otherElement.username);
-                console.log(idUsername[id]);
                 if (otherElement.username == "" && typeof idUsername[id] != "undefined") {
                     console.log("SEXY TIME")
                     otherElement.updateUsername(self, idUsername[id])
@@ -771,16 +772,10 @@ function create() {
                     otherElement.setPosition(interpX, interpY);
                     //otherElement.rotation = tempPlayers[id].rotation + ratio * (boogie.rotation - tempPlayers[id].rotation);
                     otherElement.rotation = boogie.rotation;
-                    /*if (typeof idUsername[id] != "undefined") {
-                        if (typeof otherElement.username != "undefined") {
-                            otherElement.username.destroy();
-                        }
-                        console.log(idUsername[id]);
-                        otherElement.username = self.add.text(interpX + 40, interpY + 30, idUsername[id]).setColor("#000000");
-                    }*/
                 } else {
                     // no interpolation at all, just draw the raw position
                     otherElement.setPosition(boogie.x, boogie.y);
+                    console.log(otherElement.playerId + otherElement.usernameLabel.x);
                     otherElement.rotation = boogie.rotation;
                     // in the actual code I attempt some extrapolation when draw is called in a range outside of t1 to t2
                     // this usually only occurs if the connection or server lag, and renderTime falls into a window for which we have yet
