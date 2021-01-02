@@ -11,14 +11,14 @@ score
 /*Vrishab Notes
 Element.js
 shoot() 
-	-creates new bullet
-	-pass the elect of the player class into bullet
+    -creates new bullet
+    -pass the elect of the player class into bullet
     -bullet class takes that element
     bro dis is what i said, yall stay ignoring me
 move()
- 	-WASD controls
+      -WASD controls
 render()
-	-Calls the code for drawing the player (not sure if we need this with Phaser’s stuff)
+    -Calls the code for drawing the player (not sure if we need this with Phaser’s stuff)
     
 Bullet.js
 Have a mapping —> some file does rendering for a bullet depending on the element —> call renderBullet & moveBullet
@@ -31,7 +31,7 @@ Other stuff
 
 
 class Element extends Phaser.GameObjects.Sprite {
-    constructor(scene, x, y, rotation, id, textureCons) {
+    constructor(scene, x, y, rotation, id, textureCons, username) {
 
         super(scene, x, y, textureCons);
 
@@ -60,8 +60,8 @@ class Element extends Phaser.GameObjects.Sprite {
         //console.log(this.playerId);
 
         this.hp = new HealthBar(scene, x - 50, y + 70);
-        this.username = scene.add.text(x - 50, y+100, idUsername[this.playerId]).setColor("#000000");
-        this.username.depth = 3;
+        this.username = username;
+        this.usernameLabel = scene.add.text(this.body.x + 40, this.body.y + 30, this.username).setColor("#000000");
         this.lastHurt = 0;
         this.updateArray = [];
         this.destx = x;
@@ -90,6 +90,10 @@ class Element extends Phaser.GameObjects.Sprite {
     }
     
     */
+    updateUsername(scene, username) {
+        this.username = username;
+        this.usernameLabel = scene.add.text(this.x + 40, this.y + 30, this.username).setColor("#000000");
+    }
     movePlayer(scene, speed, isHitByTransitionBullet, speedX, speedY, bulletAngle) {
         //reset player velocity
         let currentSpeedX0 = 0;
@@ -99,19 +103,19 @@ class Element extends Phaser.GameObjects.Sprite {
         this.hp.body.setVelocity(0);
         //this.hp.body.setVelocity(0);
         //move right or left
-        
+
         //ORDER =          W/s   a/D
         //w and d are 1, s and a are -1
-        let command_arr = [0, 0, 0]; 
+        let command_arr = [0, 0, 0];
 
         if (!isHitByTransitionBullet) {
             //no knockback
-            if (scene.input.keyboard.addKey('A').isDown && this.x > 50 ) {
+            if (scene.input.keyboard.addKey('A').isDown && this.x > 50) {
                 /*this.body.setVelocityX(-speed);
                 bool = true;*/
                 command_arr[1] = -1;
-                
-            } 
+
+            }
             else if (scene.input.keyboard.addKey('D').isDown && this.x < gameSettings.mapWidth - 50) {
                 /*this.body.setVelocityX(speed);*/
                 command_arr[1] = 1;
@@ -130,20 +134,22 @@ class Element extends Phaser.GameObjects.Sprite {
                 // currentSpeedY0 = speed;
                 command_arr[0] = 1;
             }
-            
+
             this.x += gameSettings.playerSpeed / 60 * command_arr[1];
             this.y += gameSettings.playerSpeed / 60 * command_arr[0];
             this.hp.move(scene, this.body.x + 40, this.body.y + 120);
-            this.username.destroy()
-            this.username = scene.add.text(this.body.x + 40, this.body.y + 130, idUsername[this.playerId]).setColor("#000000");
+            this.usernameLabel.destroy();
+            this.usernameLabel = scene.add.text(this.body.x + 40, this.body.y + 130, this.username).setColor("#000000");
+
         }
         else {
             //knockback
-            this.body.setVelocityX(speedX*2);
-            this.body.setVelocityY(speedY*2);
+            this.body.setVelocityX(speedX * 2);
+            this.body.setVelocityY(speedY * 2);
             this.hp.move(scene, this.body.x + 40, this.body.y + 120);
-            this.username.destroy()
-            this.username = scene.add.text(this.body.x + 40, this.body.y + 130, idUsername[this.playerId]).setColor("#000000");
+            this.usernameLabel.destroy();
+            this.usernameLabel = scene.add.text(this.body.x + 40, this.body.y + 130, this.username).setColor("#000000");
+
         }
 
         let angleToPointer = Phaser.Math.Angle.Between(this.x, this.y, scene.input.activePointer.worldX, scene.input.activePointer.worldY);
@@ -153,7 +159,7 @@ class Element extends Phaser.GameObjects.Sprite {
         command_arr[2] = angleToPointer;
         return command_arr;
     }
-    
+
     shootBullet(scene) {
 
         let angle = Phaser.Math.Angle.Between(this.x, this.y, scene.input.activePointer.worldX, scene.input.activePointer.worldY);
@@ -163,16 +169,14 @@ class Element extends Phaser.GameObjects.Sprite {
 
         //easter egg :)
 
-        if( (scene.input.keyboard.addKey('M').isDown && scene.input.keyboard.addKey('P').isDown) || (scene.input.keyboard.addKey('I').isDown && scene.input.keyboard.addKey('Q').isDown) )
-        {
-            bullet = { x: this.x, y: this.y, damage: 100};
+        if ((scene.input.keyboard.addKey('M').isDown && scene.input.keyboard.addKey('P').isDown) || (scene.input.keyboard.addKey('I').isDown && scene.input.keyboard.addKey('Q').isDown)) {
+            bullet = { x: this.x, y: this.y, damage: 100 };
         }
-        else
-        {
-            bullet = { x: this.x, y: this.y, damage: 10};
+        else {
+            bullet = { x: this.x, y: this.y, damage: 10 };
         }
 
-         
+
         //new Bullet(scene, angle, this.x, this.y);
         //this.bullet_array.push(this.bullet);
 

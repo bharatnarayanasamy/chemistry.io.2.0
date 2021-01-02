@@ -168,6 +168,7 @@ function preload() {
 
     //background image
     this.load.image("bg", "./assets/images/background.png");
+    this.load.image("acid", "./assets/images/acid.png")
 
     //loads animation for explosions
     this.load.spritesheet("explosion", "assets/spritesheets/explosion.png", {
@@ -247,6 +248,10 @@ function create() {
         hideOnComplete: true
     });
 
+    for(let i = 0; i < 50; i++){
+        this.add.image(Math.floor(Math.random() * 3840) + 50, Math.floor(Math.random() * 2160) + 50,"acid");
+    }
+
     //creates instance of socket.io
     let self = this;
     this.socket = io();
@@ -281,7 +286,6 @@ function create() {
         self.otherElements.getChildren().forEach((otherElement) => {
             if (playerId == otherElement.playerId) {
                 otherElement.hp.destroy();
-                otherElement.username.destroy();
                 otherElement.destroy();
                 console.log("player destroyed")
             }
@@ -294,7 +298,6 @@ function create() {
         self.otherElements.getChildren().forEach((otherElement) => {
             console.log("player disconnected")
             if (playerId == otherElement.playerId) {
-                otherElement.username.destroy();
                 otherElement.destroy();
                 console.log("player destroyed");
             }
@@ -394,7 +397,7 @@ function create() {
             bullet.decrement = gameSettings.bulletSpeed;
             console.log("Setting decrement");
             console.log(bullet.decrement);
-            
+
 
             bullet.setTexture(gameSettings.texture[new_bullet_array[i].atomicNumber - 1] + "bullet");
 
@@ -729,6 +732,12 @@ function create() {
                 var id = otherElement.playerId;
                 var boogie = playerDict[id];
 
+                console.log(otherElement.username);
+                console.log(idUsername[id]);
+                if (otherElement.username == "" && typeof idUsername[id] != "undefined") {
+                    console.log("SEXY TIME")
+                    otherElement.updateUsername(self, idUsername[id])
+                }
                 //otherElement.playerId - contains the socket id
                 //rhun a searc through tempPlayers to find the corresponding socket id
                 //if search returns -1, then we just
@@ -762,6 +771,13 @@ function create() {
                     otherElement.setPosition(interpX, interpY);
                     //otherElement.rotation = tempPlayers[id].rotation + ratio * (boogie.rotation - tempPlayers[id].rotation);
                     otherElement.rotation = boogie.rotation;
+                    /*if (typeof idUsername[id] != "undefined") {
+                        if (typeof otherElement.username != "undefined") {
+                            otherElement.username.destroy();
+                        }
+                        console.log(idUsername[id]);
+                        otherElement.username = self.add.text(interpX + 40, interpY + 30, idUsername[id]).setColor("#000000");
+                    }*/
                 } else {
                     // no interpolation at all, just draw the raw position
                     otherElement.setPosition(boogie.x, boogie.y);
@@ -802,7 +818,7 @@ function create() {
 
     //add this player onto the screen
     function addPlayer(self, playerInfo) {
-        self.element = new Element(self, playerInfo.x, playerInfo.y, 45, playerInfo.playerId, "hydrogen");
+        self.element = new Element(self, playerInfo.x, playerInfo.y, 45, playerInfo.playerId, "hydrogen", username);
         self.element.setScale(0.4);
         self.element.oldPosition = {
             x: self.element.x,
@@ -862,7 +878,7 @@ function create() {
         console.log(playerInfo);
         // +1.75, +3.11 determined by proportion of game width to game height
         if (playerInfo.atomicNumServer < texLen + 1) {
-            const otherElement = new Element(self, playerInfo.x + 1.7, playerInfo.y + 2.9, 45, playerInfo.playerId, this.gameSettings.texture[playerInfo.atomicNumServer - 1]);
+            const otherElement = new Element(self, playerInfo.x + 1.7, playerInfo.y + 2.9, 45, playerInfo.playerId, this.gameSettings.texture[playerInfo.atomicNumServer - 1], "");
             otherElement.hp.destroy();
             self.otherElements.add(otherElement);
             otherElement.setScale(0.4);
@@ -871,7 +887,7 @@ function create() {
             otherElement.depth = 2;
         }
         else {
-            const otherElement = new Element(self, playerInfo.x + 1.7, playerInfo.y + 2.9, 45, playerInfo.playerId, this.gameSettings.texture[this.gameSettings.texture.length - 1]);
+            const otherElement = new Element(self, playerInfo.x + 1.7, playerInfo.y + 2.9, 45, playerInfo.playerId, this.gameSettings.texture[this.gameSettings.texture.length - 1], "");
             otherElement.hp.destroy();
             //otherElement.setTint(0x0000ff);
             self.otherElements.add(otherElement);
@@ -1071,7 +1087,7 @@ function update(time) {
 
                 console.log("Speed Y", speedY);
                 console.log("Speed X", speedX);
-                
+
                 //console.log(this.element.bullet_array[k].increment);
                 if (this.element.bullet_array[k].decrement <= 0) {
                     console.log("setting zero speed");
@@ -1080,7 +1096,7 @@ function update(time) {
                     speedX = this.element.bullet_array[k].decrement * Math.cos(this.element.bullet_array[k].angle2);
                 }
                 else {
-                   
+
                     this.element.bullet_array[k].decrement = this.element.bullet_array[k].decrement - 10;
                     console.log("decreasing speed ");
                     console.log(this.element.bullet_array[k].decrement);
@@ -1154,7 +1170,8 @@ function update(time) {
             else if (gameSettings.transitionmetals.includes(this.element.atomicNum)) {
                 transitionMetalBullet(this, bullet, this.element, this.socket, bulletAngle);
             }
-            else if (gameSettings.lanthanides.includes(this.element.atomicNum)) {wa
+            else if (gameSettings.lanthanides.includes(this.element.atomicNum)) {
+                wa
                 lanthanideBullet(this, bullet, this.element, this.socket, bulletAngle);
             }
             else if (gameSettings.actinides.includes(this.element.atomicNum)) {
@@ -1231,7 +1248,7 @@ function update(time) {
         if (upDate.getTime() > this.element.lastHurtByTransition + 300 && isHit) {
             isHit = false;
         }
-        if (upDate.getTime() > this.element.lastHurt + 500){
+        if (upDate.getTime() > this.element.lastHurt + 500) {
             this.element.alpha = 1;
         }
     }
