@@ -19,7 +19,8 @@
       margin: 0;
       position: absolute;
       top: 30px;
-      right: -60px;
+      right: 0px;
+     
       -ms-transform: translate(-50%, -50%);
       transform: translate(-50%, -50%);
     }
@@ -28,33 +29,35 @@
       margin: 0;
       position: absolute;
       top: 50%;
-      left: 50%;
+      left: 47%;
       width: 300px;
       -ms-transform: translate(-50%, -50%);
       transform: translate(-50%, -50%);
     }
 
     .button {
-      background-color: #45FF89;
+      background-color: lightgreen;
+      position: absolute;
       /* Greenish Blue */
-      border: gray;
-      color: gray;
-      padding: 8px 80px;
+      /*border: gray;
+      color: gray;*/
+      top: 120%;
+      /*padding: 5px 80px;*/
       text-align: center;
       text-decoration: none;
-      display: inline-flex;
+      /*display: inline-flex;*/
       font-size: 14px;      
     }
   </style>
 
   <div class="signin">
-    <button id="myButton" class="button">Sign In!</button>
+    <button id="myButton" style = "top: 0px; right: 20px; color: slategray; width:200px; font-size:15pt; font-family:verdana; border-style: onset; border-width: 5px; border-color: greenyellow" class="button">Sign In!</button>
   </div>
   <div class="entergame">
     <form onsubmit="return getValue('commands')">
       <label for="fname"></label><br>
-      <input type="text" name="commands" style="font-size:18pt;height:50px;width:400px;" id="commands" maxlength="20">
-      <input type="submit" value="Enter Game" class="button">
+      <input type="text" name="commands" style="color: darkslategray; font-size:22pt; height:50px; width:400px; border-style: inset; border-width: 12px; font-family:verdana; text-align:center; border-color: lightcoral"  id="commands" maxlength="25">
+      <input type="submit" style = "color: slategray; width:428px; font-size:15pt; font-family:verdana; border-style: onset; border-width: 5px; border-color: greenyellow" value="Enter Game" class="button">
     </form>
   </div>
 

@@ -247,27 +247,16 @@ function create() {
         repeat: 0,
         hideOnComplete: true
     });
-
-    this.acid_array = [-1,-1,-1,-1,-1];
-    for(let i = 0; i < 5; i++){
-        let x = Math.floor(Math.random() * config.width);
-        let y = Math.floor(Math.random() * config.height);
-        //let q = this.physics.add.image(x,y,"acid");
-        //console.log(this.acid_array);
-        //console.log(this.acid_array[i]);
-
-        this.acid_array[i] = this.physics.add.image(x,y,"acid");//Math.floor(Math.random() * config.width), Math.floor(Math.random() * config.height),"acid");
-        //self.proton_array[i] = self.physics.add.image(server_proton_array[i].x, server_proton_array[i].y, 'proton');
+    this.acid_array = [];
+    for (let i = 0; i < 15; i++) {
+        var bb = this.physics.add.image(-1, -1, 'acid');
+        bb.setScale(0.03);
+        this.acid_array.push(bb);
     }
-
-    //self.add.physics.overlap()
-
+    
     //creates instance of socket.io
     let self = this;
     this.socket = io();
-
-
-
 
     this.otherElements = this.physics.add.group();
 
@@ -620,6 +609,20 @@ function create() {
         }
     });
 
+
+    //repeat of protonUpdate for neutrons
+    this.socket.on('acidUpdate', function (server_acid_array) {
+
+        for (let i = 0; i < server_acid_array.length; i++) {
+
+            self.acid_array[i] = self.physics.add.image(server_acid_array[i].x, server_acid_array[i].y, 'acid');
+            self.physics.add.overlap(self.element, self.acid_array[i], function () {
+                this.socket.emit('acid-hurt', self.element.playerId);
+                self.element.lastHurt = Date.now();
+            }, null, self);
+        }
+    });
+
     //Updates the kill count once this player kills someone  
     this.socket.on('updateKills', function (player) {
         if (self.socket.id == player.playerId) {
@@ -703,8 +706,7 @@ function create() {
     //used for managing the lastHurt variable, player can only heal after not being damaged for some time
     this.socket.on('player-hit', function (healthInfo) {
         if (self.socket.id == healthInfo.id) {
-            date_obj = new Date();
-            self.element.lastHurt = date_obj.getTime();
+            self.element.lastHurt = Date.now();
             self.element.alpha = 0.5;
             if (gameSettings.transitionmetals.includes(healthInfo.atomicNumber)) {
                 isHit = true;
@@ -762,13 +764,14 @@ function create() {
                 t1 = tempTime;
                 // timestamp of most recent position update form server
                 var t2 = playerInfo.time;
-                if (!isNaN((2 * renderTime) - (t1 + t2))/2) {
+                /*if (!isNaN((2 * renderTime) - (t1 + t2))/2) {
                     i++;
                     sum = sum + ((2 * renderTime) - (t1 + t2))/2;
                 }
                 if (i % 100 == 0 && i>0) {
                     console.log(sum/i);
-                }
+                }*/
+
                 // if we have positional data within this time range
                 if (renderTime <= t2 && renderTime >= t1) {
                     // total time from t1 to t2
@@ -778,7 +781,6 @@ function create() {
 
                     // fractional distance between t1 and t2
                     var ratio = portion / total;
-                    console.log(ratio);
                     // Calculating interpolation x and y in order to set position
 
                     var interpX = Math.lerp(tempPlayers[id].x, boogie.x, ratio);
