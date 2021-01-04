@@ -93,6 +93,7 @@ let socketID;
 let proton_array = [];
 let electron_array = [];
 let neutron_array = [];
+let acid_array = [];
 
 let gameWidth = 3840;
 let gameHeight = 2080;
@@ -112,32 +113,40 @@ let neutron = {
   x: Math.floor(Math.random() * 1100) + 50,
   y: Math.floor(Math.random() * 700) + 50,
 };
+let acid = {
+  x: Math.floor(Math.random() * 1100) + 50,
+  y: Math.floor(Math.random() * 700) + 50,
+};
 
 for (let i = 0; i < 15; i++) {
   proton_array.push({
     x: Math.floor(Math.random() * 3840) + 50,
     y: Math.floor(Math.random() * 2080) + 50
   });
-
 }
 
 for (let i = 0; i < 15; i++) {
-
   electron_array.push({
     x: Math.floor(Math.random() * 3840) + 50,
     y: Math.floor(Math.random() * 2080) + 50
   });
-
 }
 
 for (let i = 0; i < 15; i++) {
-
   neutron_array.push({
     x: Math.floor(Math.random() * 3840) + 50,
     y: Math.floor(Math.random() * 2080) + 50
   });
-
 }
+
+for (let i = 0; i < 5; i++) {
+  acid_array.push({
+    x: Math.floor(Math.random() * 3840) + 50,
+    y: Math.floor(Math.random() * 2080) + 50
+  });
+}
+
+
 var serverSettings = {
   playerSpeed: 300, //normally 300
   group1: [1, 3, 11, 19, 37, 55, 87],
@@ -203,6 +212,8 @@ io.on('connection', (socket) => {
   socket.emit('protonUpdate', proton_array);
   socket.emit('electronUpdate', electron_array);
   socket.emit('neutronUpdate', neutron_array);
+  socket.emit('acidUpdate', acid_array);
+
 
   socket.emit('updateTheLeaderboard');
 
@@ -266,6 +277,13 @@ io.on('connection', (socket) => {
     }
   });
 
+  //reduce player hp when player encounters acid
+  socket.on('acid-hurt', function (id) {
+    if(typeof players[id] != "undefined"){
+      players[id].health -= 0.5;
+      io.emit("update-health", players[id]);
+    }
+  });
   //when protons get collected, this resets its position and increases the score in the entire score array
   socket.on('protonCollected', function (i) {
     proton_array[i].x = Math.floor(Math.random() * 3840) + 50;
