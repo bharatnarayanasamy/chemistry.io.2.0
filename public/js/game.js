@@ -251,12 +251,12 @@ function create() {
     this.acid_array = [-1,-1,-1,-1,-1];
     for(let i = 0; i < 5; i++){
         let x = Math.floor(Math.random() * config.width);
-        let y = Math.floor(Math.random() * config.height)
-        let q = this.physics.add.image(x,y,"acid");
-        console.log(this.acid_array);
-        console.log(this.acid_array[i]);
+        let y = Math.floor(Math.random() * config.height);
+        //let q = this.physics.add.image(x,y,"acid");
+        //console.log(this.acid_array);
+        //console.log(this.acid_array[i]);
 
-        //this.acid_array[i] = q//this.physics.add.image(x,y,"acid");//Math.floor(Math.random() * config.width), Math.floor(Math.random() * config.height),"acid");
+        this.acid_array[i] = this.physics.add.image(x,y,"acid");//Math.floor(Math.random() * config.width), Math.floor(Math.random() * config.height),"acid");
         //self.proton_array[i] = self.physics.add.image(server_proton_array[i].x, server_proton_array[i].y, 'proton');
     }
 
