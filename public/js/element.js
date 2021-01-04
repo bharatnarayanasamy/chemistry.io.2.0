@@ -61,6 +61,7 @@ class Element extends Phaser.GameObjects.Sprite {
 
         this.hp = new HealthBar(scene, x - 50, y + 70);
         this.username = username;
+        this.usernameLabel = scene.add.text(x+40, y+30, username).setColor("#000000");
         this.lastHurt = 0;
         this.updateArray = [];
         this.destx = x;
@@ -91,7 +92,7 @@ class Element extends Phaser.GameObjects.Sprite {
     */
     updateUsername(scene, username) {
         this.username = username;
-        //this.usernameLabel = scene.add.text(this.x + 40, this.y + 30, this.username).setColor("#000000");
+        this.usernameLabel = scene.add.text(this.x + 40, this.y + 130, this.username).setColor("#000000");
     }
     movePlayer(scene, speed, isHitByTransitionBullet, speedX, speedY, bulletAngle) {
         //reset player velocity
@@ -136,16 +137,16 @@ class Element extends Phaser.GameObjects.Sprite {
             
             this.x += gameSettings.playerSpeed / 60 * command_arr[1];
             this.y += gameSettings.playerSpeed / 60 * command_arr[0];
-            this.hp.move(scene, this.body.x + 40, this.body.y + 120);
-            console.log(this.usernameLabel);
         }
         else {
             //knockback
             this.body.setVelocityX(speedX*2);
             this.body.setVelocityY(speedY*2);
-            this.hp.move(scene, this.body.x + 40, this.body.y + 120);
         }
-
+        this.hp.move(scene, this.body.x + 40, this.body.y + 120);
+        this.usernameLabel.x = this.body.x + 40;
+        this.usernameLabel.y = this.body.y + 130;
+        
         let angleToPointer = Phaser.Math.Angle.Between(this.x, this.y, scene.input.activePointer.worldX, scene.input.activePointer.worldY);
         let angleDelta = Phaser.Math.Angle.Wrap(angleToPointer - this.rotation);
         this.rotation = angleToPointer;

@@ -292,7 +292,7 @@ function create() {
         console.log("player disconnected");
         self.otherElements.getChildren().forEach((otherElement) => {
             if (playerId == otherElement.playerId) {
-                otherElement.hp.destroy();
+                otherElement.usernameLabel.destroy();
                 otherElement.destroy();
                 console.log("player destroyed")
             }
@@ -305,6 +305,7 @@ function create() {
         self.otherElements.getChildren().forEach((otherElement) => {
             console.log("player disconnected")
             if (playerId == otherElement.playerId) {
+                otherElement.usernameLabel.destroy();
                 otherElement.destroy();
                 console.log("player destroyed");
             }
@@ -340,6 +341,7 @@ function create() {
                         window.location.href = "index.html";
                     }
                 });
+                self.element.usernameLabel.destroy();
                 self.element.destroy();
             }
         }
@@ -404,7 +406,6 @@ function create() {
             bullet.decrement = gameSettings.bulletSpeed;
             console.log("Setting decrement");
             console.log(bullet.decrement);
-
 
             bullet.setTexture(gameSettings.texture[new_bullet_array[i].atomicNumber - 1] + "bullet");
 
@@ -727,7 +728,7 @@ function create() {
     //displays other players' movement on screenloc
     this.socket.on('playerMoved', function (playerInfo) {
         //console.log(self.element);
-        tickRate = 60;
+        tickRate = 20;
         // actual code
         var past = 1000 / tickRate;
 
@@ -759,6 +760,7 @@ function create() {
 
                 // if we have positional data within this time range
                 if (renderTime <= t2 && renderTime >= t1) {
+                    console.log(t1 - 1609732400000, renderTime - 1609732400000, t2- 1609732400000, "good");
                     // total time from t1 to t2
                     var total = t2 - t1;
                     // how far between t1 and t2 this entity is as of 'renderTime'
@@ -766,8 +768,7 @@ function create() {
 
                     // fractional distance between t1 and t2
                     var ratio = portion / total;
-                    //
-
+                    console.log(ratio);
                     // Calculating interpolation x and y in order to set position
 
                     var interpX = Math.lerp(tempPlayers[id].x, boogie.x, ratio);
@@ -776,10 +777,14 @@ function create() {
                     otherElement.setPosition(interpX, interpY);
                     //otherElement.rotation = tempPlayers[id].rotation + ratio * (boogie.rotation - tempPlayers[id].rotation);
                     otherElement.rotation = boogie.rotation;
+                    otherElement.usernameLabel.x = interpX;
+                    otherElement.usernameLabel.y = interpY + 60;
                 } else {
+                    console.log(t1 - 1609732400000, renderTime - 1609732400000, t2- 1609732400000, "bad");
                     // no interpolation at all, just draw the raw position
                     otherElement.setPosition(boogie.x, boogie.y);
-                    console.log(otherElement.playerId + otherElement.usernameLabel.x);
+                    otherElement.usernameLabel.x = boogie.x;
+                    otherElement.usernameLabel.y = boogie.y + 60;
                     otherElement.rotation = boogie.rotation;
                     // in the actual code I attempt some extrapolation when draw is called in a range outside of t1 to t2
                     // this usually only occurs if the connection or server lag, and renderTime falls into a window for which we have yet
