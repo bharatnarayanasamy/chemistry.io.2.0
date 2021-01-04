@@ -247,16 +247,16 @@ function create() {
         repeat: 0,
         hideOnComplete: true
     });
-/*
+
     var acid_array = [-1,-1,-1,-1,-1];
     for(let i = 0; i < 5; i++){
         let x = Math.floor(Math.random() * config.width);
         let y = Math.floor(Math.random() * config.height)
-        let q = this.physics.add.image(1,1,"acid");
-        //this.acid_array[i] = this.physics.add.image(1,1,"acid");//Math.floor(Math.random() * config.width), Math.floor(Math.random() * config.height),"acid");
+        let q = this.physics.add.image(x,y,"acid");
+        //this.acid_array[i] = q//this.physics.add.image(x,y,"acid");//Math.floor(Math.random() * config.width), Math.floor(Math.random() * config.height),"acid");
         //self.proton_array[i] = self.physics.add.image(server_proton_array[i].x, server_proton_array[i].y, 'proton');
     }
-*/
+
     //self.add.physics.overlap()
 
     //creates instance of socket.io
@@ -725,6 +725,9 @@ function create() {
 
 
     var t1 = 0;
+    var sum = 0;
+    var i = 0;
+
     //displays other players' movement on screenloc
     this.socket.on('playerMoved', function (playerInfo) {
         //console.log(self.element);
@@ -756,11 +759,15 @@ function create() {
                 t1 = tempTime;
                 // timestamp of most recent position update form server
                 var t2 = playerInfo.time;
-
-
+                if (!isNaN((2 * renderTime) - (t1 + t2))/2) {
+                    i++;
+                    sum = sum + ((2 * renderTime) - (t1 + t2))/2;
+                }
+                if (i % 100 == 0 && i>0) {
+                    console.log(sum/i);
+                }
                 // if we have positional data within this time range
                 if (renderTime <= t2 && renderTime >= t1) {
-                    console.log(t1 - 1609732400000, renderTime - 1609732400000, t2- 1609732400000, "good");
                     // total time from t1 to t2
                     var total = t2 - t1;
                     // how far between t1 and t2 this entity is as of 'renderTime'
@@ -780,7 +787,6 @@ function create() {
                     otherElement.usernameLabel.x = interpX;
                     otherElement.usernameLabel.y = interpY + 60;
                 } else {
-                    console.log(t1 - 1609732400000, renderTime - 1609732400000, t2- 1609732400000, "bad");
                     // no interpolation at all, just draw the raw position
                     otherElement.setPosition(boogie.x, boogie.y);
                     otherElement.usernameLabel.x = boogie.x;
