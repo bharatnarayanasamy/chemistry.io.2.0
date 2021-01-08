@@ -36,11 +36,10 @@
     }
 
     .button {
-      background-color: lightgreen;
+      background-color: indianred;
       position: absolute;
-      /* Greenish Blue */
-      /*border: gray;
-      color: gray;*/
+      transition-duration: 0.4s;
+      
       top: 120%;
       /*padding: 5px 80px;*/
       text-align: center;
@@ -48,16 +47,40 @@
       /*display: inline-flex;*/
       font-size: 14px;      
     }
+
+    /*the button while hovering*/
+    .button:hover {
+      background-color: lightcoral;
+      position: absolute;
+      transition-duration: 0.4s;
+      top: 120%;
+      /*padding: 5px 80px;*/
+      text-align: center;
+      text-decoration: none;
+      /*display: inline-flex;*/
+      font-size: 14px;   
+}   
+
+    ::placeholder {
+    color: lightgray;
+    opacity: 0.5;
+    }
   </style>
 
   <div class="signin">
-    <button id="myButton" style = "top: 0px; right: 20px; color: slategray; width:200px; font-size:15pt; font-family:verdana; border-style: onset; border-width: 5px; border-color: greenyellow" class="button">Sign In!</button>
+    <button id="myButton" style = "top: 0px; right: 20px; color: ivory; width:200px; font-size:15pt; font-family:verdana; border-style: onset; border-width: 5px; border-color: indianred" class="button">Sign In!</button>
   </div>
   <div class="entergame">
     <form onsubmit="return getValue('commands')">
       <label for="fname"></label><br>
-      <input type="text" name="commands" style="color: darkslategray; font-size:22pt; height:50px; width:400px; border-style: inset; border-width: 12px; font-family:verdana; text-align:center; border-color: lightcoral"  id="commands" maxlength="25">
-      <input type="submit" style = "color: slategray; width:428px; font-size:15pt; font-family:verdana; border-style: onset; border-width: 5px; border-color: greenyellow" value="Enter Game" class="button">
+
+      <input type="text" name="commands" 
+      style="color: darkslategray; font-size:22pt; height:50px; width:400px; 
+      border-style: outset; border-width: 12px; font-family:verdana; text-align:center; border-color: lightcoral"  
+      id="commands" maxlength="25" 
+      placeholder="Nickname (ex: Vrishab)" onblur="this.placeholder = 'Nickname (ex: Vrishab)'" onfocus= "this.placeholder = '' ">
+      
+      <input type="submit" style = "color: ivory; width:428px; font-size:15pt; font-family:verdana; border-style: onset; border-width: 5px; border-color: indianred" value="Enter Game" class="button">
     </form>
   </div>
 

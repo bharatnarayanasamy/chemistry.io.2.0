@@ -220,7 +220,7 @@ io.on('connection', (socket) => {
   //Inform all clients that a new player joined
   socket.broadcast.emit('newPlayer', players[socket.id]);
 
-  
+
 
   // when a player disconnects, remove them from our players object
   socket.on('disconnect', () => {
@@ -279,7 +279,7 @@ io.on('connection', (socket) => {
 
   //reduce player hp when player encounters acid
   socket.on('acid-hurt', function (id) {
-    if(typeof players[id] != "undefined"){
+    if (typeof players[id] != "undefined") {
       players[id].health -= 0.5;
       io.emit("update-health", players[id]);
     }
@@ -396,19 +396,35 @@ function ServerGameLoop() {
       }
 
       if (typeof players[bullet.owner_id] != "undefined" && serverSettings.group7.includes(players[bullet.owner_id].atomicNumServer)) {
-        if(bullet.decrement > 0){
+        if (bullet.decrement > 0) {
           speedY = bullet.decrement * Math.sin(bullet.angle);
           speedX = bullet.decrement * Math.cos(bullet.angle);
-          bullet.decrement -= 10;
+          bullet.decrement -= 50;
+
         }
         else {
           speedX = 0;
           speedY = 0;
+          bullet.decrement -= 50;
+        }
+
+        if (bullet.decrement > -1000) {
+          console.log("B4 -- " + bullet.x);
+          console.log(bullet.y);
+          bullet.x += speedX / 60; //update bullet position
+          bullet.y += speedY / 60;
+          console.log("AF -- " + bullet.x);
+          console.log(bullet.y);
         }
       }
+      else {
+        bullet.x += speedX / 60; //update bullet position
+        bullet.y += speedY / 60;
+      }
 
-      bullet.x += speedX / 60; //update bullet position
-      bullet.y += speedY / 60;
+
+
+
       //console.log(bullet_array[i]);
 
       if (typeof players[bullet.owner_id] != "undefined" && serverSettings.actinides.includes(players[bullet.owner_id].atomicNumServer)) {
@@ -445,17 +461,6 @@ function ServerGameLoop() {
       if (typeof players[bullet.owner_id] != "undefined" && serverSettings.group3.includes(players[bullet.owner_id].atomicNumServer)) {
         longdist = 20000;
       }
-
-      // if (typeof players[bullet.owner_id] != "undefined" && serverSettings.group7.includes(players[bullet.owner_id].atomicNumServer)) {
-      //   if (bullet_array[i].bulletSpeed > 20) {
-      //     bullet_array[i].bulletSpeed -= 7;
-      //   }
-      //   else {
-      //     bullet_array[i].bulletSpeed = 10;
-      //   }
-
-      //   longdist = 30000;
-      // }
 
       if (typeof players[bullet.owner_id] != "undefined" && serverSettings.lanthanides.includes(players[bullet.owner_id].atomicNumServer)) {
         longdist = 2250000;
