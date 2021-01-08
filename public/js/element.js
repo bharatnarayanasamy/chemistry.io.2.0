@@ -103,7 +103,7 @@ class Element extends Phaser.GameObjects.Sprite {
         this.hp.body.setVelocity(0);
         //this.hp.body.setVelocity(0);
         //move right or left
-        
+
         //ORDER =          W/s   a/D
         //w and d are 1, s and a are -1
         let command_arr = [0, 0, 0]; 
@@ -144,6 +144,8 @@ class Element extends Phaser.GameObjects.Sprite {
             this.body.setVelocityY(speedY*2);
         }
         this.hp.move(scene, this.body.x + 40, this.body.y + 120);
+
+        //console.log("Difference: ", this.body.x - this.hp.getX());
         this.usernameLabel.x = this.body.x + 40;
         this.usernameLabel.y = this.body.y + 130;
         
@@ -185,4 +187,8 @@ class Element extends Phaser.GameObjects.Sprite {
         }
     }
 
+    getHealthBar()
+    {
+        return this.hp;
+    }
 }

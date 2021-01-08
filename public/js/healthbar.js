@@ -79,4 +79,9 @@ class HealthBar {
         this.bar.clear();
     }
 
+    getX()
+    {
+        return this.x;
+    }
+
 }

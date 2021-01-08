@@ -635,6 +635,7 @@ function create() {
             self.element.atomicNum++;
 
             self.element.upgrade();
+            //UNCOMMENT UNCOMMENT   UNCOMMENT   UNCOMMENT   UNCOMMENT   UNCOMMENT UNCOMMENT     UNCOMMENT   UNCOMMENT 
             self.socket.emit('upgrade', self.element.atomicNum);
 
             idScore = {
@@ -749,7 +750,6 @@ function create() {
                 var boogie = playerDict[id];
 
                 if (otherElement.username == "" && typeof idUsername[id] != "undefined") {
-                    console.log("SEXY TIME")
                     otherElement.updateUsername(self, idUsername[id])
                 }
                 //otherElement.playerId - contains the socket id
@@ -858,7 +858,8 @@ function create() {
         self.scoreText.setScrollFactor(0);
         //self.element.hp.setScrollFactor(0);
 
-        //Labels for Groups
+        //Labels for Groups, Commented out rn cuz it looks bad, DO NOT DELETE THOUGH
+        /*
         self.alkalinesLabel = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY, "Alkalines", { fontFamily: 'defaultFont', fontSize: '25px', fill: '#575757' });
         self.alkalineEarthMetalsLabel = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + gameSettings.labelSpacing, "Alkaline Earth Metals", { fontFamily: 'defaultFont', fontSize: '25px', fill: '#575757' });
         self.group3Label = self.add.text(gameSettings.initialLabelX, gameSettings.initialLabelY + 2 * gameSettings.labelSpacing, "Group 3", { fontFamily: 'defaultFont', fontSize: '25px', fill: '#575757' });
@@ -884,7 +885,7 @@ function create() {
         self.nobleGasLabel.setScrollFactor(0);
         self.transitionMetalsLabel.setScrollFactor(0);
         self.lanthanidesLabel.setScrollFactor(0);
-        self.actinidesLabel.setScrollFactor(0);
+        self.actinidesLabel.setScrollFactor(0);*/
     }
 
     //add other players onto the screen
@@ -975,6 +976,10 @@ function update(time) {
             this.cameras.main.setZoom(1);
         }
 
+        console.log(this.element.x);
+        console.log(this.element.getHealthBar());
+        console.log(this.element.getHealthBar().getX());
+        console.log("Difference: ", this.element.x - this.element.getHealthBar().getX());
         //this.socket.emit("username", username);    
         //self.element.alpha = 1;
 
@@ -1097,34 +1102,35 @@ function update(time) {
                     this.element.bullet_array[k].setScale(this.element.bullet_array[k].scale);
                     //this.element.bullet_array[k].speed -= 100;
                 }
-
-
-
-                console.log("Speed Y", speedY);
-                console.log("Speed X", speedX);
+                
 
                 //console.log(this.element.bullet_array[k].increment);
                 if (this.element.bullet_array[k].decrement <= 0) {
                     console.log("setting zero speed");
-                    this.element.bullet_array[k].decrement = 0;
-                    speedY = this.element.bullet_array[k].decrement * Math.sin(this.element.bullet_array[k].angle2);
-                    speedX = this.element.bullet_array[k].decrement * Math.cos(this.element.bullet_array[k].angle2);
+                    speedY = 0;
+                    speedX = 0;
                 }
                 else {
-
-                    this.element.bullet_array[k].decrement = this.element.bullet_array[k].decrement - 10;
+                    this.element.bullet_array[k].decrement -= 50;
                     console.log("decreasing speed ");
                     console.log(this.element.bullet_array[k].decrement);
 
                     speedY = this.element.bullet_array[k].decrement * Math.sin(this.element.bullet_array[k].angle2);
                     speedX = this.element.bullet_array[k].decrement * Math.cos(this.element.bullet_array[k].angle2);
                 }
+
+                console.log("Speed Y", speedY);
+                console.log("Speed X", speedX);
             }
 
-
+            console.log("B4 X", this.element.bullet_array[k].x);
+            console.log("B4 Y", this.element.bullet_array[k].y);
 
             this.element.bullet_array[k].x += speedX / 60;
             this.element.bullet_array[k].y += speedY / 60;
+
+            console.log("AF X", this.element.bullet_array[k].x);
+            console.log("AF Y", this.element.bullet_array[k].y);
 
             let dist0 = Math.sqrt(Math.pow(this.element.x - this.element.bullet_array[k].x, 2) + Math.pow(this.element.y - this.element.bullet_array[k].y, 2));
 
@@ -1151,9 +1157,14 @@ function update(time) {
 
 
             }
+
+            
         }
 
-        if ((this.input.activePointer.isDown || Phaser.Input.Keyboard.JustDown(this.spacebar)) && (lastShot + 500 < time || (lastShot + 250 < time && this.element.atomicNum == 2))) {
+        if ((this.input.activePointer.isDown || Phaser.Input.Keyboard.JustDown(this.spacebar)) && 
+        (( lastShot + 500 < time && !gameSettings.group5.includes(this.element.atomicNum)) || 
+        (lastShot + 250 < time && gameSettings.group8.includes(this.element.atomicNum)) || 
+        (lastShot + 750 < time))) {
             this.scene.bringToTop(this.element)
 
             let bullet = this.element.shootBullet(this);
@@ -1186,15 +1197,17 @@ function update(time) {
                 transitionMetalBullet(this, bullet, this.element, this.socket, bulletAngle);
             }
             else if (gameSettings.lanthanides.includes(this.element.atomicNum)) {
-                wa
+                
                 lanthanideBullet(this, bullet, this.element, this.socket, bulletAngle);
             }
             else if (gameSettings.actinides.includes(this.element.atomicNum)) {
-                actinideBullet(this, bullet, this.element, this.socket, bulletAngle);
+                //actinideBullet(this, bullet, this.element, this.socket, bulletAngle);
             }
             else {
                 //damage /= 10, NEED TO CHANGE, ONLY FOR TESTING
+                //group7Bullet(this, bullet, this.element, this.socket, bulletAngle);
                 group1Bullet(this, bullet, this.element, this.socket, bulletAngle);
+                //actinideBullet(this, bullet, this.element, this.socket, bulletAngle);
             }
             lastShot = time;
         }
