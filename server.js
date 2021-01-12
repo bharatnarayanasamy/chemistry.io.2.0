@@ -396,25 +396,29 @@ function ServerGameLoop() {
       }
 
       if (typeof players[bullet.owner_id] != "undefined" && serverSettings.group7.includes(players[bullet.owner_id].atomicNumServer)) {
+       
         if (bullet.decrement > 0) {
           speedY = bullet.decrement * Math.sin(bullet.angle);
           speedX = bullet.decrement * Math.cos(bullet.angle);
           bullet.decrement -= 50;
 
-        }
-        else {
-          speedX = 0;
-          speedY = 0;
-          bullet.decrement -= 50;
-        }
-
-        if (bullet.decrement > -1000) {
           console.log("B4 -- " + bullet.x);
           console.log(bullet.y);
           bullet.x += speedX / 60; //update bullet position
           bullet.y += speedY / 60;
           console.log("AF -- " + bullet.x);
           console.log(bullet.y);
+        }
+        else {
+          speedX = 0;
+          speedY = 0;
+
+          // console.log("B4 -- " + bullet.x);
+          // console.log(bullet.y);
+          // bullet.x += speedX / 60; //update bullet position
+          // bullet.y += speedY / 60;
+          // console.log("AF -- " + bullet.x);
+          // console.log(bullet.y);
         }
       }
       else {
@@ -562,10 +566,32 @@ function UpdateLeaderboard() {
     return [leaderboardArray[key], key, player_scores[key]];
   });
 
+ 
+
   // Sort the array based on the second element
   items.sort(function (first, second) {
     return second[2] - first[2];
   });
+  
+  for (var i = 0; i < items.length; i++)
+  {
+    if (typeof players[items[i][1]] == "undefined")
+    {
+      //console.log("yes daddy");
+      items.splice(i, 1);
+    }
+  }
+  // 
+
+  /*
+  items.forEach((id) => {
+    //console.log(id[1]);
+    if(typeof players[id[1]] == "undefined"){
+      //itemDict[id] = items[id];
+      delete items[id];
+    }
+  });
+*/
 
   // Tell everyone where all the bullets are by sending the whole array
   io.emit("update-leaderboard", items);

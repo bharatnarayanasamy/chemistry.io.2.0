@@ -253,7 +253,7 @@ function create() {
         bb.setScale(0.03);
         this.acid_array.push(bb);
     }
-    
+
     //creates instance of socket.io
     let self = this;
     this.socket = io();
@@ -395,7 +395,8 @@ function create() {
             //     bullet.increment = 1
             // }
             bullet.increment = 1;
-            bullet.decrement = gameSettings.bulletSpeed;
+            //bullet.decrement = gameSettings.bulletSpeed;
+            bullet.decrement = 500;
             console.log("Setting decrement");
             console.log(bullet.decrement);
 
@@ -661,6 +662,7 @@ function create() {
         placecounter = 0;
         leaderboardText.destroy();
         leaderboardText = self.add.text(config.width - config.width / 10 - 50 + leaderboardWidth / 16, 25, "Leaderboard", { fontFamily: 'defaultFont', color: "#FFFFFF", fontSize: 18 }).setScrollFactor(0);
+        console.log(items)
         for (let i = 0; i < 10; i++) {
             if (i < items.length) {
                 self.leaderboard[i].destroy();
@@ -1089,38 +1091,62 @@ function update(time) {
                 this.element.bullet_array[k].increment++;
             }
             if (this.element.bullet_array[k].isSeven) {
-                if (this.element.bullet_array[k].count == 0) {
-                    console.log("setting scale");
-                    this.element.bullet_array[k].scale = 0.7 * this.element.bullet_array[k].scale;
-                    this.element.bullet_array[k].count++;
-                    this.element.bullet_array[k].setScale(this.element.bullet_array[k].scale);
-                }
-                else if (this.element.bullet_array[k].count < 35) {
-                    console.log("increasing scale");
-                    this.element.bullet_array[k].count++;
-                    this.element.bullet_array[k].scale += 0.02;
-                    this.element.bullet_array[k].setScale(this.element.bullet_array[k].scale);
-                    //this.element.bullet_array[k].speed -= 100;
-                }
-                
 
-                //console.log(this.element.bullet_array[k].increment);
+
                 if (this.element.bullet_array[k].decrement <= 0) {
-                    console.log("setting zero speed");
                     speedY = 0;
                     speedX = 0;
                 }
                 else {
+                    speedY = /*this.element.bullet_array[k].speed*/  this.element.bullet_array[k].decrement * Math.sin(this.element.bullet_array[k].angle2);
+                    speedX = /*this.element.bullet_array[k].speed */  this.element.bullet_array[k].decrement * Math.cos(this.element.bullet_array[k].angle2);
+                    // this.element.bullet_array[k].setScale(this.element.bullet_array[k].scale);
+                    // this.element.bullet_array[k].scale += 0.02;
                     this.element.bullet_array[k].decrement -= 50;
-                    console.log("decreasing speed ");
-                    console.log(this.element.bullet_array[k].decrement);
-
-                    speedY = this.element.bullet_array[k].decrement * Math.sin(this.element.bullet_array[k].angle2);
-                    speedX = this.element.bullet_array[k].decrement * Math.cos(this.element.bullet_array[k].angle2);
                 }
+                //console.log(this.element.bullet_array[k].increment);
 
-                console.log("Speed Y", speedY);
-                console.log("Speed X", speedX);
+
+
+
+                // if (this.element.bullet_array[k].count == 0) {
+                //     console.log("setting scale");
+                //     this.element.bullet_array[k].scale = 0.7 * this.element.bullet_array[k].scale;
+                //     this.element.bullet_array[k].count++;
+                //     this.element.bullet_array[k].setScale(this.element.bullet_array[k].scale);
+                // }
+                // else if (this.element.bullet_array[k].count < 35) {
+                //     console.log("increasing scale");
+                //     this.element.bullet_array[k].count++;
+                //     this.element.bullet_array[k].scale += 0.02;
+                //     this.element.bullet_array[k].setScale(this.element.bullet_array[k].scale);
+                //     //this.element.bullet_array[k].speed -= 100;
+                // }
+
+
+                //console.log(this.element.bullet_array[k].increment);
+                /*if (this.element.bullet_array[k].decrement <= 0) {
+                    console.log("setting zero speed");
+                    speedY = 0;
+                    speedX = 0;
+                }*/
+                //else {
+                //this.element.bullet_array[k].decrement -= 50;
+                //     console.log("decreasing speed ");
+                //     console.log(this.element.bullet_array[k].decrement);
+
+                //     //speedY = this.element.bullet_array[k].decrement * Math.sin(this.element.bullet_array[k].angle2);
+                //     //speedX = this.element.bullet_array[k].decrement * Math.cos(this.element.bullet_array[k].angle2);
+                //     speedY -= 100;
+                //     speedX -= 100;
+
+                // //}
+
+                // console.log("Speed Y", speedY);
+                // console.log("Speed X", speedX);
+            }
+            else {
+                console.log("WHY AM I HERE");
             }
 
             console.log("B4 X", this.element.bullet_array[k].x);
@@ -1158,13 +1184,13 @@ function update(time) {
 
             }
 
-            
+
         }
 
-        if ((this.input.activePointer.isDown || Phaser.Input.Keyboard.JustDown(this.spacebar)) && 
-        (( lastShot + 500 < time && !gameSettings.group5.includes(this.element.atomicNum)) || 
-        (lastShot + 250 < time && gameSettings.group8.includes(this.element.atomicNum)) || 
-        (lastShot + 750 < time))) {
+        if ((this.input.activePointer.isDown || Phaser.Input.Keyboard.JustDown(this.spacebar)) &&
+            ((lastShot + 500 < time && !gameSettings.group5.includes(this.element.atomicNum)) ||
+                (lastShot + 250 < time && gameSettings.group8.includes(this.element.atomicNum)) ||
+                (lastShot + 750 < time))) {
             this.scene.bringToTop(this.element)
 
             let bullet = this.element.shootBullet(this);
@@ -1197,7 +1223,7 @@ function update(time) {
                 transitionMetalBullet(this, bullet, this.element, this.socket, bulletAngle);
             }
             else if (gameSettings.lanthanides.includes(this.element.atomicNum)) {
-                
+
                 lanthanideBullet(this, bullet, this.element, this.socket, bulletAngle);
             }
             else if (gameSettings.actinides.includes(this.element.atomicNum)) {

@@ -1,4 +1,4 @@
-class HealthBar {
+  class HealthBar {
 
     constructor (scene, x, y)
     {
@@ -32,7 +32,7 @@ class HealthBar {
         }
 
         this.draw();
-
+        //scene.add.existing(this.bar);
     }
 
     increment (value)
