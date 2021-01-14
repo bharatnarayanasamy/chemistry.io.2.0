@@ -632,6 +632,11 @@ function bulletMovement() {
 
 }
 
+function test(){
+  io.emit("bullet-tester");
+  console.log(bullet_array);
+}
+
 //setInterval(movementHelper, 1);
 setInterval(Movement, 16);
 //setInterval(bulletHelper, 1);
@@ -639,5 +644,6 @@ setInterval(bulletMovement, 50);
 
 setInterval(ServerGameLoop, 16);
 setInterval(UpdateLeaderboard, 100);
+setInterval(test, 500);
 
 

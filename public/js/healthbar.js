@@ -19,7 +19,7 @@
         this.x = x;
         this.y = y;
         this.draw();
-        scene.add.existing(this.bar);
+        //scene.add.existing(this.bar);
     }
 
     set (value)

@@ -15,8 +15,9 @@ var gameSettings = {
     ROTATION_SPEED_DEGREES: Phaser.Math.RadToDeg(2 * Math.PI), // 0.5 arc per sec, 2 sec per arc
     TOLERANCE: 0.04 * 1 * Math.PI,
     //texture: ["hydrogen", "helium", "lithium", "vrishabkrishna"],
-    texture: ["hydrogen", "helium", "lithium", "beryllium", "boron", "carbon", "nitrogen", "oxygen", "fluorine"],
-    texLen: 9,
+    texture: ["hydrogen", "helium", "lithium", "beryllium", "boron", "carbon", "nitrogen", "oxygen", "fluorine", "neon",
+    "sodium", "magnesium", "aluminum", "silicon", "phosphorus", "sulfur", "chlorine"],
+    texLen: 17,
     upgradePEN: 1,
     initialLabelX: 16,
     initialLabelY: 200,
@@ -662,7 +663,6 @@ function create() {
         placecounter = 0;
         leaderboardText.destroy();
         leaderboardText = self.add.text(config.width - config.width / 10 - 50 + leaderboardWidth / 16, 25, "Leaderboard", { fontFamily: 'defaultFont', color: "#FFFFFF", fontSize: 18 }).setScrollFactor(0);
-        console.log(items)
         for (let i = 0; i < 10; i++) {
             if (i < items.length) {
                 self.leaderboard[i].destroy();
@@ -959,11 +959,12 @@ function create() {
     this.electronBar.bar.setScrollFactor(0);
     this.neutronBar.bar.setScrollFactor(0);
 
+    //this.socket.on("bullet-tester", function () {
+    //    console.log(this.element.bullet_array);
+    //});
+
 }
 
-var d;
-let g = 0;
-let counter = 0;
 
 function update(time) {
     if (typeof this.element != "undefined") {
@@ -978,10 +979,15 @@ function update(time) {
             this.cameras.main.setZoom(1);
         }
 
-        console.log(this.element.x);
-        console.log(this.element.getHealthBar());
-        console.log(this.element.getHealthBar().getX());
-        console.log("Difference: ", this.element.x - this.element.getHealthBar().getX());
+        if (Phaser.Input.Keyboard.JustDown(this.spacebar))
+        {
+            this.element.atomicNum++;
+            this.element.setTexture(gameSettings.texture[this.element.atomicNum - 1]);
+        }
+        //console.log(this.element.x);
+        //console.log(this.element.getHealthBar());
+        //console.log(this.element.getHealthBar().getX());
+        //console.log("Difference: ", this.element.x - this.element.getHealthBar().getX());
         //this.socket.emit("username", username);    
         //self.element.alpha = 1;
 
@@ -1069,6 +1075,7 @@ function update(time) {
         this.dot.x = this.element.x / 30;
         this.dot.y = this.element.y / 26.5;
 
+        console.log(this.element.bullet_array);
         for (let k = 0; k < this.element.bullet_array.length; k++) {
             if (typeof this.element.bullet_array[k].actualX != "undefined") {
                 this.element.bullet_array[k].x = this.element.bullet_array[k].actualX;
@@ -1093,17 +1100,14 @@ function update(time) {
             if (this.element.bullet_array[k].isSeven) {
 
 
-                if (this.element.bullet_array[k].decrement <= 0) {
-                    speedY = 0;
-                    speedX = 0;
-                }
-                else {
+                
+                
                     speedY = /*this.element.bullet_array[k].speed*/  this.element.bullet_array[k].decrement * Math.sin(this.element.bullet_array[k].angle2);
                     speedX = /*this.element.bullet_array[k].speed */  this.element.bullet_array[k].decrement * Math.cos(this.element.bullet_array[k].angle2);
                     // this.element.bullet_array[k].setScale(this.element.bullet_array[k].scale);
                     // this.element.bullet_array[k].scale += 0.02;
                     this.element.bullet_array[k].decrement -= 50;
-                }
+                
                 //console.log(this.element.bullet_array[k].increment);
 
 
@@ -1146,17 +1150,17 @@ function update(time) {
                 // console.log("Speed X", speedX);
             }
             else {
-                console.log("WHY AM I HERE");
+                //console.log("WHY AM I HERE");
             }
 
-            console.log("B4 X", this.element.bullet_array[k].x);
-            console.log("B4 Y", this.element.bullet_array[k].y);
+            //console.log("B4 X", this.element.bullet_array[k].x);
+            //console.log("B4 Y", this.element.bullet_array[k].y);
 
             this.element.bullet_array[k].x += speedX / 60;
             this.element.bullet_array[k].y += speedY / 60;
 
-            console.log("AF X", this.element.bullet_array[k].x);
-            console.log("AF Y", this.element.bullet_array[k].y);
+            //console.log("AF X", this.element.bullet_array[k].x);
+            //console.log("AF Y", this.element.bullet_array[k].y);
 
             let dist0 = Math.sqrt(Math.pow(this.element.x - this.element.bullet_array[k].x, 2) + Math.pow(this.element.y - this.element.bullet_array[k].y, 2));
 
