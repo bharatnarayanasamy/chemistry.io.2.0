@@ -165,7 +165,7 @@ var serverSettings = {
   actinides: [89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103],
   mapWidth: 3840,
   mapHeight: 2160,
-  bulletSpeed: 500
+  bulletSpeed: 1000
 }
 
 var server_seq = 0;
@@ -393,6 +393,7 @@ function ServerGameLoop() {
         speedY = (100 * bullet.increment) * Math.sin(bullet.angle);
         speedX = (100 * bullet.increment) * Math.cos(bullet.angle);
         bullet.increment++;
+        
       }
 
       if (typeof players[bullet.owner_id] != "undefined" && serverSettings.group7.includes(players[bullet.owner_id].atomicNumServer)) {
@@ -400,7 +401,7 @@ function ServerGameLoop() {
         if (bullet.decrement > 0) {
           speedY = bullet.decrement * Math.sin(bullet.angle);
           speedX = bullet.decrement * Math.cos(bullet.angle);
-          bullet.decrement -= 50;
+          bullet.decrement -= 10;
 
           console.log("B4 -- " + bullet.x);
           console.log(bullet.y);
@@ -633,7 +634,6 @@ function bulletMovement() {
 }
 
 function test(){
-  io.emit("bullet-tester");
   console.log(bullet_array);
 }
 

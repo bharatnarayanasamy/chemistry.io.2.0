@@ -4,7 +4,7 @@
 //Dictionary of game settings
 var gameSettings = {
     playerSpeed: 300, //change back to 300
-    bulletSpeed: 500,
+    bulletSpeed: 1000,
     speedScale: 6,
     maxPowerups: 14,
     maxObstacles: 2,
@@ -959,9 +959,6 @@ function create() {
     this.electronBar.bar.setScrollFactor(0);
     this.neutronBar.bar.setScrollFactor(0);
 
-    //this.socket.on("bullet-tester", function () {
-    //    console.log(this.element.bullet_array);
-    //});
 
 }
 
@@ -979,6 +976,8 @@ function update(time) {
             this.cameras.main.setZoom(1);
         }
 
+
+        //WILL DELETE LATER BECAUSE TOO OP
         if (Phaser.Input.Keyboard.JustDown(this.spacebar))
         {
             this.element.atomicNum++;
@@ -1075,7 +1074,7 @@ function update(time) {
         this.dot.x = this.element.x / 30;
         this.dot.y = this.element.y / 26.5;
 
-        console.log(this.element.bullet_array);
+        //console.log(this.element.bullet_array);
         for (let k = 0; k < this.element.bullet_array.length; k++) {
             if (typeof this.element.bullet_array[k].actualX != "undefined") {
                 this.element.bullet_array[k].x = this.element.bullet_array[k].actualX;
@@ -1099,17 +1098,32 @@ function update(time) {
             }
             if (this.element.bullet_array[k].isSeven) {
 
+                speedX = 0;
+                speedY = 0;
+                //speedY =  this.element.bullet_array[k].decrement > 0 ? this.element.bullet_array[k].decrement * Math.sin(this.element.bullet_array[k].angle2) : 1000;
+                //speedX =  this.element.bullet_array[k].decrement > 0 ? this.element.bullet_array[k].decrement * Math.cos(this.element.bullet_array[k].angle2) : 1000;
 
-                
-                
-                    speedY = /*this.element.bullet_array[k].speed*/  this.element.bullet_array[k].decrement * Math.sin(this.element.bullet_array[k].angle2);
-                    speedX = /*this.element.bullet_array[k].speed */  this.element.bullet_array[k].decrement * Math.cos(this.element.bullet_array[k].angle2);
-                    // this.element.bullet_array[k].setScale(this.element.bullet_array[k].scale);
-                    // this.element.bullet_array[k].scale += 0.02;
-                    this.element.bullet_array[k].decrement -= 50;
+
+                //speedY =  this.element.bullet_array[k].decrement * Math.sin(this.element.bullet_array[k].angle2);
+                //speedX =  this.element.bullet_array[k].decrement * Math.cos(this.element.bullet_array[k].angle2);
+
+                // this.element.bullet_array[k].setScale(this.element.bullet_array[k].scale);
+                // this.element.bullet_array[k].scale += 0.02;
+                this.element.bullet_array[k].decrement -= 10;
                 
                 //console.log(this.element.bullet_array[k].increment);
+                console.log(this.element.bullet_array[k].decrement);
 
+                if (this.element.bullet_array[k].decrement < 0)
+                {
+                    console.log("CHRIS IS IN AN AC ROOM");
+                    
+                }
+                else
+                {
+                     speedY =  this.element.bullet_array[k].decrement * Math.sin(this.element.bullet_array[k].angle2);
+                     speedX =  this.element.bullet_array[k].decrement * Math.cos(this.element.bullet_array[k].angle2);
+                }
 
 
 
