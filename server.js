@@ -393,36 +393,29 @@ function ServerGameLoop() {
         speedY = (100 * bullet.increment) * Math.sin(bullet.angle);
         speedX = (100 * bullet.increment) * Math.cos(bullet.angle);
         bullet.increment++;
-        
+        console.log("we out here");
       }
 
       if (typeof players[bullet.owner_id] != "undefined" && serverSettings.group7.includes(players[bullet.owner_id].atomicNumServer)) {
-       
+        
         if (bullet.decrement > 0) {
           speedY = bullet.decrement * Math.sin(bullet.angle);
           speedX = bullet.decrement * Math.cos(bullet.angle);
           bullet.decrement -= 10;
 
           console.log("B4 -- " + bullet.x);
-          console.log(bullet.y);
-          bullet.x += speedX / 60; //update bullet position
-          bullet.y += speedY / 60;
           console.log("AF -- " + bullet.x);
-          console.log(bullet.y);
         }
         else {
           speedX = 0;
           speedY = 0;
 
-          // console.log("B4 -- " + bullet.x);
-          // console.log(bullet.y);
-          // bullet.x += speedX / 60; //update bullet position
-          // bullet.y += speedY / 60;
-          // console.log("AF -- " + bullet.x);
-          // console.log(bullet.y);
+          console.log("AYO");
+
         }
       }
       else {
+
         bullet.x += speedX / 60; //update bullet position
         bullet.y += speedY / 60;
       }
@@ -473,6 +466,7 @@ function ServerGameLoop() {
 
       // Remove if it goes off screen
       if (bullet.x < -10 || bullet.x > gameWidth + 10 || bullet.y < -10 || bullet.y > gameHeight + 10) {
+        console.log("why am i here? F bullet shudnt hit wall");
         bullet_array.splice(i, 1);
         i--;
         delete_set.push(bullet.id);
@@ -480,10 +474,11 @@ function ServerGameLoop() {
       }
 
       //Remove bullet once it has travelled 1000 units
-      if ((Math.pow(bullet.x - bullet.ix, 2) + Math.pow(bullet.y - bullet.iy, 2)) > longdist) {
-        bullet_array.splice(i, 1);
-        i--;
-        delete_set.push(bullet.id);
+      if ((Math.pow(bullet.x - bullet.ix, 2) + Math.pow(bullet.y - bullet.iy, 2)) > longdist && typeof players[bullet.owner_id] != "undefined" && !serverSettings.group7.includes(players[bullet.owner_id].atomicNumServer)) {
+        console.log("why am i here? F bullet shudnt go this far");
+         bullet_array.splice(i, 1);
+         i--;
+         delete_set.push(bullet.id);
       }
 
       for (let id in players) {
@@ -529,6 +524,8 @@ function ServerGameLoop() {
             }
 
             if (typeof players[owner] != "undefined" && !(serverSettings.group8.includes(players[owner].atomicNumServer) || serverSettings.group7.includes(players[owner].atomicNumServer))) {
+              //console.log("yo wtf is going on");
+
               bullet_array.splice(i, 1);
               i--;
               delete_set.push(bullet.id);
@@ -634,7 +631,7 @@ function bulletMovement() {
 }
 
 function test(){
-  console.log(bullet_array);
+  //console.log(bullet_array);
 }
 
 //setInterval(movementHelper, 1);

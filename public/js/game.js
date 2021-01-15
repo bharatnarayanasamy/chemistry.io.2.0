@@ -398,8 +398,6 @@ function create() {
             bullet.increment = 1;
             //bullet.decrement = gameSettings.bulletSpeed;
             bullet.decrement = 500;
-            console.log("Setting decrement");
-            console.log(bullet.decrement);
 
             bullet.setTexture(gameSettings.texture[new_bullet_array[i].atomicNumber - 1] + "bullet");
 
@@ -411,6 +409,7 @@ function create() {
 
         for (let i = self.element.bullet_array.length - 1; i >= 0; i--) {
             if (delete_set.has(self.element.bullet_array[i].id)) {
+                console.log("DELETING BULLET");
                 self.element.bullet_array[i].destroy();
                 self.element.bullet_array.splice(i, 1);
             }
@@ -1100,33 +1099,26 @@ function update(time) {
 
                 speedX = 0;
                 speedY = 0;
-                //speedY =  this.element.bullet_array[k].decrement > 0 ? this.element.bullet_array[k].decrement * Math.sin(this.element.bullet_array[k].angle2) : 1000;
-                //speedX =  this.element.bullet_array[k].decrement > 0 ? this.element.bullet_array[k].decrement * Math.cos(this.element.bullet_array[k].angle2) : 1000;
-
-
-                //speedY =  this.element.bullet_array[k].decrement * Math.sin(this.element.bullet_array[k].angle2);
-                //speedX =  this.element.bullet_array[k].decrement * Math.cos(this.element.bullet_array[k].angle2);
-
-                // this.element.bullet_array[k].setScale(this.element.bullet_array[k].scale);
-                // this.element.bullet_array[k].scale += 0.02;
+                
                 this.element.bullet_array[k].decrement -= 10;
                 
-                //console.log(this.element.bullet_array[k].increment);
-                console.log(this.element.bullet_array[k].decrement);
+                //console.log(this.element.bullet_array[k].decrement);
 
                 if (this.element.bullet_array[k].decrement < 0)
                 {
-                    console.log("CHRIS IS IN AN AC ROOM");
+                    //console.log("CHRIS IS IN AN AC ROOM");
                     
                 }
                 else
                 {
-                     speedY =  this.element.bullet_array[k].decrement * Math.sin(this.element.bullet_array[k].angle2);
-                     speedX =  this.element.bullet_array[k].decrement * Math.cos(this.element.bullet_array[k].angle2);
+                    this.element.bullet_array[k].scale += 0.01;
+                    this.element.bullet_array[k].setScale(this.element.bullet_array[k].scale);
+                    speedY =  this.element.bullet_array[k].decrement * Math.sin(this.element.bullet_array[k].angle2);
+                    speedX =  this.element.bullet_array[k].decrement * Math.cos(this.element.bullet_array[k].angle2);
                 }
 
 
-
+                //nah i cant stop thinking about myself cuz im goated – "bharat, 2021"
                 // if (this.element.bullet_array[k].count == 0) {
                 //     console.log("setting scale");
                 //     this.element.bullet_array[k].scale = 0.7 * this.element.bullet_array[k].scale;
@@ -1181,7 +1173,7 @@ function update(time) {
             this.otherElements.getChildren().forEach((otherElement) => {
                 let dist = Math.sqrt(Math.pow(otherElement.x - this.element.bullet_array[k].x, 2) + Math.pow(otherElement.y - this.element.bullet_array[k].y, 2));
 
-                // When opponent gets hit by player's helium bullets
+                // When opponent gets hit by player's noble gas or halogen bullets
                 if (dist < 70 && !(gameSettings.group8.includes(this.element.atomicNum) || gameSettings.group7.includes(this.element.atomicNum))) {
                     if (this.element.bullet_array[k].owner_id != otherElement.playerId && !this.element.bullet_array[k].isEight && !this.element.bullet_array[k].isSeven) {
                         this.element.bullet_array[k].setVisible(false);
