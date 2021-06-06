@@ -2,9 +2,12 @@
   <a href = "http://chemistry2-io.herokuapp.com">http://chemistry2-io.herokuapp.com</a>
 
 ------------------------------------------------------------------------------------
-Created By:
+## Founders
 
 Krishna Dasari
-  Chris Liao
-    Bharat Narayanasamysamy
-      Pranav Kakhandiki
+  
+Chris Liao
+  
+Bharat Narayanasamysamy
+
+Pranav Kakhandiki
