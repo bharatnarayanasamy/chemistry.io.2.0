@@ -1,14 +1,10 @@
 
 
 
-
-<h1>
-  <img width="180" alt="Screen Shot 2021-06-05 at 10 49 38 PM" src="https://user-images.githubusercontent.com/32230561/120914008-106a0900-c650-11eb-9a5f-c4b863e52ad1.png">
-  </h1>
-<br>
-<h1 align = "center"> chemistry.io  </h1>
-  
-  <a href = "http://chemistry2-io.herokuapp.com">http://chemistry2-io.herokuapp.com</a>
+<h1 align = "center"> 
+  <img width="180" alt="Screen Shot 2021-06-05 at 10 49 38 PM" src="https://user-images.githubusercontent.com/32230561/120914008-106a0900-c650-11eb-9a5f-c4b863e52ad1.png"> <br>
+   chemistry.io </h1>
+  <a href = "http://chemistry2-io.herokuapp.com">http://chemistry2-io.herokuapp.com </a>
 
 ------------------------------------------------------------------------------------
 ## Description
