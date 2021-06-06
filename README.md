@@ -10,7 +10,7 @@ Built with Node.js, socket.io, HTML5 Canvas and Phaser 3.
   
 ## Founders
 
-Krishna Dasari (iq@yale.edu)
+Krishna Dasari (krishna.dasari@yale.edu)
   
 Chris Liao (chrisliao@uchicago.edu)
   
