@@ -10,4 +10,4 @@ Chris Liao (chrisliao@uchicago.edu)
   
 Bharat Narayanasamysamy (ap@collegeboard.edu)
 
-Pranav Kakhandiki (ag@cornell.edu)
+Pranav Kakhandiki (pak225@cornell.edu)
