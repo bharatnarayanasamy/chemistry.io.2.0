@@ -1,4 +1,5 @@
-<img width="306" alt="Screen Shot 2021-06-05 at 10 46 46 PM" src="https://user-images.githubusercontent.com/32230561/120913950-a0f41980-c64f-11eb-8516-0acacb83e4b4.png">
+<img width="380" alt="Screen Shot 2021-06-05 at 10 49 38 PM" src="https://user-images.githubusercontent.com/32230561/120914008-106a0900-c650-11eb-9a5f-c4b863e52ad1.png">
+
 
 <h1> chemistry.io <h1>
   <a href = "http://chemistry2-io.herokuapp.com">http://chemistry2-io.herokuapp.com</a>
