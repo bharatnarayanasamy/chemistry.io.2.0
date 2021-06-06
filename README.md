@@ -3,7 +3,7 @@
 
 ------------------------------------------------------------------------------------
 ## Description
-A multiplayer shooter web game based on the periodic table. 
+A multiplayer shooter web game based on the periodic table. Move up the periodic table by collecting enough protons/neutrons/electrons, or by killing someone else
 
 Built with Node.js, socket.io, HTML5 Canvas and Phaser 3.
 
