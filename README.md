@@ -3,7 +3,7 @@
 
 ------------------------------------------------------------------------------------
 ## Description
-An multiplayer shooter web game based on the periodic table. 
+A multiplayer shooter web game based on the periodic table. 
 
 Built with Node.js, socket.io, HTML5 Canvas and Phaser 3.
 
