@@ -1,6 +1,10 @@
 <h1> PLAY OUR GAME HERE <h1>
   <a href = "http://chemistry2-io.herokuapp.com">http://chemistry2-io.herokuapp.com</a>
 
+An multiplayer shooter web game based on the periodic table. 
+
+Built with Node.js, socket.io, HTML5 Canvas and Phaser 3.
+
 ------------------------------------------------------------------------------------
 ## Founders
 
@@ -10,4 +14,4 @@ Chris Liao (chrisliao@uchicago.edu)
   
 Bharat Narayanasamysamy (ap@collegeboard.edu)
 
-Pranav Kakhandiki (pak225@cornell.edu)
+Pranav Kakhandiki (ag@cornell.edu)
