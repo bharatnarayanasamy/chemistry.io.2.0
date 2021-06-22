@@ -16,6 +16,6 @@ Krishna Dasari (krishna.dasari@yale.edu)
   
 Chris Liao (chrisliao@uchicago.edu)
   
-Bharat Narayanasamysamy (ap@collegeboard.edu)
+Bharat Narayanasamy (bharatn@andrew.cmu.edu)
 
 Pranav Kakhandiki (pak225@cornell.edu)
