@@ -18,4 +18,4 @@ Chris Liao (chrisliao@uchicago.edu)
   
 Bharat Narayanasamy (bharatn@andrew.cmu.edu)
 
-Pranav Kakhandiki (pak225@cornell.edu)
+Pranav Gettig (pak225@cornell.edu)
